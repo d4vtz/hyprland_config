@@ -34,10 +34,23 @@ dolphin
 
 ## Instalación
 
-Clona el repositorio y enlaza la configuración:
+Clona primero el repositorio fuera de `~/.config`:
 
 ```bash
-git clone https://github.com/d4vtz/hyprland_config.git ~/.config/hypr
+git clone https://github.com/d4vtz/hyprland_config.git ~/.local/src/hyprland_config
+```
+
+Antes de enlazarlo, conserva cualquier configuración local existente:
+
+```bash
+mv ~/.config/hypr ~/.config/hypr.backup
+ln -s ~/.local/src/hyprland_config ~/.config/hypr
+```
+
+Valida la configuración:
+
+```bash
+luac -p ~/.config/hypr/hyprland.lua
 ```
 
 En Plasma Login Manager selecciona **Hyprland (uwsm-managed)**.
