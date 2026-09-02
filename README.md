@@ -99,7 +99,8 @@ Hyprland inicia `plasma-polkit-agent.service`, por lo que las solicitudes de
 privilegios conservan el diálogo de Plasma. No ejecutes simultáneamente
 `hyprpolkitagent`: Polkit debe tener un solo agente gráfico por sesión.
 
-`kwallet-pam` puede desbloquear la cartera durante el inicio de sesión cuando
+`plasma-kwallet-pam.service` entrega a KWallet las credenciales capturadas por
+PAM durante el inicio de sesión. `kwallet-pam` puede desbloquear la cartera cuando
 la contraseña de la cartera coincide con la contraseña del usuario. Después de
 instalarlo, abre KWalletManager, selecciona la cartera `kdewallet` y comprueba
 que use la misma contraseña de tu cuenta.
