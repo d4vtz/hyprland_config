@@ -1,0 +1,53 @@
+@import "themes/current.css";
+
+* {
+  border: none;
+  border-radius: 0;
+  font-family: "JetBrainsMono Nerd Font", sans-serif;
+  font-size: 13px;
+  min-height: 0;
+}
+
+window#waybar {
+  background: transparent;
+  color: @foreground;
+}
+
+.modules-left, .modules-center, .modules-right {
+  background: alpha(@background, 0.94);
+  border: 1px solid alpha(@purple, 0.32);
+  border-radius: 10px;
+  padding: 0 4px;
+}
+
+#custom-launcher, #workspaces, #window, #clock, #mpris, #network,
+#pulseaudio, #battery, #tray, #custom-notifications, #custom-power {
+  padding: 0 10px;
+  margin: 3px 0;
+}
+
+#custom-launcher, #custom-notifications, #custom-power { color: @purple; }
+#clock { color: @foreground; font-weight: 700; }
+#window { color: @comment; }
+#mpris { color: @pink; }
+#network { color: @cyan; }
+#pulseaudio { color: @green; }
+#battery { color: @yellow; }
+#battery.warning { color: @orange; }
+#battery.critical { color: @red; }
+
+#workspaces button {
+  color: @comment;
+  padding: 0 7px;
+  border-radius: 7px;
+}
+#workspaces button.active { color: @purple; background: @selection; }
+#workspaces button.urgent { color: @background; background: @red; }
+#workspaces button:hover { color: @foreground; background: @current_line; }
+
+tooltip {
+  background: @background;
+  color: @foreground;
+  border: 1px solid @purple;
+  border-radius: 10px;
+}

@@ -1,0 +1,37 @@
+@import "themes/current.css";
+
+* {
+  font-family: "JetBrainsMono Nerd Font", sans-serif;
+  color: @foreground;
+}
+
+.control-center {
+  background: alpha(@background, 0.96);
+  border: 1px solid alpha(@purple, 0.55);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.notification-row { outline: none; }
+.notification {
+  background: @current_line;
+  border: 1px solid alpha(@comment, 0.5);
+  border-radius: 11px;
+  margin: 6px;
+  padding: 2px;
+}
+.notification.critical { border-color: @red; }
+.notification-content { padding: 8px; }
+.summary { font-weight: 700; color: @foreground; }
+.body { color: @comment; }
+.time { color: @purple; }
+
+.control-center .notification { box-shadow: none; }
+.widget-title { margin: 8px; }
+.widget-title > button, .widget-dnd > switch {
+  background: @current_line;
+  border: 1px solid alpha(@purple, 0.45);
+  border-radius: 8px;
+}
+.widget-dnd { margin: 8px; }
+switch:checked { background: @purple; }

@@ -1,0 +1,87 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 34,
+  "spacing": 6,
+  "margin-top": 6,
+  "margin-left": 8,
+  "margin-right": 8,
+
+  "modules-left": ["custom/launcher", "hyprland/workspaces", "hyprland/window"],
+  "modules-center": ["clock"],
+  "modules-right": ["mpris", "network", "pulseaudio", "battery", "tray", "custom/notifications", "custom/power"],
+
+  "custom/launcher": {
+    "format": "",
+    "tooltip": false,
+    "on-click": "rofi -show drun"
+  },
+  "hyprland/workspaces": {
+    "persistent-workspaces": {
+      "1": [], "2": [], "3": [], "4": [], "5": [], "6": [], "7": []
+    },
+    "format": "{name}",
+    "on-scroll-up": "hyprctl dispatch workspace e+1",
+    "on-scroll-down": "hyprctl dispatch workspace e-1"
+  },
+  "hyprland/window": {
+    "format": "{title}",
+    "max-length": 42,
+    "separate-outputs": true
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "tooltip-format": "<big>{:%A, %d de %B}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+  "mpris": {
+    "format": "{player_icon} {dynamic}",
+    "format-paused": " {dynamic}",
+    "player-icons": { "default": "" },
+    "max-length": 24,
+    "dynamic-order": ["title", "artist"],
+    "on-click": "playerctl play-pause"
+  },
+  "network": {
+    "format-wifi": "  {signalStrength}%",
+    "format-ethernet": "󰈀",
+    "format-disconnected": "󰤭",
+    "tooltip-format": "{ifname}: {ipaddr}/{cidr}",
+    "on-click": "nm-connection-editor"
+  },
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "󰝟",
+    "format-icons": { "default": ["", "", ""] },
+    "scroll-step": 5,
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "on-click-right": "pavucontrol"
+  },
+  "battery": {
+    "states": { "warning": 25, "critical": 12 },
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+  },
+  "tray": {
+    "icon-size": 16,
+    "spacing": 8
+  },
+  "custom/notifications": {
+    "exec": "swaync-client -swb",
+    "return-type": "json",
+    "format": "{icon}",
+    "format-icons": {
+      "notification": "󱅫", "none": "󰂚",
+      "dnd-notification": "󰂛", "dnd-none": "󰪓",
+      "inhibited-notification": "󰂛", "inhibited-none": "󰂚",
+      "dnd-inhibited-notification": "󰂛", "dnd-inhibited-none": "󰪓"
+    },
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw"
+  },
+  "custom/power": {
+    "format": "",
+    "tooltip": false,
+    "on-click": "~/.config/hypr/scripts/powermenu.sh"
+  }
+}

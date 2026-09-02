@@ -1,81 +1,143 @@
 # Hyprland Configuration
 
-Configuración personal de Hyprland para Arch Linux, escrita en Lua y probada con Hyprland 0.56.2.
+Escritorio Hyprland modular para Arch Linux, escrito en Lua y probado con
+Hyprland 0.56.2. Está diseñado para una pantalla 1920×1200, trabajo con código,
+LaTeX, PDF, Xournal++ y multimedia.
 
-## Entorno
+## Diseño
 
-- Arch Linux
-- Hyprland 0.56.2
-- Sesión administrada por UWSM
-- Plasma Login Manager
-- GPU Intel con controlador i915
-- Kitty y Dolphin
-- Distribución de teclado latinoamericana
-- Diseño master
-- Cinco espacios de trabajo
+- Configuración de Hyprland completamente en Lua.
+- Tema Dracula desacoplado y preparado para añadir otras paletas.
+- Layout master con siete espacios persistentes.
+- Waybar superior, modular y ligera, con reloj centrado.
+- Rofi como lanzador, SwayNC como centro de notificaciones.
+- Hyprpaper, Hyprlock e Hypridle.
+- Capturas con Grimblast y edición en Satty.
+- Super + F1 abre una hoja de atajos filtrable.
 
-## Dependencias básicas
+## Dependencias
 
-```text
-hyprland
-uwsm
-xdg-desktop-portal-hyprland
-qt5-wayland
-qt6-wayland
-hyprpolkitagent
-pipewire
-wireplumber
-rtkit
-brightnessctl
-playerctl
-kitty
-dolphin
+Instala los paquetes oficiales:
+
+```bash
+sudo pacman -S --needed \
+  uwsm xdg-desktop-portal-hyprland hyprpolkitagent \
+  waybar rofi swaync hyprpaper hyprlock hypridle \
+  satty grim slurp wl-clipboard cliphist \
+  brightnessctl playerctl pavucontrol network-manager-applet \
+  pipewire wireplumber qt5-wayland qt6-wayland \
+  kitty dolphin ttf-jetbrains-mono-nerd
+```
+
+Grimblast está en AUR:
+
+```bash
+paru -S grimblast-git
 ```
 
 ## Instalación
 
-Clona primero el repositorio fuera de `~/.config`:
+Clona fuera de ~/.config:
 
 ```bash
 git clone https://github.com/d4vtz/hyprland_config.git ~/.local/src/hyprland_config
+cd ~/.local/src/hyprland_config
 ```
 
-Antes de enlazarlo, conserva cualquier configuración local existente:
+Conserva configuraciones previas que no sean enlaces:
 
 ```bash
-mv ~/.config/hypr ~/.config/hypr.backup
-ln -s ~/.local/src/hyprland_config ~/.config/hypr
+mv ~/.config/hypr ~/.config/hypr.backup 2>/dev/null || true
+mv ~/.config/waybar ~/.config/waybar.backup 2>/dev/null || true
+mv ~/.config/rofi ~/.config/rofi.backup 2>/dev/null || true
+mv ~/.config/swaync ~/.config/swaync.backup 2>/dev/null || true
 ```
 
-Valida la configuración:
+Instala los enlaces:
 
 ```bash
-luac -p ~/.config/hypr/hyprland.lua
+./scripts/install-links.sh
 ```
 
-En Plasma Login Manager selecciona **Hyprland (uwsm-managed)**.
+Valida Lua antes de iniciar la sesión:
+
+```bash
+find . -name '*.lua' -print0 | xargs -0 -n1 luac -p
+```
+
+Selecciona **Hyprland (uwsm-managed)** en Plasma Login Manager.
 
 ## Atajos principales
 
 | Atajo | Acción |
 |---|---|
-| `Meta + Enter` | Abrir Kitty |
-| `Meta + E` | Abrir Dolphin |
-| `Meta + R` | Abrir Hyprlauncher |
-| `Meta + Q` | Cerrar ventana |
-| `Meta + Shift + Q` | Cerrar Hyprland |
-| `Meta + H/J/K/L` | Cambiar foco |
-| `Meta + Shift + H/J/K/L` | Intercambiar ventanas |
-| `Meta + Shift + Enter` | Intercambiar con la ventana maestra |
-| `Meta + Tab` | Recorrer ventanas |
-| `Meta + Ctrl + ←/→` | Ajustar el área maestra |
-| `Meta + F` | Pantalla completa |
-| `Meta + V` | Alternar ventana flotante |
-| `Meta + 1…5` | Cambiar de espacio |
-| `Meta + Shift + 1…5` | Mover ventana a otro espacio |
-| `Meta + S` | Mostrar scratchpad |
-| `Meta + Shift + S` | Enviar ventana al scratchpad |
+| Super + F1 | Mostrar y filtrar todos los atajos |
+| Super + Espacio | Abrir Rofi |
+| Super + Enter | Abrir Kitty |
+| Super + E | Abrir Dolphin |
+| Super + B | Abrir navegador |
+| Super + N | Abrir SwayNC |
+| Super + Escape | Menú de energía |
+| Super + H/J/K/L | Cambiar el foco |
+| Super + flechas | Cambiar el foco |
+| Super + Shift + dirección | Intercambiar ventanas |
+| Super + Ctrl + flechas | Redimensionar |
+| Super + 1…7 | Cambiar espacio de trabajo |
+| Super + Shift + 1…7 | Mover ventana |
+| Print | Seleccionar región y editarla |
+| Shift + Print | Copiar la pantalla |
+| Ctrl + Print | Capturar y editar la ventana activa |
 
-## Estado
+## Fondo de pantalla
 
-Configuración base en desarrollo. Plasma permanece disponible como sesión alternativa.
+Hyprpaper arranca sin imponer una imagen. Configúrala así:
+
+```bash
+~/.config/hypr/scripts/set-wallpaper.sh ~/Imágenes/fondo.jpg
+```
+
+## Temas
+
+Dracula es el tema inicial. El selector sincroniza Hyprland, Waybar, Rofi,
+SwayNC y Hyprlock:
+
+```bash
+~/.config/hypr/scripts/theme-switch.sh dracula
+```
+
+Para añadir una paleta llamada nord, crea:
+
+```text
+themes/nord.lua
+themes/nord.css
+themes/nord.rasi
+themes/nord-hyprlock.conf
+```
+
+y ejecuta theme-switch.sh nord.
+
+## Organización
+
+```text
+hyprland.lua           Entrada mínima
+lua/                   Módulos de Hyprland
+themes/                Paletas compartidas
+waybar/                Barra y estilos
+rofi/                  Lanzador
+swaync/                Notificaciones
+scripts/               Utilidades del escritorio
+hyprlock.conf           Pantalla de bloqueo
+hypridle.conf           Inactividad y suspensión
+hyprpaper.conf          Fondo
+```
+
+## Actualización
+
+```bash
+cd ~/.local/src/hyprland_config
+git pull --ff-only
+hyprctl reload
+pkill -SIGUSR2 waybar
+swaync-client -R
+swaync-client -rs
+```
