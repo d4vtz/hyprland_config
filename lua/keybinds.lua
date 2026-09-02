@@ -14,7 +14,7 @@ return function(settings)
     hl.bind(mod .. " + Q", hl.dsp.window.close())
     hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
     hl.bind(mod .. " + F", hl.dsp.window.fullscreen({ action = "toggle", mode = "fullscreen" }))
-    hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ action = "toggle", mode = "maximize" }))
+    hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ action = "toggle", mode = "maximized" }))
     hl.bind(mod .. " + SHIFT + RETURN", hl.dsp.layout("swapwithmaster auto"))
     hl.bind(mod .. " + TAB", hl.dsp.layout("cyclenext loop"))
 

@@ -7,6 +7,8 @@ if [[ $# -ne 1 || ! -f $1 ]]; then
 fi
 
 wallpaper=$(realpath "$1")
-hyprctl hyprpaper preload "$wallpaper"
-hyprctl hyprpaper wallpaper ",$wallpaper"
-hyprctl hyprpaper unload unused
+
+# Hyprpaper moderno carga la imagen al asignarla; preload/unload son IPC antiguo.
+while IFS= read -r monitor; do
+  hyprctl hyprpaper wallpaper "$monitor, $wallpaper, cover"
+done < <(hyprctl monitors -j | jq -r '.[].name')

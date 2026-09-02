@@ -23,7 +23,7 @@ Instala los paquetes oficiales:
 sudo pacman -S --needed \
   uwsm xdg-desktop-portal-hyprland hyprpolkitagent \
   waybar rofi swaync hyprpaper hyprlock hypridle \
-  satty grim slurp wl-clipboard cliphist \
+  satty grim slurp wl-clipboard cliphist jq \
   brightnessctl playerctl pavucontrol network-manager-applet \
   pipewire wireplumber qt5-wayland qt6-wayland \
   kitty dolphin ttf-jetbrains-mono-nerd
