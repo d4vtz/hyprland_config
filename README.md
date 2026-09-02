@@ -21,7 +21,8 @@ Instala los paquetes oficiales:
 
 ```bash
 sudo pacman -S --needed \
-  uwsm xdg-desktop-portal-hyprland hyprpolkitagent \
+  uwsm xdg-desktop-portal-hyprland polkit-kde-agent \
+  kwallet kwallet-pam kwalletmanager \
   waybar rofi swaync hyprpaper hyprlock hypridle \
   satty grim slurp wl-clipboard cliphist jq \
   brightnessctl playerctl pavucontrol network-manager-applet \
@@ -84,9 +85,24 @@ Selecciona **Hyprland (uwsm-managed)** en Plasma Login Manager.
 | Super + Ctrl + flechas | Redimensionar |
 | Super + 1…7 | Cambiar espacio de trabajo |
 | Super + Shift + 1…7 | Mover ventana |
+| Super + PageUp/PageDown | Recorrer los siete escritorios |
+| Super + Ctrl + PageUp/PageDown | Recorrer solamente escritorios ocupados |
+| Super + rueda | Recorrer los siete escritorios |
+| Super + Ctrl + rueda | Recorrer solamente escritorios ocupados |
 | Print | Seleccionar región y editarla |
 | Shift + Print | Copiar la pantalla |
 | Ctrl + Print | Capturar y editar la ventana activa |
+
+## Plasma Polkit y KWallet
+
+Hyprland inicia `plasma-polkit-agent.service`, por lo que las solicitudes de
+privilegios conservan el diálogo de Plasma. No ejecutes simultáneamente
+`hyprpolkitagent`: Polkit debe tener un solo agente gráfico por sesión.
+
+`kwallet-pam` puede desbloquear la cartera durante el inicio de sesión cuando
+la contraseña de la cartera coincide con la contraseña del usuario. Después de
+instalarlo, abre KWalletManager, selecciona la cartera `kdewallet` y comprueba
+que use la misma contraseña de tu cuenta.
 
 ## Fondo de pantalla
 

@@ -45,10 +45,18 @@ return function(settings)
         hl.bind(mod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
     end
 
+    -- r±1 incluye escritorios vacíos; e±1 salta solamente entre los ocupados.
+    hl.bind(mod .. " + Page_Up", hl.dsp.focus({ workspace = "r-1" }))
+    hl.bind(mod .. " + Page_Down", hl.dsp.focus({ workspace = "r+1" }))
+    hl.bind(mod .. " + CTRL + Page_Up", hl.dsp.focus({ workspace = "e-1" }))
+    hl.bind(mod .. " + CTRL + Page_Down", hl.dsp.focus({ workspace = "e+1" }))
+
     hl.bind(mod .. " + S", hl.dsp.workspace.toggle_special("scratchpad"))
     hl.bind(mod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:scratchpad" }))
-    hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-    hl.bind(mod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
+    hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "r+1" }))
+    hl.bind(mod .. " + mouse_up", hl.dsp.focus({ workspace = "r-1" }))
+    hl.bind(mod .. " + CTRL + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
+    hl.bind(mod .. " + CTRL + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
     hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
     hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 

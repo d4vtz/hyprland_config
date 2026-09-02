@@ -19,8 +19,8 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name = "float-hyprpolkitagent",
-    match = { class = "^hyprpolkitagent$" },
+    name = "float-plasma-polkit-agent",
+    match = { class = "^(org.kde.polkit-kde-authentication-agent-1|polkit-kde-authentication-agent-1)$" },
     float = true,
     center = true,
     size = { 520, 260 },
