@@ -4,7 +4,7 @@ import QtQuick
 
 QtObject {
     // Superficies: oscuras y neutras para que los acentos no compitan.
-    readonly property color barBackground: "#e6171820"
+    readonly property color barBackground: "transparent"
     readonly property color background: "#191a22"
     readonly property color surface: "#22242f"
     readonly property color elevated: "#2a2c38"

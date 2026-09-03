@@ -24,7 +24,7 @@ ShellRoot {
                 anchors.margins: 4
                 color: Theme.barBackground
                 radius: 11
-                border.color: Theme.border
+                border.color: "transparent"
 
                 RowLayout {
                     anchors.left: parent.left
