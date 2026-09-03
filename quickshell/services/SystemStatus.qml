@@ -9,9 +9,11 @@ QtObject {
     property string network: "--"
     property bool wifiEnabled: false
     property bool bluetoothEnabled: false
+    property bool bluetoothAudioActive: false
     property string battery: "--"
     property string batteryState: "Sin batería"
     property string batteryTime: "--"
+    property bool acConnected: false
     property real brightness: 0
     property real cpuUsage: 0
     property real cpuTemperature: 0
@@ -20,7 +22,11 @@ QtObject {
     property string memoryText: "--"
     property real diskUsage: 0
     property string diskText: "--"
+    property real gpuUsage: 0
+    property real gpuTemperature: 0
+    property real gpuFrequency: 0
     property string powerProfile: "balanced"
+    property string powerProfiles: ""
     property bool nightLightEnabled: false
     property string userName: ""
     property string hostName: ""
@@ -55,19 +61,20 @@ QtObject {
     }
 
     property Process batteryProcess: Process {
-        command: ["sh", "-c", "b=$(find /sys/class/power_supply -maxdepth 1 -name 'BAT*' -print -quit); [ -z \"$b\" ] && { printf 'CA|Sin batería|--'; exit; }; cap=$(cat \"$b/capacity\"); st=$(cat \"$b/status\"); case \"$st\" in Charging) label=Cargando;; Discharging) label=Descargando;; Full) label='Carga completa';; *) label=\"$st\";; esac; now=$(cat \"$b/energy_now\" 2>/dev/null || cat \"$b/charge_now\" 2>/dev/null || echo 0); rate=$(cat \"$b/power_now\" 2>/dev/null || cat \"$b/current_now\" 2>/dev/null || echo 0); if [ \"\${rate:-0}\" -gt 0 ] 2>/dev/null; then secs=$((now*3600/rate)); printf '%s|%s|%dh %02d min' \"$cap\" \"$label\" $((secs/3600)) $(((secs%3600)/60)); else printf '%s|%s|--' \"$cap\" \"$label\"; fi"]
+        command: ["bash", "-c", "b=$(find /sys/class/power_supply -maxdepth 1 -name 'BAT*' -print -quit); ac=0; for p in /sys/class/power_supply/*/online; do [[ -r $p && $(<$p) == 1 ]] && ac=1; done; [[ -z $b ]] && { printf 'CA|Sin batería|--|%s' \"$ac\"; exit; }; cap=$(<$b/capacity); st=$(<$b/status); case \"$st\" in Charging) label=Cargando;; Discharging) label=Descargando;; Full) label='Carga completa';; 'Not charging') label='Conectada, sin cargar';; *) label=\"$st\";; esac; now=$(cat \"$b/energy_now\" 2>/dev/null || cat \"$b/charge_now\" 2>/dev/null || echo 0); full=$(cat \"$b/energy_full\" 2>/dev/null || cat \"$b/charge_full\" 2>/dev/null || echo \"$now\"); rate=$(cat \"$b/power_now\" 2>/dev/null || cat \"$b/current_now\" 2>/dev/null || echo 0); if [[ \${rate:-0} -gt 0 ]]; then [[ $st == Charging ]] && amount=$((full-now)) || amount=$now; secs=$((amount*3600/rate)); printf '%s|%s|%dh %02d min|%s' \"$cap\" \"$label\" $((secs/3600)) $(((secs%3600)/60)) \"$ac\"; else printf '%s|%s|--|%s' \"$cap\" \"$label\" \"$ac\"; fi"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const fields = text.trim().split("|")
                 root.battery = fields[0] || "CA"
                 root.batteryState = fields[1] || "Sin batería"
                 root.batteryTime = fields[2] || "--"
+                root.acConnected = fields[3] === "1"
             }
         }
     }
 
     property Process sensorsProcess: Process {
-        command: ["sh", "-c", "read _ u n s i w x y z _ < /proc/stat; idle1=$((i+w)); total1=$((u+n+s+i+w+x+y+z)); sleep .15; read _ u n s i w x y z _ < /proc/stat; idle2=$((i+w)); total2=$((u+n+s+i+w+x+y+z)); cpu=$((100*(total2-total1-idle2+idle1)/(total2-total1))); temp=$(awk '{printf \"%.0f\", $1/1000}' /sys/class/thermal/thermal_zone*/temp 2>/dev/null | head -n1); freq=$(awk '{sum+=$1;n++} END {if(n) printf \"%.1f\",sum/n/1000000;else print 0}' /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq 2>/dev/null); read mt mu < <(free -b | awk '/Mem:/ {print $2,$3}'); memp=$((100*mu/mt)); mem=$(awk -v u=$mu -v t=$mt 'BEGIN{printf \"%.1f / %.1f GiB\",u/1073741824,t/1073741824}'); read size used pct < <(df -B1 / | awk 'NR==2{gsub(/%/,\"\",$5);print $2,$3,$5}'); disk=$(awk -v u=$used -v t=$size 'BEGIN{printf \"%.1f / %.1f GiB\",u/1073741824,t/1073741824}'); printf '%s|%s|%s|%s|%s|%s|%s' \"$cpu\" \"\${temp:-0}\" \"$freq\" \"$memp\" \"$mem\" \"$pct\" \"$disk\""]
+        command: ["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/hardware-status.sh"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const fields = text.trim().split("|")
@@ -78,18 +85,23 @@ QtObject {
                 root.memoryText = fields[4] || "--"
                 root.diskUsage = (Number(fields[5]) || 0) / 100
                 root.diskText = fields[6] || "--"
+                root.gpuUsage = Number(fields[7]) || 0
+                root.gpuTemperature = Number(fields[8]) || 0
+                root.gpuFrequency = Number(fields[9]) || 0
             }
         }
     }
 
     property Process stateProcess: Process {
-        command: ["sh", "-c", "bt=$(bluetoothctl show 2>/dev/null | awk '/Powered:/{print $2;exit}'); profile=$(powerprofilesctl get 2>/dev/null || echo balanced); pgrep -x hyprsunset >/dev/null && night=1 || night=0; printf '%s|%s|%s' \"$bt\" \"$profile\" \"$night\""]
+        command: ["bash", "-c", "bt=$(bluetoothctl show 2>/dev/null | awk '/Powered:/{print $2;exit}'); profile=$(powerprofilesctl get 2>/dev/null || echo unavailable); profiles=$(powerprofilesctl list 2>/dev/null | sed -nE 's/^[[:space:]]*\\*?[[:space:]]*(performance|balanced|power-saver):.*/\\1/p' | paste -sd,); pgrep -x hyprsunset >/dev/null && night=1 || night=0; pactl list sinks 2>/dev/null | awk 'BEGIN{RS=\"\"} /State: RUNNING/ && /Name: bluez_output/{active=1} END{exit !active}' && bta=1 || bta=0; printf '%s|%s|%s|%s|%s' \"$bt\" \"$profile\" \"$night\" \"$bta\" \"$profiles\""]
         stdout: StdioCollector {
             onStreamFinished: {
                 const fields = text.trim().split("|")
                 root.bluetoothEnabled = fields[0] === "yes"
                 root.powerProfile = fields[1] || "balanced"
                 root.nightLightEnabled = fields[2] === "1"
+                root.bluetoothAudioActive = fields[3] === "1"
+                root.powerProfiles = fields[4] || ""
             }
         }
     }
