@@ -30,6 +30,7 @@ Pill {
     }
 
     MouseArea {
+        parent: root
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: Qt.PointingHandCursor

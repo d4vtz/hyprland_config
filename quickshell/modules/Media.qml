@@ -20,6 +20,7 @@ Pill {
     }
 
     MouseArea {
+        parent: root
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         onClicked: root.expanded = !root.expanded

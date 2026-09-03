@@ -30,8 +30,14 @@ ShellRoot {
                     anchors.leftMargin: 8
                     spacing: 7
                     Pill {
+                        id: launcherPill
                         Text { text: "󰣇"; color: Theme.purple; font.family: Theme.fontFamily; font.pixelSize: 16 }
-                        MouseArea { anchors.fill: parent; onClicked: launcher.running = true }
+                        MouseArea {
+                            parent: launcherPill
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: launcher.running = true
+                        }
                         Process { id: launcher; command: ["rofi", "-show", "drun"] }
                     }
                     Workspaces { screen: modelData }
