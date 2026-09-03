@@ -59,7 +59,7 @@ Pill {
             height: 326
             radius: Theme.radius + 2
             color: Theme.background
-            border.color: "#66557d"
+            border.color: Theme.border
 
             MouseArea { anchors.fill: parent }
 
@@ -76,7 +76,7 @@ Pill {
                         implicitHeight: 30
                         radius: 8
                         color: previousArea.containsMouse ? Theme.current : "transparent"
-                        Text { anchors.centerIn: parent; text: "󰅁"; color: Theme.purple; font.family: Theme.fontFamily }
+                        Text { anchors.centerIn: parent; text: "󰅁"; color: Theme.purple; font.family: Theme.iconFamily }
                         MouseArea {
                             id: previousArea
                             anchors.fill: parent
@@ -102,7 +102,7 @@ Pill {
                         implicitHeight: 30
                         radius: 8
                         color: nextArea.containsMouse ? Theme.current : "transparent"
-                        Text { anchors.centerIn: parent; text: "󰅂"; color: Theme.purple; font.family: Theme.fontFamily }
+                        Text { anchors.centerIn: parent; text: "󰅂"; color: Theme.purple; font.family: Theme.iconFamily }
                         MouseArea {
                             id: nextArea
                             anchors.fill: parent
@@ -158,7 +158,7 @@ Pill {
                             radius: 8
                             color: isToday ? Theme.purple
                                 : selected ? Theme.current
-                                : dayArea.containsMouse ? "#383a4a"
+                                : dayArea.containsMouse ? Theme.surfaceHover
                                 : "transparent"
                             border.color: selected && !isToday ? Theme.purple : "transparent"
 
@@ -170,7 +170,7 @@ Pill {
                                 anchors.centerIn: parent
                                 text: dayCell.cellDate.getDate()
                                 color: dayCell.isToday ? Theme.background
-                                    : !dayCell.inCurrentMonth ? "#565a72"
+                                    : !dayCell.inCurrentMonth ? Theme.subtle
                                     : dayCell.weekend ? Theme.pink
                                     : Theme.foreground
                                 font.family: Theme.fontFamily

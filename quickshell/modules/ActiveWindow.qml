@@ -17,7 +17,7 @@ Pill {
         Text {
             text: "󰣆"
             color: Theme.cyan
-            font.family: Theme.fontFamily
+            font.family: Theme.iconFamily
             font.pixelSize: 15
         }
         Text {

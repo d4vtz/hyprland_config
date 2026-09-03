@@ -22,9 +22,9 @@ ShellRoot {
             Rectangle {
                 anchors.fill: parent
                 anchors.margins: 4
-                color: "#e6111218"
+                color: Theme.barBackground
                 radius: 11
-                border.color: "#452f465f"
+                border.color: Theme.border
 
                 RowLayout {
                     anchors.left: parent.left
@@ -33,7 +33,7 @@ ShellRoot {
                     spacing: 7
                     Pill {
                         id: launcherPill
-                        Text { text: "󰣇"; color: Theme.purple; font.family: Theme.fontFamily; font.pixelSize: 16 }
+                        Text { text: "󰣇"; color: Theme.purple; font.family: Theme.iconFamily; font.pixelSize: 16 }
                         MouseArea {
                             parent: launcherPill
                             anchors.fill: parent

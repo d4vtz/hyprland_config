@@ -48,7 +48,7 @@ Pill {
         Text {
             text: "󰅇"
             color: root.currentTab === 2 && root.expanded ? Theme.pink : Theme.muted
-            font.family: Theme.fontFamily
+            font.family: Theme.iconFamily
             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.openTab(2) }
         }
 
@@ -59,7 +59,7 @@ Pill {
                 anchors.centerIn: parent
                 text: NotificationService.doNotDisturb ? "󰂛" : "󰂚"
                 color: root.currentTab === 1 && root.expanded ? Theme.purple : Theme.muted
-                font.family: Theme.fontFamily
+                font.family: Theme.iconFamily
             }
             Rectangle {
                 visible: NotificationService.count > 0
@@ -73,7 +73,7 @@ Pill {
                     anchors.centerIn: parent
                     text: Math.min(99, NotificationService.count)
                     color: Theme.background
-                    font.family: Theme.fontFamily
+                    font.family: Theme.iconFamily
                     font.pixelSize: 7
                     font.bold: true
                 }
@@ -84,7 +84,7 @@ Pill {
         Text {
             text: "󰐥"
             color: root.currentTab === 0 && root.expanded ? Theme.red : Theme.muted
-            font.family: Theme.fontFamily
+            font.family: Theme.iconFamily
             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.openTab(0) }
         }
     }
@@ -107,7 +107,7 @@ Pill {
             height: 430
             radius: Theme.radius + 2
             color: Theme.background
-            border.color: "#66557d"
+            border.color: Theme.border
 
             MouseArea { anchors.fill: parent }
 
@@ -136,7 +136,7 @@ Pill {
                                 anchors.centerIn: parent
                                 text: modelData.icon
                                 color: root.currentTab === modelData.tab ? Theme.purple : Theme.muted
-                                font.family: Theme.fontFamily
+                                font.family: Theme.iconFamily
                                 font.pixelSize: 16
                             }
                             MouseArea {

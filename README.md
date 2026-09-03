@@ -28,7 +28,7 @@ sudo pacman -S --needed \
   satty grim slurp wl-clipboard cliphist jq cava \
   brightnessctl playerctl pavucontrol network-manager-applet \
   pipewire wireplumber qt5-wayland qt6-wayland \
-  kitty dolphin ttf-jetbrains-mono-nerd
+  kitty dolphin inter-font ttf-jetbrains-mono-nerd
 ```
 
 Grimblast está en AUR:

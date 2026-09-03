@@ -10,8 +10,8 @@ Rectangle {
     implicitWidth: content.implicitWidth + 20
     implicitHeight: 32
     radius: Theme.radius
-    color: active ? Theme.current : Theme.surface
-    border.color: active ? Theme.purple : "#66557d"
+    color: active ? Theme.elevated : Theme.surface
+    border.color: active ? Theme.borderActive : Theme.border
     border.width: 1
 
     Behavior on color { ColorAnimation { duration: Theme.animationFast } }
@@ -23,4 +23,3 @@ Rectangle {
         spacing: 8
     }
 }
-

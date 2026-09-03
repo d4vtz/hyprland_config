@@ -75,14 +75,14 @@ ColumnLayout {
         Layout.preferredHeight: 34
         radius: 8
         color: Theme.surface
-        border.color: search.activeFocus ? Theme.purple : "#565970"
+        border.color: search.activeFocus ? Theme.purple : Theme.border
         Text {
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             text: "󰍉"
             color: Theme.muted
-            font.family: Theme.fontFamily
+            font.family: Theme.iconFamily
         }
         TextInput {
             id: search

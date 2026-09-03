@@ -24,7 +24,7 @@ Pill {
 
     RowLayout {
         spacing: 9
-        Text { text: "󰖩"; color: Theme.cyan; font.family: Theme.fontFamily }
+        Text { text: "󰖩"; color: Theme.cyan; font.family: Theme.iconFamily }
         Text {
             text: root.sink ? Math.round(root.sink.audio.volume * 100) + "%" : "--"
             color: Theme.muted
@@ -85,7 +85,7 @@ Pill {
             height: root.outputsExpanded ? 436 : 350
             radius: Theme.radius + 2
             color: Theme.background
-            border.color: "#66557d"
+            border.color: Theme.border
 
             MouseArea { anchors.fill: parent }
 
@@ -149,7 +149,7 @@ Pill {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 28
                             radius: 7
-                            color: outputArea.containsMouse || root.outputsExpanded ? "#514762" : Theme.current
+                            color: outputArea.containsMouse || root.outputsExpanded ? Theme.surfaceHover : Theme.current
                             RowLayout {
                                 anchors.fill: parent
                                 anchors.leftMargin: 9
@@ -162,7 +162,7 @@ Pill {
                                     font.pixelSize: 10
                                     elide: Text.ElideRight
                                 }
-                                Text { text: root.outputsExpanded ? "󰅃" : "󰅀"; color: Theme.pink; font.family: Theme.fontFamily }
+                                Text { text: root.outputsExpanded ? "󰅃" : "󰅀"; color: Theme.pink; font.family: Theme.iconFamily }
                             }
                             MouseArea {
                                 id: outputArea

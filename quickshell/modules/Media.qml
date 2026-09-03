@@ -115,7 +115,7 @@ Pill {
             height: 188
             radius: Theme.radius + 2
             color: Theme.background
-            border.color: "#66557d"
+            border.color: Theme.border
 
             MouseArea { anchors.fill: parent }
 
@@ -135,7 +135,7 @@ Pill {
                         anchors.centerIn: parent
                         text: "󰎆"
                         color: Theme.current
-                        font.family: Theme.fontFamily
+                        font.family: Theme.iconFamily
                         font.pixelSize: 38
                     }
 
@@ -250,7 +250,7 @@ Pill {
                                 anchors.centerIn: parent
                                 text: root.player && root.player.isPlaying ? "󰏤" : "󰐊"
                                 color: Theme.background
-                                font.family: Theme.fontFamily
+                                font.family: Theme.iconFamily
                                 font.pixelSize: 17
                             }
                             MouseArea {
@@ -267,7 +267,7 @@ Pill {
                             text: "󰒭"
                             color: Theme.foreground
                             opacity: root.player && root.player.canGoNext ? 1 : 0.3
-                            font.family: Theme.fontFamily
+                            font.family: Theme.iconFamily
                             font.pixelSize: 18
                             MouseArea {
                                 anchors.fill: parent

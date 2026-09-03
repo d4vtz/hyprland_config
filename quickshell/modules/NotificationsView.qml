@@ -19,7 +19,7 @@ ColumnLayout {
         Text {
             text: NotificationService.doNotDisturb ? "󰂛" : "󰂚"
             color: NotificationService.doNotDisturb ? Theme.red : Theme.purple
-            font.family: Theme.fontFamily
+            font.family: Theme.iconFamily
             font.pixelSize: 16
             MouseArea {
                 anchors.fill: parent
@@ -30,7 +30,7 @@ ColumnLayout {
         Text {
             text: "󰆴"
             color: Theme.muted
-            font.family: Theme.fontFamily
+            font.family: Theme.iconFamily
             font.pixelSize: 15
             opacity: NotificationService.count > 0 ? 1 : 0.35
             MouseArea {
@@ -102,7 +102,7 @@ ColumnLayout {
                 Text {
                     text: "󰅖"
                     color: Theme.muted
-                    font.family: Theme.fontFamily
+                    font.family: Theme.iconFamily
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
@@ -123,4 +123,3 @@ ColumnLayout {
         }
     }
 }
-

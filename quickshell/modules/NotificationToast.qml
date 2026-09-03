@@ -35,7 +35,7 @@ PanelWindow {
         anchors.margins: 4
         radius: Theme.radius + 2
         color: Theme.background
-        border.color: "#66557d"
+        border.color: Theme.border
 
         RowLayout {
             anchors.fill: parent
@@ -91,7 +91,7 @@ PanelWindow {
             Text {
                 text: "󰅖"
                 color: Theme.muted
-                font.family: Theme.fontFamily
+                font.family: Theme.iconFamily
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor

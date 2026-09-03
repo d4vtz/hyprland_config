@@ -17,7 +17,7 @@ RowLayout {
         horizontalAlignment: Text.AlignHCenter
         text: root.icon
         color: root.accent
-        font.family: Theme.fontFamily
+        font.family: Theme.iconFamily
         font.pixelSize: 15
     }
 
@@ -55,4 +55,3 @@ RowLayout {
         }
     }
 }
-

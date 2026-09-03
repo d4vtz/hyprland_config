@@ -74,11 +74,11 @@ ColumnLayout {
                 Layout.preferredHeight: 64
                 radius: 8
                 color: actionArea.containsMouse ? Theme.current : Theme.surface
-                border.color: actionArea.containsMouse ? modelData.color : "#45485a"
+                border.color: actionArea.containsMouse ? modelData.color : Theme.border
                 Column {
                     anchors.centerIn: parent
                     spacing: 5
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.icon; color: modelData.color; font.family: Theme.fontFamily; font.pixelSize: 17 }
+                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.icon; color: modelData.color; font.family: Theme.iconFamily; font.pixelSize: 17 }
                     Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.label; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 7 }
                 }
                 MouseArea {
@@ -97,4 +97,3 @@ ColumnLayout {
 
     Item { Layout.fillHeight: true }
 }
-
