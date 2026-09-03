@@ -10,37 +10,70 @@ import "../services"
 
 Pill {
     id: root
-
     property bool expanded: false
-    property bool outputsExpanded: false
+    property int page: 0
+    property int deviceMenu: 0 // 0 cerrado, 1 salidas, 2 entradas
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
-    readonly property var outputNodes: Pipewire.nodes.values.filter(node =>
-        node.audio !== null && node.isSink && !node.isStream)
+    readonly property var sinks: Pipewire.nodes.values.filter(n => n.audio !== null && n.isSink && !n.isStream)
+    readonly property var sources: Pipewire.nodes.values.filter(n => n.audio !== null && !n.isSink && !n.isStream)
+    readonly property int batteryValue: Number(SystemStatus.battery)
+
+    function deviceName(node, input) {
+        if (!node) return input ? "Sin entrada" : "Sin salida"
+        const raw = String(node.description || node.nickname || node.name || "")
+        const lower = raw.toLowerCase()
+        if (lower.indexOf("bluetooth") >= 0 || lower.indexOf("bluez") >= 0)
+            return raw.replace(/^.*[-:] /, "") || "Bluetooth"
+        if (lower.indexOf("hdmi") >= 0 || lower.indexOf("displayport") >= 0)
+            return "HDMI / DisplayPort"
+        if (lower.indexOf("speaker") >= 0 || lower.indexOf("analog stereo") >= 0)
+            return "Altavoces integrados"
+        if (lower.indexOf("microphone") >= 0 || lower.indexOf("mic") >= 0)
+            return "Micrófono integrado"
+        return raw.replace(/Raptor Lake-P\/U\/H cAVS/gi, "").trim() || (input ? "Entrada de audio" : "Salida de audio")
+    }
+
+    function batteryIcon() {
+        if (SystemStatus.battery === "CA") return "󰚥"
+        if (SystemStatus.batteryState === "Cargando") return "󰂄"
+        if (batteryValue < 15) return "󰁺"
+        if (batteryValue < 40) return "󰁼"
+        if (batteryValue < 70) return "󰁾"
+        return "󰁹"
+    }
 
     active: expanded
-
-    PwObjectTracker { objects: [root.sink, root.source].concat(root.outputNodes) }
+    PwObjectTracker { objects: [root.sink, root.source].concat(root.sinks).concat(root.sources) }
 
     RowLayout {
         spacing: 9
-        Text { text: "󰖩"; color: Theme.cyan; font.family: Theme.iconFamily }
         Text {
-            text: root.sink ? Math.round(root.sink.audio.volume * 100) + "%" : "--"
-            color: Theme.muted
-            font.family: Theme.fontFamily
-            font.pixelSize: 11
+            text: root.batteryIcon() + " " + SystemStatus.battery + (SystemStatus.battery === "CA" ? "" : "%")
+            color: root.batteryValue > 0 && root.batteryValue < 15 ? Theme.red : Theme.foreground
+            font.family: Theme.iconFamily
+            font.pixelSize: 12
         }
         Text {
-            text: root.source && root.source.audio.muted ? "󰍭" : "󰍬"
-            color: root.source && root.source.audio.muted ? Theme.red : Theme.green
-            font.family: Theme.fontFamily
+            text: (root.sink && root.sink.audio.muted ? "󰝟 " : "󰕾 ") +
+                  (root.sink ? Math.round(root.sink.audio.volume * 100) + "%" : "--")
+            color: Theme.foreground
+            font.family: Theme.iconFamily
+            font.pixelSize: 12
         }
         Text {
-            text: "󰁹 " + SystemStatus.battery + (SystemStatus.battery === "CA" ? "" : "%")
-            color: Theme.orange
-            font.family: Theme.fontFamily
-            font.pixelSize: 11
+            visible: root.source && !root.source.audio.muted
+            text: "󰍬"
+            color: Theme.red
+            font.family: Theme.iconFamily
+            font.pixelSize: 14
+        }
+        Text {
+            visible: SystemStatus.bluetoothEnabled
+            text: "󰂯"
+            color: Theme.purple
+            font.family: Theme.iconFamily
+            font.pixelSize: 14
         }
     }
 
@@ -51,15 +84,12 @@ Pill {
         onClicked: root.expanded = !root.expanded
         onWheel: wheel => {
             if (root.sink)
-                root.sink.audio.volume = Math.max(0, Math.min(1.5,
-                    root.sink.audio.volume + (wheel.angleDelta.y > 0 ? 0.05 : -0.05)))
+                root.sink.audio.volume = Math.max(0, Math.min(1.5, root.sink.audio.volume + (wheel.angleDelta.y > 0 ? .05 : -.05)))
         }
     }
 
-    Process {
-        id: brightnessSetter
-        onExited: SystemStatus.refresh()
-    }
+    Process { id: command; onExited: SystemStatus.refresh() }
+    Process { id: brightnessSetter; onExited: SystemStatus.refresh() }
 
     PanelWindow {
         visible: root.expanded
@@ -70,10 +100,7 @@ Pill {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: {
-                root.outputsExpanded = false
-                root.expanded = false
-            }
+            onClicked: { root.deviceMenu = 0; root.expanded = false }
         }
 
         Rectangle {
@@ -81,12 +108,12 @@ Pill {
             anchors.right: parent.right
             anchors.topMargin: 2
             anchors.rightMargin: 102
-            width: 330
-            height: root.outputsExpanded ? 436 : 350
+            width: 390
+            height: root.page === 0 ? (root.deviceMenu ? 540 : 445) : 410
             radius: Theme.radius + 2
             color: Theme.background
             border.color: Theme.border
-
+            Behavior on height { NumberAnimation { duration: Theme.animationFast } }
             MouseArea { anchors.fill: parent }
 
             ColumnLayout {
@@ -96,168 +123,240 @@ Pill {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Text { text: "Hardware"; color: Theme.foreground; font.family: Theme.fontFamily; font.bold: true }
+                    Text { text: "Hardware"; color: Theme.foreground; font.family: Theme.fontFamily; font.bold: true; font.pixelSize: 15 }
                     Item { Layout.fillWidth: true }
-                    Text { text: SystemStatus.network; color: Theme.cyan; font.family: Theme.fontFamily; font.pixelSize: 10; elide: Text.ElideRight; Layout.maximumWidth: 145 }
-                    Text { text: SystemStatus.battery + (SystemStatus.battery === "CA" ? "" : "%"); color: Theme.orange; font.family: Theme.fontFamily; font.pixelSize: 10 }
+                    Rectangle {
+                        Layout.preferredWidth: 105; Layout.preferredHeight: 30; radius: 7
+                        color: root.page === 0 ? Theme.elevated : "transparent"
+                        Text { anchors.centerIn: parent; text: "Controles"; color: root.page === 0 ? Theme.purple : Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 11 }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { root.page = 0; root.deviceMenu = 0 } }
+                    }
+                    Rectangle {
+                        Layout.preferredWidth: 105; Layout.preferredHeight: 30; radius: 7
+                        color: root.page === 1 ? Theme.elevated : "transparent"
+                        Text { anchors.centerIn: parent; text: "Sensores"; color: root.page === 1 ? Theme.purple : Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 11 }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { root.page = 1; root.deviceMenu = 0 } }
+                    }
                 }
 
-                Rectangle {
+                ColumnLayout {
+                    visible: root.page === 0
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 58
-                    radius: 8
-                    color: Theme.surface
-                    ValueSlider {
-                        anchors.fill: parent
-                        anchors.margins: 12
-                        icon: "󰃠"
-                        value: SystemStatus.brightness
-                        accent: Theme.yellow
+                    spacing: 8
+
+                    ControlRow {
+                        icon: "󰃠"; value: SystemStatus.brightness; percent: Math.round(SystemStatus.brightness * 100) + "%"
                         onValueRequested: value => {
                             SystemStatus.brightness = value
                             brightnessSetter.command = ["brightnessctl", "set", Math.round(value * 100) + "%"]
                             brightnessSetter.running = true
                         }
                     }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: root.outputsExpanded ? 150 : 78
-                    radius: 8
-                    color: Theme.surface
-
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 8
-
-                        ValueSlider {
-                            Layout.fillWidth: true
-                            icon: root.sink && root.sink.audio.muted ? "󰝟" : "󰕾"
-                            value: root.sink ? Math.min(1, root.sink.audio.volume) : 0
-                            accent: Theme.purple
-                            onValueRequested: value => {
-                                if (root.sink) {
-                                    root.sink.audio.muted = false
-                                    root.sink.audio.volume = value
-                                }
-                            }
-                        }
-
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 28
-                            radius: 7
-                            color: outputArea.containsMouse || root.outputsExpanded ? Theme.surfaceHover : Theme.current
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: 9
-                                anchors.rightMargin: 9
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: root.sink ? (root.sink.description || root.sink.nickname || root.sink.name) : "Sin salida"
-                                    color: Theme.foreground
-                                    font.family: Theme.fontFamily
-                                    font.pixelSize: 10
-                                    elide: Text.ElideRight
-                                }
-                                Text { text: root.outputsExpanded ? "󰅃" : "󰅀"; color: Theme.pink; font.family: Theme.iconFamily }
-                            }
-                            MouseArea {
-                                id: outputArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.outputsExpanded = !root.outputsExpanded
-                            }
-                        }
-
-                        ColumnLayout {
-                            visible: root.outputsExpanded
-                            Layout.fillWidth: true
-                            spacing: 3
-                            Repeater {
-                                model: root.outputNodes
-                                delegate: Rectangle {
-                                    required property var modelData
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 27
-                                    radius: 6
-                                    color: modelData === root.sink ? Theme.pink : deviceArea.containsMouse ? Theme.current : "transparent"
-                                    Text {
-                                        anchors.fill: parent
-                                        anchors.leftMargin: 9
-                                        anchors.rightMargin: 9
-                                        verticalAlignment: Text.AlignVCenter
-                                        text: modelData.description || modelData.nickname || modelData.name
-                                        color: modelData === root.sink ? Theme.background : Theme.foreground
-                                        font.family: Theme.fontFamily
-                                        font.pixelSize: 9
-                                        elide: Text.ElideRight
-                                    }
-                                    MouseArea {
-                                        id: deviceArea
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            Pipewire.preferredDefaultAudioSink = modelData
-                                            root.outputsExpanded = false
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    ControlRow {
+                        icon: root.sink && root.sink.audio.muted ? "󰝟" : "󰕾"
+                        value: root.sink ? Math.min(1, root.sink.audio.volume) : 0
+                        percent: root.sink ? Math.round(root.sink.audio.volume * 100) + "%" : "--"
+                        onValueRequested: value => { if (root.sink) { root.sink.audio.muted = false; root.sink.audio.volume = value } }
                     }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 58
-                    radius: 8
-                    color: Theme.surface
-                    ValueSlider {
-                        anchors.fill: parent
-                        anchors.margins: 12
+                    DeviceSelector {
+                        title: "Salida"; icon: "󰓃"; label: root.deviceName(root.sink, false)
+                        expanded: root.deviceMenu === 1; nodes: root.sinks; current: root.sink
+                        onToggle: root.deviceMenu = root.deviceMenu === 1 ? 0 : 1
+                        onSelected: node => { Pipewire.preferredDefaultAudioSink = node; root.deviceMenu = 0 }
+                    }
+                    ControlRow {
                         icon: root.source && root.source.audio.muted ? "󰍭" : "󰍬"
-                        value: root.source ? root.source.audio.volume : 0
-                        accent: root.source && root.source.audio.muted ? Theme.red : Theme.cyan
-                        onValueRequested: value => {
-                            if (root.source) {
-                                root.source.audio.muted = false
-                                root.source.audio.volume = value
+                        value: root.source ? Math.min(1, root.source.audio.volume) : 0
+                        percent: root.source ? Math.round(root.source.audio.volume * 100) + "%" : "--"
+                        alert: root.source && !root.source.audio.muted
+                        onIconClicked: { if (root.source) root.source.audio.muted = !root.source.audio.muted }
+                        onValueRequested: value => { if (root.source) root.source.audio.volume = value }
+                    }
+                    DeviceSelector {
+                        title: "Entrada"; icon: "󰍬"; label: root.deviceName(root.source, true)
+                        expanded: root.deviceMenu === 2; nodes: root.sources; current: root.source
+                        onToggle: root.deviceMenu = root.deviceMenu === 2 ? 0 : 2
+                        onSelected: node => { Pipewire.preferredDefaultAudioSource = node; root.deviceMenu = 0 }
+                    }
+
+                    Text { text: "Perfil de energía"; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 10 }
+                    RowLayout {
+                        Layout.fillWidth: true; spacing: 6
+                        Repeater {
+                            model: [{id:"performance", label:"Rendimiento"}, {id:"balanced", label:"Equilibrado"}, {id:"power-saver", label:"Ahorro"}]
+                            delegate: Rectangle {
+                                required property var modelData
+                                Layout.fillWidth: true; Layout.preferredHeight: 34; radius: 8
+                                color: SystemStatus.powerProfile === modelData.id ? Theme.purple : Theme.surface
+                                Text { anchors.centerIn: parent; text: modelData.label; color: SystemStatus.powerProfile === modelData.id ? Theme.background : Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 10 }
+                                MouseArea {
+                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                    onClicked: { command.command = ["powerprofilesctl", "set", modelData.id]; command.running = true }
+                                }
                             }
                         }
                     }
                 }
 
-                RowLayout {
+                ColumnLayout {
+                    visible: root.page === 1
                     Layout.fillWidth: true
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 42
-                        radius: 8
-                        color: Theme.surface
-                        Text { anchors.centerIn: parent; text: "󰖩  " + SystemStatus.network; color: Theme.cyan; font.family: Theme.fontFamily; font.pixelSize: 10 }
+                    spacing: 8
+                    SensorCard {
+                        icon: "󰍛"; title: "CPU"
+                        detail: Math.round(SystemStatus.cpuUsage) + "%  ·  " + Math.round(SystemStatus.cpuTemperature) + "°C  ·  " + SystemStatus.cpuFrequency.toFixed(1) + " GHz"
+                        value: SystemStatus.cpuUsage / 100
+                        critical: SystemStatus.cpuTemperature > 75
                     }
-                    Rectangle {
-                        Layout.preferredWidth: 82
-                        Layout.preferredHeight: 42
-                        radius: 8
-                        color: Theme.surface
-                        Text { anchors.centerIn: parent; text: "󰁹  " + SystemStatus.battery + (SystemStatus.battery === "CA" ? "" : "%"); color: Theme.orange; font.family: Theme.fontFamily; font.pixelSize: 10 }
+                    SensorCard {
+                        icon: "󰘚"; title: "Memoria RAM"
+                        detail: Math.round(SystemStatus.memoryUsage * 100) + "%  ·  " + SystemStatus.memoryText
+                        value: SystemStatus.memoryUsage
+                    }
+                    SensorCard {
+                        icon: "󰋊"; title: "Almacenamiento /"
+                        detail: Math.round(SystemStatus.diskUsage * 100) + "%  ·  " + SystemStatus.diskText
+                        value: SystemStatus.diskUsage
+                    }
+                    SensorCard {
+                        icon: root.batteryIcon(); title: "Batería"
+                        detail: SystemStatus.battery + (SystemStatus.battery === "CA" ? "" : "%") + "  ·  " + SystemStatus.batteryState + "  ·  " + SystemStatus.batteryTime
+                        value: SystemStatus.battery === "CA" ? 0 : root.batteryValue / 100
+                        critical: root.batteryValue > 0 && root.batteryValue < 15
+                    }
+                }
+
+                Item { Layout.fillHeight: true }
+                Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: Theme.border }
+                RowLayout {
+                    Layout.fillWidth: true; spacing: 8
+                    QuickToggle {
+                        text: "Wi-Fi"; icon: "󰖩"; checked: SystemStatus.wifiEnabled
+                        onClicked: { command.command = ["nmcli", "radio", "wifi", checked ? "off" : "on"]; command.running = true }
+                    }
+                    QuickToggle {
+                        text: "Bluetooth"; icon: "󰂯"; checked: SystemStatus.bluetoothEnabled
+                        onClicked: { command.command = ["bluetoothctl", "power", checked ? "off" : "on"]; command.running = true }
+                    }
+                    QuickToggle {
+                        text: "Luz nocturna"; icon: "󰖔"; checked: SystemStatus.nightLightEnabled
+                        onClicked: {
+                            command.command = checked ? ["pkill", "-x", "hyprsunset"] : ["hyprsunset", "-t", "4500"]
+                            command.running = true
+                        }
                     }
                 }
             }
         }
 
-        Shortcut {
-            sequence: "Esc"
-            onActivated: {
-                root.outputsExpanded = false
-                root.expanded = false
+        Shortcut { sequence: "Esc"; onActivated: { root.deviceMenu = 0; root.expanded = false } }
+    }
+
+    component ControlRow: Rectangle {
+        id: controlRow
+        property string icon: ""
+        property real value: 0
+        property string percent: "--"
+        property bool alert: false
+        signal valueRequested(real value)
+        signal iconClicked()
+        Layout.fillWidth: true; Layout.preferredHeight: 52; radius: 8; color: Theme.surface
+        RowLayout {
+            anchors.fill: parent; anchors.margins: 11; spacing: 10
+            Text {
+                Layout.preferredWidth: 22; horizontalAlignment: Text.AlignHCenter
+                text: controlRow.icon; color: controlRow.alert ? Theme.red : Theme.purple
+                font.family: Theme.iconFamily; font.pixelSize: 15
+                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: controlRow.iconClicked() }
+            }
+            Rectangle {
+                id: track
+                Layout.fillWidth: true; Layout.preferredHeight: 6; radius: 3; color: Theme.current
+                Rectangle { width: parent.width * Math.max(0, Math.min(1, controlRow.value)); height: parent.height; radius: 3; color: controlRow.alert ? Theme.red : Theme.purple }
+                Rectangle { x: Math.max(0, Math.min(parent.width-width, parent.width*controlRow.value-width/2)); anchors.verticalCenter: parent.verticalCenter; width: 12; height: 12; radius: 6; color: Theme.foreground }
+                MouseArea {
+                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                    onPressed: mouse => controlRow.valueRequested(Math.max(0, Math.min(1, mouse.x/width)))
+                    onPositionChanged: mouse => { if (pressed) controlRow.valueRequested(Math.max(0, Math.min(1, mouse.x/width))) }
+                }
+            }
+            Text { Layout.preferredWidth: 39; horizontalAlignment: Text.AlignRight; text: controlRow.percent; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 11 }
+        }
+    }
+
+    component DeviceSelector: ColumnLayout {
+        id: selector
+        property string title: ""
+        property string icon: ""
+        property string label: ""
+        property bool expanded: false
+        property var nodes: []
+        property var current: null
+        signal toggle()
+        signal selected(var node)
+        Layout.fillWidth: true; spacing: 3
+        Rectangle {
+            Layout.fillWidth: true; Layout.preferredHeight: 34; radius: 8; color: Theme.surface
+            RowLayout {
+                anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 10
+                Text { text: selector.icon; color: Theme.purple; font.family: Theme.iconFamily }
+                Text { text: selector.title; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 10 }
+                Text { Layout.fillWidth: true; text: selector.label; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 10; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
+                Text { text: selector.expanded ? "󰅃" : "󰅀"; color: Theme.muted; font.family: Theme.iconFamily }
+            }
+            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: selector.toggle() }
+        }
+        ColumnLayout {
+            visible: selector.expanded; Layout.fillWidth: true; spacing: 3
+            Repeater {
+                model: selector.nodes
+                delegate: Rectangle {
+                    required property var modelData
+                    Layout.fillWidth: true; Layout.preferredHeight: 28; radius: 6
+                    color: modelData === selector.current ? Theme.elevated : "transparent"
+                    Text { anchors.fill: parent; anchors.leftMargin: 12; anchors.rightMargin: 12; verticalAlignment: Text.AlignVCenter; text: root.deviceName(modelData, selector.title === "Entrada"); color: modelData === selector.current ? Theme.purple : Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 10; elide: Text.ElideRight }
+                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: selector.selected(modelData) }
+                }
             }
         }
+    }
+
+    component SensorCard: Rectangle {
+        id: sensor
+        property string icon: ""
+        property string title: ""
+        property string detail: ""
+        property real value: 0
+        property bool critical: false
+        Layout.fillWidth: true; Layout.preferredHeight: 72; radius: 8; color: Theme.surface
+        ColumnLayout {
+            anchors.fill: parent; anchors.margins: 11; spacing: 7
+            RowLayout {
+                Text { text: sensor.icon; color: sensor.critical ? Theme.red : Theme.purple; font.family: Theme.iconFamily; font.pixelSize: 15 }
+                Text { text: sensor.title; color: Theme.foreground; font.family: Theme.fontFamily; font.bold: true; font.pixelSize: 11 }
+                Item { Layout.fillWidth: true }
+                Text { text: sensor.detail; color: sensor.critical ? Theme.red : Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 10 }
+            }
+            Rectangle {
+                Layout.fillWidth: true; Layout.preferredHeight: 5; radius: 3; color: Theme.current
+                Rectangle { width: parent.width*Math.max(0,Math.min(1,sensor.value)); height: parent.height; radius: 3; color: sensor.critical ? Theme.red : Theme.purple }
+            }
+        }
+    }
+
+    component QuickToggle: Rectangle {
+        id: toggle
+        property string text: ""
+        property string icon: ""
+        property bool checked: false
+        signal clicked()
+        Layout.fillWidth: true; Layout.preferredHeight: 38; radius: 8
+        color: checked ? Theme.purple : Theme.surface
+        RowLayout {
+            anchors.centerIn: parent; spacing: 5
+            Text { text: toggle.icon; color: toggle.checked ? Theme.background : Theme.muted; font.family: Theme.iconFamily }
+            Text { text: toggle.text; color: toggle.checked ? Theme.background : Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 9 }
+        }
+        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: toggle.clicked() }
     }
 }
