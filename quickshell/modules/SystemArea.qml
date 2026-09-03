@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.SystemTray
+import Quickshell.Wayland
 import ".."
 import "../components"
 import "../services"
@@ -90,19 +91,25 @@ Pill {
 
     PanelWindow {
         visible: root.expanded
-        anchors { top: true; right: true }
-        margins { top: 2; right: 8 }
-        implicitWidth: 350
-        implicitHeight: 430
+        anchors { top: true; right: true; bottom: true; left: true }
         exclusiveZone: 0
         color: "transparent"
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+
+        MouseArea { anchors.fill: parent; onClicked: root.expanded = false }
 
         Rectangle {
-            anchors.fill: parent
-            anchors.margins: 4
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.topMargin: 2
+            anchors.rightMargin: 8
+            width: 350
+            height: 430
             radius: Theme.radius + 2
             color: Theme.background
             border.color: "#66557d"
+
+            MouseArea { anchors.fill: parent }
 
             ColumnLayout {
                 anchors.fill: parent
