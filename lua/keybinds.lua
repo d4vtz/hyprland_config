@@ -55,17 +55,55 @@ return function(settings)
         end
     end
 
+    -- Los escritorios persistentes siempre cuentan como existentes para e±1.
+    -- Por eso comprobamos sus ventanas directamente para saltar los vacíos.
+    local function cycle_occupied_workspace(step)
+        return function()
+            local current = hl.get_active_workspace().id
+            local occupied = {}
+
+            for i = 1, settings.workspaces do
+                if #hl.get_workspace_windows(i) > 0 then
+                    table.insert(occupied, i)
+                end
+            end
+
+            if #occupied == 0 then
+                return
+            end
+
+            local target = step > 0 and occupied[1] or occupied[#occupied]
+            if step > 0 then
+                for _, workspace in ipairs(occupied) do
+                    if workspace > current then
+                        target = workspace
+                        break
+                    end
+                end
+            else
+                for i = #occupied, 1, -1 do
+                    if occupied[i] < current then
+                        target = occupied[i]
+                        break
+                    end
+                end
+            end
+
+            hl.dispatch(hl.dsp.focus({ workspace = target }))
+        end
+    end
+
     hl.bind(mod .. " + Page_Up", cycle_workspace(-1))
     hl.bind(mod .. " + Page_Down", cycle_workspace(1))
-    hl.bind(mod .. " + CTRL + Page_Up", hl.dsp.focus({ workspace = "e-1" }))
-    hl.bind(mod .. " + CTRL + Page_Down", hl.dsp.focus({ workspace = "e+1" }))
+    hl.bind(mod .. " + CTRL + Page_Up", cycle_occupied_workspace(-1))
+    hl.bind(mod .. " + CTRL + Page_Down", cycle_occupied_workspace(1))
 
     hl.bind(mod .. " + S", hl.dsp.workspace.toggle_special("scratchpad"))
     hl.bind(mod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:scratchpad" }))
     hl.bind(mod .. " + mouse_down", cycle_workspace(1))
     hl.bind(mod .. " + mouse_up", cycle_workspace(-1))
-    hl.bind(mod .. " + CTRL + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-    hl.bind(mod .. " + CTRL + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
+    hl.bind(mod .. " + CTRL + mouse_down", cycle_occupied_workspace(1))
+    hl.bind(mod .. " + CTRL + mouse_up", cycle_occupied_workspace(-1))
     hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
     hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
