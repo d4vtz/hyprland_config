@@ -76,19 +76,18 @@ read_gpu() {
   done
 
   if [[ $busy == 0 ]] && command -v intel_gpu_top >/dev/null && command -v jq >/dev/null; then
-    local json measured_busy measured_frequency
-    json=$(intel_gpu_top -J -s 150 -n 2 -o - 2>/dev/null || true)
+    local json measured_busy=0 measured_frequency=0
+    json=$(intel_gpu_top -J -s 250 -n 3 -o - 2>/dev/null || true)
     if [[ -n $json ]]; then
-      measured_busy=$(jq -rs '
+      read -r measured_busy measured_frequency < <(jq -rsr '
         def samples: if length == 1 and (.[0] | type) == "array" then .[0] else . end;
-        samples | last | [.. | objects | .busy? // empty] | max // 0
-      ' <<< "$json" 2>/dev/null || printf '0')
-      measured_frequency=$(jq -rs '
-        def samples: if length == 1 and (.[0] | type) == "array" then .[0] else . end;
-        samples | last | .frequency.actual // .frequency.requested // 0
-      ' <<< "$json" 2>/dev/null || printf '0')
+        samples as $samples |
+        ([$samples[] | [.. | objects | .busy? // empty | tonumber] | max // 0] | max // 0) as $busy |
+        ([$samples[] | (.frequency.actual // .frequency.requested // 0 | tonumber)] | max // 0) as $frequency |
+        [$busy, $frequency] | @tsv
+      ' <<< "$json" 2>/dev/null || printf '0\t0')
       busy=$(number_or_zero "$measured_busy")
-      ((frequency == 0)) 2>/dev/null && frequency=$(number_or_zero "$measured_frequency")
+      frequency=$(number_or_zero "$measured_frequency")
     fi
   fi
 
