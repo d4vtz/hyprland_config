@@ -30,36 +30,38 @@ Pill {
     }
 
     RowLayout {
-        spacing: 10
+        spacing: 11
 
         Repeater {
             model: SystemTray.items
             delegate: Image {
                 required property var modelData
                 source: modelData.icon
-                sourceSize.width: 16
-                sourceSize.height: 16
-                width: 16
-                height: 16
+                sourceSize.width: 19
+                sourceSize.height: 19
+                width: 19
+                height: 19
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: modelData.activate() }
             }
         }
 
         Text {
             text: "󰅇"
-            color: root.currentTab === 2 && root.expanded ? Theme.pink : Theme.muted
+            color: Theme.pink
             font.family: Theme.iconFamily
+            font.pixelSize: 17
             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.openTab(2) }
         }
 
         Item {
-            implicitWidth: 18
-            implicitHeight: 18
+            implicitWidth: 22
+            implicitHeight: 20
             Text {
                 anchors.centerIn: parent
                 text: NotificationService.doNotDisturb ? "󰂛" : "󰂚"
-                color: root.currentTab === 1 && root.expanded ? Theme.purple : Theme.muted
+                color: NotificationService.doNotDisturb ? Theme.red : Theme.purple
                 font.family: Theme.iconFamily
+                font.pixelSize: 17
             }
             Rectangle {
                 visible: NotificationService.count > 0
@@ -83,8 +85,9 @@ Pill {
 
         Text {
             text: "󰐥"
-            color: root.currentTab === 0 && root.expanded ? Theme.red : Theme.muted
+            color: Theme.red
             font.family: Theme.iconFamily
+            font.pixelSize: 17
             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.openTab(0) }
         }
     }
