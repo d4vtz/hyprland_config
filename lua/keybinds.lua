@@ -93,17 +93,17 @@ return function(settings)
         end
     end
 
-    hl.bind(mod .. " + Page_Up", cycle_workspace(-1))
-    hl.bind(mod .. " + Page_Down", cycle_workspace(1))
-    hl.bind(mod .. " + CTRL + Page_Up", cycle_occupied_workspace(-1))
-    hl.bind(mod .. " + CTRL + Page_Down", cycle_occupied_workspace(1))
+    hl.bind(mod .. " + Page_Up", cycle_occupied_workspace(-1))
+    hl.bind(mod .. " + Page_Down", cycle_occupied_workspace(1))
+    hl.bind(mod .. " + CTRL + Page_Up", cycle_workspace(-1))
+    hl.bind(mod .. " + CTRL + Page_Down", cycle_workspace(1))
 
     hl.bind(mod .. " + S", hl.dsp.workspace.toggle_special("scratchpad"))
     hl.bind(mod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:scratchpad" }))
-    hl.bind(mod .. " + mouse_down", cycle_workspace(1))
-    hl.bind(mod .. " + mouse_up", cycle_workspace(-1))
-    hl.bind(mod .. " + CTRL + mouse_down", cycle_occupied_workspace(1))
-    hl.bind(mod .. " + CTRL + mouse_up", cycle_occupied_workspace(-1))
+    hl.bind(mod .. " + mouse_down", cycle_occupied_workspace(1))
+    hl.bind(mod .. " + mouse_up", cycle_occupied_workspace(-1))
+    hl.bind(mod .. " + CTRL + mouse_down", cycle_workspace(1))
+    hl.bind(mod .. " + CTRL + mouse_up", cycle_workspace(-1))
     hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
     hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
