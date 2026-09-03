@@ -14,7 +14,7 @@ window#waybar {
 }
 
 .modules-left, .modules-center,
-#media, #system, #session {
+#media, #hardware, #system {
   background: alpha(@background, 0.94);
   border: 1px solid alpha(@purple, 0.32);
   border-radius: 10px;
@@ -28,7 +28,7 @@ window#waybar {
 }
 
 #custom-launcher, #workspaces, #window, #clock, #custom-media, #mpris, #network,
-#pulseaudio, #battery, #tray, #custom-notifications, #custom-power {
+#pulseaudio, #pulseaudio.microphone, #battery, #tray, #custom-notifications, #custom-power {
   padding: 0 10px;
   margin: 3px 0;
 }
@@ -39,6 +39,8 @@ window#waybar {
 #mpris { color: @pink; }
 #network { color: @cyan; }
 #pulseaudio { color: @green; }
+#pulseaudio.microphone { color: @pink; }
+#pulseaudio.microphone.source-muted { color: @comment; }
 #battery { color: @yellow; }
 #battery.warning { color: @orange; }
 #battery.critical { color: @red; }
