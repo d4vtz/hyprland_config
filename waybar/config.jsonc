@@ -9,7 +9,7 @@
 
   "modules-left": ["custom/launcher", "hyprland/workspaces", "hyprland/window"],
   "modules-center": ["clock"],
-  "modules-right": ["group/media", "group/system", "group/session"],
+  "modules-right": ["group/media", "group/hardware", "group/system"],
 
   "custom/launcher": {
     "format": "",
@@ -77,11 +77,11 @@
     },
     "modules": ["custom/media", "mpris"]
   },
-  "group/system": {
+  "group/hardware": {
     "orientation": "inherit",
-    "modules": ["network", "pulseaudio", "battery"]
+    "modules": ["network", "pulseaudio", "pulseaudio#microphone", "battery"]
   },
-  "group/session": {
+  "group/system": {
     "orientation": "inherit",
     "modules": ["tray", "custom/notifications", "custom/power"]
   },
@@ -99,6 +99,16 @@
     "scroll-step": 5,
     "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
     "on-click-right": "pavucontrol"
+  },
+  "pulseaudio#microphone": {
+    "format": "{format_source}",
+    "format-source": " {source_volume}%",
+    "format-source-muted": "",
+    "target": "source",
+    "scroll-step": 5,
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
+    "on-click-right": "pavucontrol",
+    "tooltip-format": "{source_desc}"
   },
   "battery": {
     "states": { "warning": 25, "critical": 12 },
