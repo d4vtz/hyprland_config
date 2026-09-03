@@ -42,7 +42,7 @@ hl.window_rule({
 })
 
 -- Desenfoque para las superficies semitransparentes del escritorio.
-for _, namespace in ipairs({ "waybar", "rofi", "swaync-control-center", "swaync-notification-window" }) do
+for _, namespace in ipairs({ "waybar", "rofi" }) do
     hl.layer_rule({
         name = "blur-" .. namespace,
         match = { namespace = "^" .. namespace .. "$" },

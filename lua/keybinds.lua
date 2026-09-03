@@ -9,7 +9,7 @@ return function(settings)
     hl.bind(mod .. " + SPACE", exec(settings.menu))
     hl.bind(mod .. " + F1", exec("~/.config/hypr/scripts/keybinds-help.sh"))
     hl.bind(mod .. " + ESCAPE", exec("~/.config/hypr/scripts/powermenu.sh"))
-    hl.bind(mod .. " + N", exec("swaync-client -t -sw"))
+    hl.bind(mod .. " + N", exec("qs ipc call system notifications"))
 
     hl.bind(mod .. " + Q", hl.dsp.window.close())
     hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))

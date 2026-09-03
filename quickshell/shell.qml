@@ -6,6 +6,8 @@ import "components"
 import "modules"
 
 ShellRoot {
+    NotificationToast {}
+
     Variants {
         model: Quickshell.screens
 

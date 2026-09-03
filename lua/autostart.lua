@@ -6,7 +6,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("systemctl --user start plasma-kwallet-pam.service")
     -- Quickshell sustituye a Waybar; scripts/bar-waybar.sh permite volver temporalmente.
     hl.exec_cmd("uwsm app -- qs")
-    hl.exec_cmd("uwsm app -- swaync")
+    -- Quickshell recibe notificaciones; cliphist conserva el historial del portapapeles.
+    hl.exec_cmd("uwsm app -- wl-paste --watch cliphist store")
     hl.exec_cmd("uwsm app -- hyprpaper")
     hl.exec_cmd("uwsm app -- hypridle")
 end)

@@ -21,6 +21,4 @@ ln -sfn "$theme-hyprlock.conf" "$root/themes/current-hyprlock.conf"
 
 hyprctl reload
 pkill -SIGUSR2 waybar || true
-swaync-client -R
-swaync-client -rs
 printf 'Tema activo: %s\n' "$theme"

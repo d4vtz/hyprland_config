@@ -10,7 +10,7 @@ LaTeX, PDF, Xournal++ y multimedia.
 - Tema Dracula desacoplado y preparado para añadir otras paletas.
 - Layout master con siete espacios persistentes.
 - Quickshell superior, modular y animada, con reloj centrado.
-- Rofi como lanzador, SwayNC como centro de notificaciones.
+- Rofi como lanzador y centro de notificaciones nativo de Quickshell.
 - Hyprpaper, Hyprlock e Hypridle.
 - Capturas con Grimblast y edición en Satty.
 - Super + F1 abre una hoja de atajos filtrable.
@@ -24,7 +24,7 @@ sudo pacman -S --needed \
   uwsm xdg-desktop-portal-hyprland polkit-kde-agent \
   kwallet kwallet-pam kwalletmanager \
   quickshell qt6-declarative qt6-svg qt6-imageformats \
-  waybar rofi swaync hyprpaper hyprlock hypridle \
+  waybar rofi hyprpaper hyprlock hypridle \
   satty grim slurp wl-clipboard cliphist jq cava \
   brightnessctl playerctl pavucontrol network-manager-applet \
   pipewire wireplumber qt5-wayland qt6-wayland \
@@ -53,7 +53,6 @@ mv ~/.config/hypr ~/.config/hypr.backup 2>/dev/null || true
 mv ~/.config/waybar ~/.config/waybar.backup 2>/dev/null || true
 mv ~/.config/quickshell ~/.config/quickshell.backup 2>/dev/null || true
 mv ~/.config/rofi ~/.config/rofi.backup 2>/dev/null || true
-mv ~/.config/swaync ~/.config/swaync.backup 2>/dev/null || true
 ```
 
 Instala los enlaces:
@@ -79,7 +78,7 @@ Selecciona **Hyprland (uwsm-managed)** en Plasma Login Manager.
 | Super + Enter | Abrir Kitty |
 | Super + E | Abrir Dolphin |
 | Super + B | Abrir navegador |
-| Super + N | Abrir SwayNC |
+| Super + N | Abrir las notificaciones de Quickshell |
 | Super + Escape | Menú de energía |
 | Super + H/J/K/L | Cambiar el foco |
 | Super + flechas | Cambiar el foco |
@@ -145,7 +144,7 @@ themes/                Paletas compartidas
 quickshell/             Shell principal y paneles QML
 waybar/                 Barra anterior, conservada como fallback
 rofi/                  Lanzador
-swaync/                Notificaciones
+swaync/                Configuración anterior, conservada como referencia
 scripts/               Utilidades del escritorio
 hyprlock.conf           Pantalla de bloqueo
 hypridle.conf           Inactividad y suspensión
@@ -159,8 +158,6 @@ cd ~/.local/src/hyprland_config
 git pull --ff-only
 hyprctl reload
 qs kill && uwsm app -- qs
-swaync-client -R
-swaync-client -rs
 ```
 
 Durante la migración puedes alternar sin cerrar la sesión:
