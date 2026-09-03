@@ -14,9 +14,11 @@ link_config() {
 }
 
 mkdir -p "$config_dir"
+mkdir -p "$config_dir/autostart"
 link_config "$root" "$config_dir/hypr"
 link_config "$root/waybar" "$config_dir/waybar"
 link_config "$root/rofi" "$config_dir/rofi"
 link_config "$root/swaync" "$config_dir/swaync"
+link_config "$root/autostart/nm-applet.desktop" "$config_dir/autostart/nm-applet.desktop"
 
 printf 'Enlaces instalados. Cierra la sesión y entra en Hyprland (uwsm-managed).\n'
