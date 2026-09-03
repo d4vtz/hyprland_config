@@ -30,7 +30,25 @@
     "icon": true,
     "icon-size": 15,
     "separate-outputs": true,
-    "tooltip-format": "{title}"
+    "tooltip-format": "{title}",
+    "rewrite": {
+      "^(google-chrome|Google-chrome|chromium|Chromium)$": "Chrome",
+      "^(firefox|firefox-esr|Firefox)$": "Firefox",
+      "^(kitty|Kitty)$": "Kitty",
+      "^(dolphin|org.kde.dolphin)$": "Dolphin",
+      "^(nvim|Neovim)$": "Neovim",
+      "^(code|Code|code-oss)$": "VS Code",
+      "^(codium|VSCodium)$": "VSCodium",
+      "^(okular|org.kde.okular)$": "Okular",
+      "^(com.github.xournalpp.xournalpp|xournalpp)$": "Xournal++",
+      "^(libreoffice-writer|soffice)$": "LibreOffice Writer",
+      "^libreoffice-calc$": "LibreOffice Calc",
+      "^libreoffice-impress$": "LibreOffice Impress",
+      "^(org.kde.kate|kate)$": "Kate",
+      "^(systemsettings|org.kde.systemsettings)$": "Ajustes de KDE",
+      "^(pavucontrol|org.pulseaudio.pavucontrol)$": "Control de audio",
+      "^(org.pwmt.zathura|zathura)$": "Zathura"
+    }
   },
   "clock": {
     "format": "{:%H:%M}",
