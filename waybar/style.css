@@ -13,22 +13,29 @@ window#waybar {
   color: @foreground;
 }
 
-.modules-left, .modules-center, .modules-right {
+.modules-left, .modules-center,
+#media, #system, #session {
   background: alpha(@background, 0.94);
   border: 1px solid alpha(@purple, 0.32);
   border-radius: 10px;
   padding: 0 4px;
 }
 
-#custom-launcher, #workspaces, #window, #clock, #mpris, #network,
+.modules-right {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+#custom-launcher, #workspaces, #window, #clock, #custom-media, #mpris, #network,
 #pulseaudio, #battery, #tray, #custom-notifications, #custom-power {
   padding: 0 10px;
   margin: 3px 0;
 }
 
-#custom-launcher, #custom-notifications, #custom-power { color: @purple; }
+#custom-launcher, #custom-media, #custom-notifications, #custom-power { color: @purple; }
 #clock { color: @foreground; font-weight: 700; }
-#window { color: @comment; }
+#window { color: @comment; padding-right: 8px; }
 #mpris { color: @pink; }
 #network { color: @cyan; }
 #pulseaudio { color: @green; }
