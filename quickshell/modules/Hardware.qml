@@ -47,33 +47,37 @@ Pill {
     PwObjectTracker { objects: [root.sink, root.source].concat(root.sinks).concat(root.sources) }
 
     RowLayout {
-        spacing: 9
+        spacing: 11
         Text {
-            text: root.batteryIcon() + " " + SystemStatus.battery + (SystemStatus.battery === "CA" ? "" : "%")
-            color: root.batteryValue > 0 && root.batteryValue < 15 ? Theme.red : Theme.foreground
+            text: root.batteryIcon() + " " + SystemStatus.battery +
+                  (SystemStatus.battery === "CA" ? "" : "%") +
+                  (SystemStatus.acConnected && SystemStatus.batteryState !== "Cargando" ? " 󰚥" : "")
+            color: root.batteryValue > 0 && root.batteryValue < 15 ? Theme.red :
+                   SystemStatus.batteryState === "Cargando" ? Theme.green :
+                   SystemStatus.acConnected ? Theme.yellow : Theme.orange
             font.family: Theme.iconFamily
-            font.pixelSize: 12
+            font.pixelSize: 14
         }
         Text {
             text: (root.sink && root.sink.audio.muted ? "󰝟 " : "󰕾 ") +
                   (root.sink ? Math.round(root.sink.audio.volume * 100) + "%" : "--")
-            color: Theme.foreground
+            color: root.sink && root.sink.audio.muted ? Theme.muted : Theme.cyan
             font.family: Theme.iconFamily
-            font.pixelSize: 12
+            font.pixelSize: 14
         }
         Text {
             visible: root.source && !root.source.audio.muted
             text: "󰍬"
             color: Theme.red
             font.family: Theme.iconFamily
-            font.pixelSize: 14
+            font.pixelSize: 16
         }
         Text {
             visible: SystemStatus.bluetoothEnabled
-            text: "󰂯"
-            color: Theme.purple
+            text: SystemStatus.bluetoothAudioActive ? "󰋋" : "󰂯"
+            color: SystemStatus.bluetoothAudioActive ? Theme.green : Theme.cyan
             font.family: Theme.iconFamily
-            font.pixelSize: 14
+            font.pixelSize: 16
         }
     }
 
@@ -89,6 +93,17 @@ Pill {
     }
 
     Process { id: command; onExited: SystemStatus.refresh() }
+    Process { id: settingsLauncher }
+    Process {
+        id: profileSetter
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text.trim())
+                    SystemStatus.powerProfile = text.trim()
+                SystemStatus.refresh()
+            }
+        }
+    }
     Process { id: brightnessSetter; onExited: SystemStatus.refresh() }
 
     PanelWindow {
@@ -109,7 +124,7 @@ Pill {
             anchors.topMargin: 2
             anchors.rightMargin: 102
             width: 390
-            height: root.page === 0 ? (root.deviceMenu ? 540 : 445) : 410
+            height: root.page === 0 ? (root.deviceMenu ? 540 : 445) : 545
             radius: Theme.radius + 2
             color: Theme.background
             border.color: Theme.border
@@ -146,6 +161,7 @@ Pill {
 
                     ControlRow {
                         icon: "󰃠"; value: SystemStatus.brightness; percent: Math.round(SystemStatus.brightness * 100) + "%"
+                        accent: Theme.yellow
                         onValueRequested: value => {
                             SystemStatus.brightness = value
                             brightnessSetter.command = ["brightnessctl", "set", Math.round(value * 100) + "%"]
@@ -156,10 +172,12 @@ Pill {
                         icon: root.sink && root.sink.audio.muted ? "󰝟" : "󰕾"
                         value: root.sink ? Math.min(1, root.sink.audio.volume) : 0
                         percent: root.sink ? Math.round(root.sink.audio.volume * 100) + "%" : "--"
+                        accent: Theme.cyan
                         onValueRequested: value => { if (root.sink) { root.sink.audio.muted = false; root.sink.audio.volume = value } }
                     }
                     DeviceSelector {
                         title: "Salida"; icon: "󰓃"; label: root.deviceName(root.sink, false)
+                        accent: Theme.cyan
                         expanded: root.deviceMenu === 1; nodes: root.sinks; current: root.sink
                         onToggle: root.deviceMenu = root.deviceMenu === 1 ? 0 : 1
                         onSelected: node => { Pipewire.preferredDefaultAudioSink = node; root.deviceMenu = 0 }
@@ -174,6 +192,7 @@ Pill {
                     }
                     DeviceSelector {
                         title: "Entrada"; icon: "󰍬"; label: root.deviceName(root.source, true)
+                        accent: Theme.pink
                         expanded: root.deviceMenu === 2; nodes: root.sources; current: root.source
                         onToggle: root.deviceMenu = root.deviceMenu === 2 ? 0 : 2
                         onSelected: node => { Pipewire.preferredDefaultAudioSource = node; root.deviceMenu = 0 }
@@ -186,12 +205,18 @@ Pill {
                             model: [{id:"performance", label:"Rendimiento"}, {id:"balanced", label:"Equilibrado"}, {id:"power-saver", label:"Ahorro"}]
                             delegate: Rectangle {
                                 required property var modelData
+                                readonly property bool available: SystemStatus.powerProfiles.indexOf(modelData.id) >= 0
                                 Layout.fillWidth: true; Layout.preferredHeight: 34; radius: 8
                                 color: SystemStatus.powerProfile === modelData.id ? Theme.purple : Theme.surface
+                                opacity: available ? 1 : 0.38
                                 Text { anchors.centerIn: parent; text: modelData.label; color: SystemStatus.powerProfile === modelData.id ? Theme.background : Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 10 }
                                 MouseArea {
                                     anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                    onClicked: { command.command = ["powerprofilesctl", "set", modelData.id]; command.running = true }
+                                    enabled: parent.available
+                                    onClicked: {
+                                        profileSetter.command = ["bash", "-c", "powerprofilesctl set " + modelData.id + " && powerprofilesctl get"]
+                                        profileSetter.running = true
+                                    }
                                 }
                             }
                         }
@@ -204,9 +229,19 @@ Pill {
                     spacing: 8
                     SensorCard {
                         icon: "󰍛"; title: "CPU"
-                        detail: Math.round(SystemStatus.cpuUsage) + "%  ·  " + Math.round(SystemStatus.cpuTemperature) + "°C  ·  " + SystemStatus.cpuFrequency.toFixed(1) + " GHz"
+                        detail: Math.round(SystemStatus.cpuUsage) + "%  ·  " +
+                                (SystemStatus.cpuTemperature > 0 ? Math.round(SystemStatus.cpuTemperature) + "°C  ·  " : "") +
+                                SystemStatus.cpuFrequency.toFixed(1) + " GHz"
                         value: SystemStatus.cpuUsage / 100
                         critical: SystemStatus.cpuTemperature > 75
+                    }
+                    SensorCard {
+                        icon: "󰢮"; title: "GPU Intel"
+                        detail: Math.round(SystemStatus.gpuUsage) + "%  ·  " +
+                                (SystemStatus.gpuTemperature > 0 ? Math.round(SystemStatus.gpuTemperature) + "°C  ·  " : "") +
+                                (SystemStatus.gpuFrequency > 0 ? Math.round(SystemStatus.gpuFrequency) + " MHz" : "frecuencia no disponible")
+                        value: SystemStatus.gpuUsage / 100
+                        critical: SystemStatus.gpuTemperature > 85
                     }
                     SensorCard {
                         icon: "󰘚"; title: "Memoria RAM"
@@ -231,18 +266,19 @@ Pill {
                 RowLayout {
                     Layout.fillWidth: true; spacing: 8
                     QuickToggle {
-                        text: "Wi-Fi"; icon: "󰖩"; checked: SystemStatus.wifiEnabled
-                        onClicked: { command.command = ["nmcli", "radio", "wifi", checked ? "off" : "on"]; command.running = true }
+                        text: "Wi-Fi"; icon: "󰖩"; checked: SystemStatus.wifiEnabled; accent: Theme.cyan
+                        onClicked: { settingsLauncher.command = ["nm-connection-editor"]; settingsLauncher.running = true; root.expanded = false }
                     }
                     QuickToggle {
-                        text: "Bluetooth"; icon: "󰂯"; checked: SystemStatus.bluetoothEnabled
-                        onClicked: { command.command = ["bluetoothctl", "power", checked ? "off" : "on"]; command.running = true }
+                        text: "Bluetooth"; icon: "󰂯"; checked: SystemStatus.bluetoothEnabled; accent: Theme.purple
+                        onClicked: { settingsLauncher.command = ["blueman-manager"]; settingsLauncher.running = true; root.expanded = false }
                     }
                     QuickToggle {
-                        text: "Luz nocturna"; icon: "󰖔"; checked: SystemStatus.nightLightEnabled
+                        text: "Luz nocturna"; icon: "󰖔"; checked: SystemStatus.nightLightEnabled; accent: Theme.orange
                         onClicked: {
-                            command.command = checked ? ["pkill", "-x", "hyprsunset"] : ["hyprsunset", "-t", "4500"]
-                            command.running = true
+                            settingsLauncher.command = ["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/night-light-menu.sh"]
+                            settingsLauncher.running = true
+                            root.expanded = false
                         }
                     }
                 }
@@ -258,6 +294,7 @@ Pill {
         property real value: 0
         property string percent: "--"
         property bool alert: false
+        property color accent: Theme.purple
         signal valueRequested(real value)
         signal iconClicked()
         Layout.fillWidth: true; Layout.preferredHeight: 52; radius: 8; color: Theme.surface
@@ -265,14 +302,14 @@ Pill {
             anchors.fill: parent; anchors.margins: 11; spacing: 10
             Text {
                 Layout.preferredWidth: 22; horizontalAlignment: Text.AlignHCenter
-                text: controlRow.icon; color: controlRow.alert ? Theme.red : Theme.purple
-                font.family: Theme.iconFamily; font.pixelSize: 15
+                text: controlRow.icon; color: controlRow.alert ? Theme.red : controlRow.accent
+                font.family: Theme.iconFamily; font.pixelSize: 18
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: controlRow.iconClicked() }
             }
             Rectangle {
                 id: track
                 Layout.fillWidth: true; Layout.preferredHeight: 6; radius: 3; color: Theme.current
-                Rectangle { width: parent.width * Math.max(0, Math.min(1, controlRow.value)); height: parent.height; radius: 3; color: controlRow.alert ? Theme.red : Theme.purple }
+                Rectangle { width: parent.width * Math.max(0, Math.min(1, controlRow.value)); height: parent.height; radius: 3; color: controlRow.alert ? Theme.red : controlRow.accent }
                 Rectangle { x: Math.max(0, Math.min(parent.width-width, parent.width*controlRow.value-width/2)); anchors.verticalCenter: parent.verticalCenter; width: 12; height: 12; radius: 6; color: Theme.foreground }
                 MouseArea {
                     anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -292,6 +329,7 @@ Pill {
         property bool expanded: false
         property var nodes: []
         property var current: null
+        property color accent: Theme.purple
         signal toggle()
         signal selected(var node)
         Layout.fillWidth: true; spacing: 3
@@ -299,7 +337,7 @@ Pill {
             Layout.fillWidth: true; Layout.preferredHeight: 34; radius: 8; color: Theme.surface
             RowLayout {
                 anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 10
-                Text { text: selector.icon; color: Theme.purple; font.family: Theme.iconFamily }
+                Text { text: selector.icon; color: selector.accent; font.family: Theme.iconFamily; font.pixelSize: 16 }
                 Text { text: selector.title; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 10 }
                 Text { Layout.fillWidth: true; text: selector.label; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 10; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
                 Text { text: selector.expanded ? "󰅃" : "󰅀"; color: Theme.muted; font.family: Theme.iconFamily }
@@ -349,12 +387,13 @@ Pill {
         property string text: ""
         property string icon: ""
         property bool checked: false
+        property color accent: Theme.purple
         signal clicked()
         Layout.fillWidth: true; Layout.preferredHeight: 38; radius: 8
-        color: checked ? Theme.purple : Theme.surface
+        color: checked ? accent : Theme.surface
         RowLayout {
             anchors.centerIn: parent; spacing: 5
-            Text { text: toggle.icon; color: toggle.checked ? Theme.background : Theme.muted; font.family: Theme.iconFamily }
+            Text { text: toggle.icon; color: toggle.checked ? Theme.background : toggle.accent; font.family: Theme.iconFamily; font.pixelSize: 16 }
             Text { text: toggle.text; color: toggle.checked ? Theme.background : Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 9 }
         }
         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: toggle.clicked() }
