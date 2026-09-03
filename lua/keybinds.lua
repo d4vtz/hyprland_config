@@ -47,7 +47,7 @@ return function(settings)
 
     -- Ciclo cerrado entre los escritorios configurados (1…7 por defecto).
     -- El script evita que el desplazamiento relativo cree escritorios 8, 9, etc.
-    local workspace_cycle = "~/.config/hypr/scripts/workspace-cycle.sh " .. settings.workspaces
+    local workspace_cycle = "bash ~/.config/hypr/scripts/workspace-cycle.sh " .. settings.workspaces
     hl.bind(mod .. " + Page_Up", exec(workspace_cycle .. " previous"))
     hl.bind(mod .. " + Page_Down", exec(workspace_cycle .. " next"))
     hl.bind(mod .. " + CTRL + Page_Up", hl.dsp.focus({ workspace = "e-1" }))
