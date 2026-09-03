@@ -74,6 +74,24 @@ read_gpu() {
     done
     break
   done
+
+  if [[ $busy == 0 ]] && command -v intel_gpu_top >/dev/null && command -v jq >/dev/null; then
+    local json measured_busy measured_frequency
+    json=$(intel_gpu_top -J -s 150 -n 2 -o - 2>/dev/null || true)
+    if [[ -n $json ]]; then
+      measured_busy=$(jq -rs '
+        def samples: if length == 1 and (.[0] | type) == "array" then .[0] else . end;
+        samples | last | [.. | objects | .busy? // empty] | max // 0
+      ' <<< "$json" 2>/dev/null || printf '0')
+      measured_frequency=$(jq -rs '
+        def samples: if length == 1 and (.[0] | type) == "array" then .[0] else . end;
+        samples | last | .frequency.actual // .frequency.requested // 0
+      ' <<< "$json" 2>/dev/null || printf '0')
+      busy=$(number_or_zero "$measured_busy")
+      ((frequency == 0)) 2>/dev/null && frequency=$(number_or_zero "$measured_frequency")
+    fi
+  fi
+
   printf '%s|%s|%s' "$(number_or_zero "$busy")" "$(number_or_zero "$temperature")" "$(number_or_zero "$frequency")"
 }
 
