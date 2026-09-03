@@ -2,7 +2,10 @@
 set -u
 
 number_or_zero() {
-  [[ \${1:-} =~ ^[0-9]+([.][0-9]+)?$ ]] && printf '%s' "$1" || printf '0'
+  awk -v value="${1:-}" 'BEGIN {
+    if (value ~ /^[0-9]+([.][0-9]+)?$/) printf "%s", value
+    else printf "0"
+  }'
 }
 
 read_cpu_usage() {
