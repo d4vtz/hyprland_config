@@ -20,8 +20,8 @@ Pill {
                 source: modelData.icon
                 sourceSize.width: 16
                 sourceSize.height: 16
-                implicitWidth: 16
-                implicitHeight: 16
+                width: 16
+                height: 16
                 MouseArea { anchors.fill: parent; onClicked: modelData.activate() }
             }
         }
