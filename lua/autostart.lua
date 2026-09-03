@@ -9,5 +9,7 @@ hl.on("hyprland.start", function()
     -- Quickshell recibe notificaciones; cliphist conserva el historial del portapapeles.
     hl.exec_cmd("uwsm app -- wl-paste --watch cliphist store")
     hl.exec_cmd("uwsm app -- hyprpaper")
+    -- Espera al IPC de Hyprpaper y recupera el último fondo elegido.
+    hl.exec_cmd("uwsm app -- ~/.config/hypr/scripts/restore-wallpaper.sh")
     hl.exec_cmd("uwsm app -- hypridle")
 end)

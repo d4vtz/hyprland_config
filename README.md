@@ -114,6 +114,10 @@ Hyprpaper arranca sin imponer una imagen. Configúrala así:
 ~/.config/hypr/scripts/set-wallpaper.sh ~/Imágenes/fondo.jpg
 ```
 
+La ruta elegida se guarda en `$XDG_STATE_HOME/hyprland/wallpaper` (o
+`~/.local/state/hyprland/wallpaper`) y se restaura en cada inicio de Hyprland.
+Este archivo es local a la máquina y no ensucia el repositorio.
+
 ## Temas
 
 Dracula es el tema inicial. Quickshell concentra su paleta en
