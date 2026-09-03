@@ -23,9 +23,9 @@ bindings=$(
     'SUPER + Tab                   Recorrer ventanas' \
     'SUPER + 1…7                   Cambiar espacio de trabajo' \
     'SUPER + Shift + 1…7           Mover ventana a otro espacio' \
-    'SUPER + PageUp/PageDown        Recorrer los siete escritorios' \
+    'SUPER + PageUp/PageDown        Ciclo cerrado entre escritorios 1…7' \
     'SUPER + Ctrl + PageUp/PageDown Recorrer escritorios ocupados' \
-    'SUPER + rueda                  Recorrer los siete escritorios' \
+    'SUPER + rueda                  Ciclo cerrado entre escritorios 1…7' \
     'SUPER + Ctrl + rueda           Recorrer escritorios ocupados' \
     'SUPER + S                     Mostrar scratchpad' \
     'SUPER + Shift + S             Enviar ventana al scratchpad' \
