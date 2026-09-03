@@ -46,17 +46,24 @@ return function(settings)
     end
 
     -- Ciclo cerrado entre los escritorios configurados (1…7 por defecto).
-    -- El script evita que el desplazamiento relativo cree escritorios 8, 9, etc.
-    local workspace_cycle = "bash ~/.config/hypr/scripts/workspace-cycle.sh " .. settings.workspaces
-    hl.bind(mod .. " + Page_Up", exec(workspace_cycle .. " previous"))
-    hl.bind(mod .. " + Page_Down", exec(workspace_cycle .. " next"))
+    -- El módulo evita que el desplazamiento relativo cree escritorios 8, 9, etc.
+    local function cycle_workspace(step)
+        return function()
+            local current = hl.get_active_workspace().id
+            local target = ((current - 1 + step) % settings.workspaces) + 1
+            hl.dispatch(hl.dsp.focus({ workspace = target }))
+        end
+    end
+
+    hl.bind(mod .. " + Page_Up", cycle_workspace(-1))
+    hl.bind(mod .. " + Page_Down", cycle_workspace(1))
     hl.bind(mod .. " + CTRL + Page_Up", hl.dsp.focus({ workspace = "e-1" }))
     hl.bind(mod .. " + CTRL + Page_Down", hl.dsp.focus({ workspace = "e+1" }))
 
     hl.bind(mod .. " + S", hl.dsp.workspace.toggle_special("scratchpad"))
     hl.bind(mod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:scratchpad" }))
-    hl.bind(mod .. " + mouse_down", exec(workspace_cycle .. " next"))
-    hl.bind(mod .. " + mouse_up", exec(workspace_cycle .. " previous"))
+    hl.bind(mod .. " + mouse_down", cycle_workspace(1))
+    hl.bind(mod .. " + mouse_up", cycle_workspace(-1))
     hl.bind(mod .. " + CTRL + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
     hl.bind(mod .. " + CTRL + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
     hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
