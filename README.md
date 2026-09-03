@@ -27,6 +27,7 @@ sudo pacman -S --needed \
   waybar rofi hyprpaper hyprlock hypridle \
   satty grim slurp wl-clipboard cliphist jq cava \
   brightnessctl playerctl pavucontrol network-manager-applet \
+  bluez-utils power-profiles-daemon hyprsunset \
   pipewire wireplumber qt5-wayland qt6-wayland \
   kitty dolphin inter-font ttf-jetbrains-mono-nerd
 ```
