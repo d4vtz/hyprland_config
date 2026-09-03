@@ -9,7 +9,7 @@ LaTeX, PDF, Xournal++ y multimedia.
 - Configuración de Hyprland completamente en Lua.
 - Tema Dracula desacoplado y preparado para añadir otras paletas.
 - Layout master con siete espacios persistentes.
-- Waybar superior, modular y ligera, con reloj centrado.
+- Quickshell superior, modular y animada, con reloj centrado.
 - Rofi como lanzador, SwayNC como centro de notificaciones.
 - Hyprpaper, Hyprlock e Hypridle.
 - Capturas con Grimblast y edición en Satty.
@@ -23,6 +23,7 @@ Instala los paquetes oficiales:
 sudo pacman -S --needed \
   uwsm xdg-desktop-portal-hyprland polkit-kde-agent \
   kwallet kwallet-pam kwalletmanager \
+  quickshell qt6-declarative qt6-svg qt6-imageformats \
   waybar rofi swaync hyprpaper hyprlock hypridle \
   satty grim slurp wl-clipboard cliphist jq \
   brightnessctl playerctl pavucontrol network-manager-applet \
@@ -50,6 +51,7 @@ Conserva configuraciones previas que no sean enlaces:
 ```bash
 mv ~/.config/hypr ~/.config/hypr.backup 2>/dev/null || true
 mv ~/.config/waybar ~/.config/waybar.backup 2>/dev/null || true
+mv ~/.config/quickshell ~/.config/quickshell.backup 2>/dev/null || true
 mv ~/.config/rofi ~/.config/rofi.backup 2>/dev/null || true
 mv ~/.config/swaync ~/.config/swaync.backup 2>/dev/null || true
 ```
@@ -115,8 +117,9 @@ Hyprpaper arranca sin imponer una imagen. Configúrala así:
 
 ## Temas
 
-Dracula es el tema inicial. El selector sincroniza Hyprland, Waybar, Rofi,
-SwayNC y Hyprlock:
+Dracula es el tema inicial. Quickshell concentra su paleta en
+`quickshell/Theme.qml`; el selector existente sincroniza Hyprland, la Waybar de
+respaldo, Rofi, SwayNC y Hyprlock:
 
 ```bash
 ~/.config/hypr/scripts/theme-switch.sh dracula
@@ -139,7 +142,8 @@ y ejecuta theme-switch.sh nord.
 hyprland.lua           Entrada mínima
 lua/                   Módulos de Hyprland
 themes/                Paletas compartidas
-waybar/                Barra y estilos
+quickshell/             Shell principal y paneles QML
+waybar/                 Barra anterior, conservada como fallback
 rofi/                  Lanzador
 swaync/                Notificaciones
 scripts/               Utilidades del escritorio
@@ -154,7 +158,14 @@ hyprpaper.conf          Fondo
 cd ~/.local/src/hyprland_config
 git pull --ff-only
 hyprctl reload
-pkill -SIGUSR2 waybar
+qs kill && uwsm app -- qs
 swaync-client -R
 swaync-client -rs
+```
+
+Durante la migración puedes alternar sin cerrar la sesión:
+
+```bash
+~/.config/hypr/scripts/bar-waybar.sh       # fallback
+~/.config/hypr/scripts/bar-quickshell.sh  # volver a Quickshell
 ```

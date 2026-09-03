@@ -16,6 +16,7 @@ link_config() {
 mkdir -p "$config_dir"
 mkdir -p "$config_dir/autostart"
 link_config "$root" "$config_dir/hypr"
+link_config "$root/quickshell" "$config_dir/quickshell"
 link_config "$root/waybar" "$config_dir/waybar"
 link_config "$root/rofi" "$config_dir/rofi"
 link_config "$root/swaync" "$config_dir/swaync"
