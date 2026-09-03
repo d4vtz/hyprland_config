@@ -39,17 +39,9 @@ Pill {
             spectrum = values
     }
 
-    Text {
-        text: root.player && root.player.isPlaying ? "󰏤" : "󰎆"
-        color: root.player ? Theme.purple : Theme.muted
-        font.family: Theme.fontFamily
-        font.pixelSize: 16
-    }
-
     Item {
         Layout.preferredWidth: 42
         Layout.preferredHeight: 18
-        visible: root.player !== null
 
         Row {
             anchors.fill: parent
@@ -107,7 +99,7 @@ Pill {
     PanelWindow {
         visible: root.expanded
         anchors { top: true; right: true }
-        margins { top: 43; right: 304 }
+        margins { top: 2; right: 304 }
         implicitWidth: 390
         implicitHeight: 188
         exclusiveZone: 0
