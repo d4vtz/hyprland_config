@@ -9,7 +9,7 @@
 
   "modules-left": ["custom/launcher", "hyprland/workspaces", "hyprland/window"],
   "modules-center": ["clock"],
-  "modules-right": ["mpris", "network", "pulseaudio", "battery", "tray", "custom/notifications", "custom/power"],
+  "modules-right": ["group/media", "group/system", "group/session"],
 
   "custom/launcher": {
     "format": "",
@@ -25,21 +25,47 @@
     "on-scroll-down": "hyprctl dispatch workspace e-1"
   },
   "hyprland/window": {
-    "format": "{title}",
-    "max-length": 42,
-    "separate-outputs": true
+    "format": "{class}",
+    "max-length": 20,
+    "icon": true,
+    "icon-size": 15,
+    "separate-outputs": true,
+    "tooltip-format": "{title}"
   },
   "clock": {
     "format": "{:%H:%M}",
     "tooltip-format": "<big>{:%A, %d de %B}</big>\n<tt><small>{calendar}</small></tt>"
   },
   "mpris": {
-    "format": "{player_icon} {dynamic}",
-    "format-paused": " {dynamic}",
-    "player-icons": { "default": "" },
-    "max-length": 24,
+    "format": "{dynamic}",
+    "format-paused": "  {dynamic}",
+    "max-length": 22,
     "dynamic-order": ["title", "artist"],
+    "on-click": "playerctl play-pause",
+    "on-click-right": "playerctl next"
+  },
+  "custom/media": {
+    "format": "",
+    "tooltip": true,
+    "tooltip-format": "Multimedia",
     "on-click": "playerctl play-pause"
+  },
+  "group/media": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 250,
+      "children-class": "media-details",
+      "transition-left-to-right": false
+    },
+    "modules": ["custom/media", "mpris"]
+  },
+  "group/system": {
+    "orientation": "inherit",
+    "modules": ["network", "pulseaudio", "battery"]
+  },
+  "group/session": {
+    "orientation": "inherit",
+    "modules": ["tray", "custom/notifications", "custom/power"]
   },
   "network": {
     "format-wifi": "  {signalStrength}%",
