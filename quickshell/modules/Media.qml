@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Mpris
 import ".."
 import "../components"
@@ -9,6 +10,7 @@ Pill {
     id: root
 
     property bool expanded: false
+    property var spectrum: [0, 0, 0, 0, 0, 0, 0, 0]
     readonly property var players: Mpris.players.values
     readonly property var player: {
         for (let candidate of players) {
@@ -28,11 +30,64 @@ Pill {
         return minutes + ":" + (remainder < 10 ? "0" : "") + remainder
     }
 
+    function updateSpectrum(frame) {
+        const values = frame.trim().split(";")
+            .filter(value => value.length > 0)
+            .slice(0, 8)
+            .map(value => Math.max(0.06, Math.min(1, Number(value) / 100)))
+        if (values.length === 8)
+            spectrum = values
+    }
+
     Text {
         text: root.player && root.player.isPlaying ? "󰏤" : "󰎆"
         color: root.player ? Theme.purple : Theme.muted
         font.family: Theme.fontFamily
         font.pixelSize: 16
+    }
+
+    Item {
+        Layout.preferredWidth: 42
+        Layout.preferredHeight: 18
+        visible: root.player !== null
+
+        Row {
+            anchors.fill: parent
+            spacing: 2
+
+            Repeater {
+                model: 8
+                delegate: Item {
+                    required property int index
+                    width: 3
+                    height: parent.height
+
+                    Rectangle {
+                        width: parent.width
+                        height: Math.max(2, parent.height * root.spectrum[index])
+                        anchors.bottom: parent.bottom
+                        radius: 2
+                        color: index < 3 ? Theme.purple : index < 6 ? Theme.pink : Theme.cyan
+
+                        Behavior on height {
+                            NumberAnimation { duration: 65; easing.type: Easing.OutQuad }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Process {
+        running: true
+        command: [
+            "cava",
+            "-p",
+            Qt.resolvedUrl("../cava.conf").toString().replace("file://", "")
+        ]
+        stdout: SplitParser {
+            onRead: frame => root.updateSpectrum(frame)
+        }
     }
 
     MouseArea {
@@ -52,7 +107,7 @@ Pill {
     PanelWindow {
         visible: root.expanded
         anchors { top: true; right: true }
-        margins { top: 48; right: 304 }
+        margins { top: 43; right: 304 }
         implicitWidth: 390
         implicitHeight: 188
         exclusiveZone: 0

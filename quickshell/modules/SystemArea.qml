@@ -45,7 +45,7 @@ Pill {
     PanelWindow {
         visible: root.expanded
         anchors { top: true; right: true; bottom: true }
-        margins { top: 48; right: 8; bottom: 8 }
+        margins { top: 43; right: 8; bottom: 8 }
         implicitWidth: 320
         exclusiveZone: 0
         color: "transparent"

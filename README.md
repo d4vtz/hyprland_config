@@ -25,7 +25,7 @@ sudo pacman -S --needed \
   kwallet kwallet-pam kwalletmanager \
   quickshell qt6-declarative qt6-svg qt6-imageformats \
   waybar rofi swaync hyprpaper hyprlock hypridle \
-  satty grim slurp wl-clipboard cliphist jq \
+  satty grim slurp wl-clipboard cliphist jq cava \
   brightnessctl playerctl pavucontrol network-manager-applet \
   pipewire wireplumber qt5-wayland qt6-wayland \
   kitty dolphin ttf-jetbrains-mono-nerd
