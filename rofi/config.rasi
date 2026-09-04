@@ -1,0 +1,38 @@
+@theme "themes/current.rasi"
+
+configuration {
+    modi: "drun,run,window";
+    show-icons: true;
+    display-drun: "Aplicaciones";
+    display-run: "Comando";
+    display-window: "Ventanas";
+    drun-display-format: "{name}";
+    font: "JetBrainsMono Nerd Font 12";
+}
+
+window {
+    width: 42%;
+    border: 2px;
+    border-color: @selected;
+    border-radius: 14px;
+    background-color: @background;
+}
+
+mainbox { padding: 18px; spacing: 12px; }
+inputbar {
+    padding: 12px;
+    spacing: 10px;
+    border-radius: 9px;
+    background-color: @background-alt;
+    text-color: @foreground;
+}
+prompt { text-color: @selected; }
+entry { text-color: @foreground; placeholder: "Buscar…"; }
+listview { lines: 8; columns: 1; spacing: 6px; }
+element { padding: 10px; spacing: 10px; border-radius: 8px; }
+element selected {
+    background-color: @selected;
+    text-color: @background;
+}
+element-icon { size: 24px; }
+element-text { vertical-align: 0.5; }

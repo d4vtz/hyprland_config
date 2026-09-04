@@ -1,0 +1,2 @@
+singleton SystemStatus 1.0 SystemStatus.qml
+singleton NotificationService 1.0 NotificationService.qml
