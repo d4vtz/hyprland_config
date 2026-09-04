@@ -5,7 +5,9 @@ run_once() {
   local process=$1
   shift
   command -v "$1" >/dev/null 2>&1 || return 0
-  pgrep -u "$UID" -x "$process" >/dev/null 2>&1 || uwsm app -- "$@"
+  if ! pgrep -u "$UID" -x "$process" >/dev/null 2>&1; then
+    uwsm app -- "$@" >/dev/null 2>&1 &
+  fi
 }
 
 run_once qs qs
@@ -18,10 +20,10 @@ run_once udiskie udiskie --automount --notify --smart-tray
 
 # Dos watchers separados conservan texto e imágenes en cliphist.
 if ! pgrep -u "$UID" -f 'wl-paste --type text --watch cliphist store' >/dev/null 2>&1; then
-  uwsm app -- wl-paste --type text --watch cliphist store
+  uwsm app -- wl-paste --type text --watch cliphist store >/dev/null 2>&1 &
 fi
 if ! pgrep -u "$UID" -f 'wl-paste --type image --watch cliphist store' >/dev/null 2>&1; then
-  uwsm app -- wl-paste --type image --watch cliphist store
+  uwsm app -- wl-paste --type image --watch cliphist store >/dev/null 2>&1 &
 fi
 
-uwsm app -- "$HOME/.config/hypr/scripts/restore-wallpaper.sh"
+uwsm app -- "$HOME/.config/hypr/scripts/restore-wallpaper.sh" >/dev/null 2>&1 &

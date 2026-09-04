@@ -12,6 +12,8 @@ LaTeX, PDF, Xournal++ y multimedia.
 - Quickshell superior, modular y animada, con reloj centrado.
 - Rofi como búsqueda unificada y centro de notificaciones nativo de Quickshell.
 - Integración de dispositivos extraíbles, KDE Connect y applets de red/Bluetooth.
+- OSD propio para volumen, micrófono y brillo.
+- Indicadores contextuales para micrófono activo, Bluetooth conectado y VPN.
 - Hyprpaper, Hyprlock e Hypridle.
 - Capturas con Grimblast y edición en Satty.
 - Super + F1 abre una hoja de atajos filtrable.
@@ -95,6 +97,10 @@ Selecciona **Hyprland (uwsm-managed)** en Plasma Login Manager.
 | Print | Seleccionar región y editarla |
 | Shift + Print | Copiar la pantalla |
 | Ctrl + Print | Capturar y editar la ventana activa |
+
+En los controles rápidos de Wi-Fi y Bluetooth, el clic principal cambia el
+estado y el clic secundario abre su administrador. Los botones de apagar,
+reiniciar y cerrar sesión requieren confirmación.
 
 ## Plasma Polkit y KWallet
 

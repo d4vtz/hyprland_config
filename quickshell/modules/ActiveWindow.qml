@@ -9,6 +9,9 @@ Pill {
     readonly property var window: Hyprland.activeToplevel
     visible: window !== null
     implicitWidth: Math.min(260, contentRow.implicitWidth + 20)
+    Layout.fillWidth: true
+    Layout.maximumWidth: 260
+    clip: true
 
     RowLayout {
         id: contentRow

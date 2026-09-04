@@ -7,6 +7,7 @@ import "modules"
 
 ShellRoot {
     NotificationToast {}
+    DesktopOsd {}
 
     Variants {
         model: Quickshell.screens
@@ -15,9 +16,9 @@ ShellRoot {
             required property var modelData
             screen: modelData
             color: "transparent"
-            implicitHeight: 46
+            implicitHeight: Theme.barHeight + 8
             anchors { top: true; left: true; right: true }
-            exclusiveZone: 46
+            exclusiveZone: Theme.barHeight + 8
 
             Rectangle {
                 anchors.fill: parent
@@ -28,9 +29,12 @@ ShellRoot {
 
                 RowLayout {
                     anchors.left: parent.left
+                    anchors.right: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.leftMargin: 8
+                    anchors.rightMargin: 48
                     spacing: 7
+                    clip: true
                     Pill {
                         id: launcherPill
                         Text { text: "󰣇"; color: Theme.purple; font.family: Theme.iconFamily; font.pixelSize: 16 }
@@ -49,10 +53,13 @@ ShellRoot {
                 Clock { anchors.centerIn: parent }
 
                 RowLayout {
+                    anchors.left: parent.horizontalCenter
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
+                    anchors.leftMargin: 48
                     anchors.rightMargin: 8
                     spacing: 7
+                    clip: true
                     Media {}
                     Hardware {}
                     SystemArea {}

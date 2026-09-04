@@ -72,7 +72,7 @@ Pill {
     }
 
     Process {
-        running: true
+        running: root.player !== null && root.player.isPlaying
         command: [
             "cava",
             "-p",
@@ -109,7 +109,7 @@ Pill {
         Rectangle {
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 2
+            anchors.topMargin: Theme.barHeight + 12
             anchors.rightMargin: 304
             width: 390
             height: 188

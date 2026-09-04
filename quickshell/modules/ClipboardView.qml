@@ -8,6 +8,7 @@ ColumnLayout {
 
     property string query: ""
     property var entries: []
+    signal entryCopied()
     readonly property var filteredEntries: entries.filter(entry =>
         entry.preview.toLowerCase().includes(query.toLowerCase()))
 
@@ -18,6 +19,7 @@ ColumnLayout {
     function copyEntry(entry) {
         copyProcess.command = ["sh", "-c", "cliphist decode " + Number(entry.id) + " | wl-copy"]
         copyProcess.running = true
+        entryCopied()
     }
 
     spacing: 9
@@ -117,6 +119,12 @@ ColumnLayout {
                 anchors.fill: parent
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
+                Text {
+                    text: /\[\[ binary data/.test(modelData.preview) ? "󰋩" :
+                          /^https?:\/\//.test(modelData.preview) ? "󰌹" : "󰅇"
+                    color: Theme.purple
+                    font.family: Theme.iconFamily
+                }
                 Text {
                     Layout.fillWidth: true
                     text: modelData.preview

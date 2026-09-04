@@ -8,8 +8,11 @@ QtObject {
     id: root
     property string network: "--"
     property bool wifiEnabled: false
+    property bool vpnActive: false
     property bool bluetoothEnabled: false
+    property bool bluetoothConnected: false
     property bool bluetoothAudioActive: false
+    property bool microphoneActive: false
     property string battery: "--"
     property string batteryState: "Sin batería"
     property string batteryTime: "--"
@@ -38,26 +41,44 @@ QtObject {
         networkProcess.running = true
         batteryProcess.running = true
         brightnessProcess.running = true
-        sensorsProcess.running = true
         stateProcess.running = true
-        identityProcess.running = true
     }
 
+    function refreshSensors() { sensorsProcess.running = true }
+    function refreshIdentity() { identityProcess.running = true }
+
     property Timer timer: Timer {
-        interval: 5000
+        interval: 10000
         repeat: true
         running: true
         triggeredOnStart: true
         onTriggered: root.refresh()
     }
 
+    property Timer sensorsTimer: Timer {
+        interval: 10000
+        repeat: true
+        running: true
+        triggeredOnStart: true
+        onTriggered: root.refreshSensors()
+    }
+
+    property Timer identityTimer: Timer {
+        interval: 60000
+        repeat: true
+        running: true
+        triggeredOnStart: true
+        onTriggered: root.refreshIdentity()
+    }
+
     property Process networkProcess: Process {
-        command: ["sh", "-c", "printf '%s|' \"$(nmcli -t -f WIFI general 2>/dev/null)\"; nmcli -t -f TYPE,STATE,CONNECTION device 2>/dev/null | awk -F: '$1 == \"wifi\" && $2 == \"connected\" {print $3; exit}'"]
+        command: ["sh", "-c", "wifi=$(nmcli -t -f WIFI general 2>/dev/null); connection=$(nmcli -t -f TYPE,STATE,CONNECTION device 2>/dev/null | awk -F: '$1 == \"wifi\" && $2 == \"connected\" {print $3; exit}'); nmcli -t -f TYPE connection show --active 2>/dev/null | grep -Eq '^(vpn|wireguard)$' && vpn=1 || vpn=0; printf '%s|%s|%s' \"$wifi\" \"$connection\" \"$vpn\""]
         stdout: StdioCollector {
             onStreamFinished: {
                 const fields = text.trim().split("|")
                 root.wifiEnabled = fields[0] === "enabled"
                 root.network = fields[1] || (root.wifiEnabled ? "Sin conexión" : "Wi-Fi apagado")
+                root.vpnActive = fields[2] === "1"
             }
         }
     }
@@ -95,15 +116,17 @@ QtObject {
     }
 
     property Process stateProcess: Process {
-        command: ["bash", "-c", "bt=$(bluetoothctl show 2>/dev/null | awk '/Powered:/{print $2;exit}'); profile=$(powerprofilesctl get 2>/dev/null || echo unavailable); profiles=$(powerprofilesctl list 2>/dev/null | sed -nE 's/^[[:space:]]*\\*?[[:space:]]*(performance|balanced|power-saver):.*/\\1/p' | paste -sd,); pgrep -x hyprsunset >/dev/null && night=1 || night=0; pactl list sinks 2>/dev/null | awk 'BEGIN{RS=\"\"} /State: RUNNING/ && /Name: bluez_output/{active=1} END{exit !active}' && bta=1 || bta=0; printf '%s|%s|%s|%s|%s' \"$bt\" \"$profile\" \"$night\" \"$bta\" \"$profiles\""]
+        command: ["bash", "-c", "bt=$(bluetoothctl show 2>/dev/null | awk '/Powered:/{print $2;exit}'); bluetoothctl devices Connected 2>/dev/null | grep -q '^Device ' && btc=1 || btc=0; profile=$(powerprofilesctl get 2>/dev/null || echo unavailable); profiles=$(powerprofilesctl list 2>/dev/null | sed -nE 's/^[[:space:]]*\\*?[[:space:]]*(performance|balanced|power-saver):.*/\\1/p' | paste -sd,); pgrep -x hyprsunset >/dev/null && night=1 || night=0; pactl list sinks 2>/dev/null | awk 'BEGIN{RS=\"\"} /State: RUNNING/ && /Name: bluez_output/{active=1} END{exit !active}' && bta=1 || bta=0; pactl list source-outputs 2>/dev/null | grep -q 'State: RUNNING' && mic=1 || mic=0; printf '%s|%s|%s|%s|%s|%s|%s' \"$bt\" \"$btc\" \"$profile\" \"$night\" \"$bta\" \"$profiles\" \"$mic\""]
         stdout: StdioCollector {
             onStreamFinished: {
                 const fields = text.trim().split("|")
                 root.bluetoothEnabled = fields[0] === "yes"
-                root.powerProfile = fields[1] || "balanced"
-                root.nightLightEnabled = fields[2] === "1"
-                root.bluetoothAudioActive = fields[3] === "1"
-                root.powerProfiles = fields[4] || ""
+                root.bluetoothConnected = fields[1] === "1"
+                root.powerProfile = fields[2] || "balanced"
+                root.nightLightEnabled = fields[3] === "1"
+                root.bluetoothAudioActive = fields[4] === "1"
+                root.powerProfiles = fields[5] || ""
+                root.microphoneActive = fields[6] === "1"
             }
         }
     }
