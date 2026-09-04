@@ -30,6 +30,8 @@ QtObject {
     property bool nightLightEnabled: false
     property string userName: ""
     property string hostName: ""
+    property string distribution: "Arch Linux"
+    property string kernel: ""
     property string uptime: ""
 
     function refresh() {
@@ -61,7 +63,7 @@ QtObject {
     }
 
     property Process batteryProcess: Process {
-        command: ["bash", "-c", "b=$(find /sys/class/power_supply -maxdepth 1 -name 'BAT*' -print -quit); ac=0; for p in /sys/class/power_supply/*/online; do [[ -r $p && $(<$p) == 1 ]] && ac=1; done; [[ -z $b ]] && { printf 'CA|Sin batería|--|%s' \"$ac\"; exit; }; cap=$(<$b/capacity); st=$(<$b/status); case \"$st\" in Charging) label=Cargando;; Discharging) label=Descargando;; Full) label='Carga completa';; 'Not charging') label='Conectada, sin cargar';; *) label=\"$st\";; esac; now=$(cat \"$b/energy_now\" 2>/dev/null || cat \"$b/charge_now\" 2>/dev/null || echo 0); full=$(cat \"$b/energy_full\" 2>/dev/null || cat \"$b/charge_full\" 2>/dev/null || echo \"$now\"); rate=$(cat \"$b/power_now\" 2>/dev/null || cat \"$b/current_now\" 2>/dev/null || echo 0); if [[ \${rate:-0} -gt 0 ]]; then [[ $st == Charging ]] && amount=$((full-now)) || amount=$now; secs=$((amount*3600/rate)); printf '%s|%s|%dh %02d min|%s' \"$cap\" \"$label\" $((secs/3600)) $(((secs%3600)/60)) \"$ac\"; else printf '%s|%s|--|%s' \"$cap\" \"$label\" \"$ac\"; fi"]
+        command: ["bash", "-c", "b=$(find /sys/class/power_supply -maxdepth 1 -name 'BAT*' -print -quit); ac=0; for p in /sys/class/power_supply/*/online; do [[ -r $p && $(<$p) == 1 ]] && ac=1; done; [[ -z $b ]] && { printf 'CA|Sin batería|--|%s' \"$ac\"; exit; }; cap=$(<$b/capacity); st=$(<$b/status); case \"$st\" in Charging) label=Cargando;; Discharging) label=Descargando;; Full) label='Carga completa';; 'Not charging') label='Conectada, sin cargar';; *) label=\"$st\";; esac; now=$(cat \"$b/energy_now\" 2>/dev/null || cat \"$b/charge_now\" 2>/dev/null || echo 0); full=$(cat \"$b/energy_full\" 2>/dev/null || cat \"$b/charge_full\" 2>/dev/null || echo \"$now\"); rate=$(cat \"$b/power_now\" 2>/dev/null || cat \"$b/current_now\" 2>/dev/null || echo 0); if [[ ${rate:-0} -gt 0 ]]; then [[ $st == Charging ]] && amount=$((full-now)) || amount=$now; secs=$((amount*3600/rate)); printf '%s|%s|%dh %02d min|%s' \"$cap\" \"$label\" $((secs/3600)) $(((secs%3600)/60)) \"$ac\"; else printf '%s|%s|--|%s' \"$cap\" \"$label\" \"$ac\"; fi"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const fields = text.trim().split("|")
@@ -114,13 +116,15 @@ QtObject {
     }
 
     property Process identityProcess: Process {
-        command: ["sh", "-c", "printf '%s|%s|%s' \"$(id -un)\" \"$(hostnamectl --static 2>/dev/null || hostname)\" \"$(uptime -p | sed 's/^up //')\""]
+        command: ["bash", "-c", "source /etc/os-release 2>/dev/null || true; printf '%s|%s|%s|%s|%s' \"$(id -un)\" \"$(hostnamectl --static 2>/dev/null || hostname)\" \"${PRETTY_NAME:-Arch Linux}\" \"$(uname -r)\" \"$(uptime -p | sed 's/^up //')\""]
         stdout: StdioCollector {
             onStreamFinished: {
                 const fields = text.trim().split("|")
                 root.userName = fields[0] || "usuario"
                 root.hostName = fields[1] || "equipo"
-                root.uptime = fields[2] || ""
+                root.distribution = fields[2] || "Arch Linux"
+                root.kernel = fields[3] || ""
+                root.uptime = fields[4] || ""
             }
         }
     }
