@@ -11,6 +11,7 @@ ColumnLayout {
     property string trashSize: "--"
     property int orphanCount: 0
     property string lastUpgrade: "--"
+    readonly property bool refreshing: statusProcess.running
     spacing: 9
 
     function refresh() { statusProcess.running = true }
@@ -18,7 +19,7 @@ ColumnLayout {
 
     Process {
         id: statusProcess
-        command: ["bash", "-c", "failed=$(( $(systemctl --failed --no-legend 2>/dev/null | wc -l) + $(systemctl --user --failed --no-legend 2>/dev/null | wc -l) )); cache=$(du -sh /var/cache/pacman/pkg 2>/dev/null | cut -f1); trash=$(du -sh \"${XDG_DATA_HOME:-$HOME/.local/share}/Trash\" 2>/dev/null | cut -f1); orphans=$(pacman -Qtdq 2>/dev/null | wc -l); last=$(grep '\\[ALPM\\] upgraded' /var/log/pacman.log 2>/dev/null | tail -n1 | cut -d']' -f1 | tr -d '['); printf '%s|%s|%s|%s|%s' \"$failed\" \"${cache:---}\" \"${trash:---}\" \"$orphans\" \"${last:---}\""]
+        command: ["bash", "-c", "failed=$(( $(systemctl --failed --no-legend 2>/dev/null | wc -l) + $(systemctl --user --failed --no-legend 2>/dev/null | wc -l) )); cache=$(du -sh /var/cache/pacman/pkg 2>/dev/null | cut -f1); trash=$(du -sh \"${XDG_DATA_HOME:-$HOME/.local/share}/Trash\" 2>/dev/null | cut -f1); orphans=$(pacman -Qtdq 2>/dev/null | wc -l); raw=$(grep '\\[ALPM\\] upgraded' /var/log/pacman.log 2>/dev/null | tail -n1 | cut -d']' -f1 | tr -d '['); if [[ -n $raw ]]; then last=$(date -d \"$raw\" '+%d/%m/%Y %H:%M' 2>/dev/null || printf '%s' \"$raw\"); else last=--; fi; printf '%s|%s|%s|%s|%s' \"$failed\" \"${cache:---}\" \"${trash:---}\" \"$orphans\" \"$last\""]
         stdout: StdioCollector {
             onStreamFinished: {
                 const fields = text.trim().split("|")
@@ -32,6 +33,40 @@ ColumnLayout {
     }
     Process { id: action; onExited: root.refresh() }
     Process { id: terminal }
+
+    RowLayout {
+        Layout.fillWidth: true
+        Text {
+            text: "Estado del sistema"
+            color: Theme.foreground
+            font.family: Theme.fontFamily
+            font.pixelSize: 11
+            font.bold: true
+        }
+        Item { Layout.fillWidth: true }
+        Rectangle {
+            Layout.preferredWidth: 92
+            Layout.preferredHeight: 28
+            radius: 7
+            color: refreshArea.containsMouse ? Theme.current : Theme.elevated
+            border.color: Theme.cyan
+            opacity: root.refreshing ? 0.6 : 1
+            RowLayout {
+                anchors.centerIn: parent
+                spacing: 6
+                Text { text: "󰑐"; color: Theme.cyan; font.family: Theme.iconFamily; font.pixelSize: 13 }
+                Text { text: root.refreshing ? "Actualizando" : "Actualizar"; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 8 }
+            }
+            MouseArea {
+                id: refreshArea
+                anchors.fill: parent
+                enabled: !root.refreshing
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.refresh()
+            }
+        }
+    }
 
     StatusCard {
         icon: root.failedServices > 0 ? "󰀦" : "󰄬"
@@ -85,12 +120,6 @@ ColumnLayout {
         Text { text: "Última actualización"; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 9 }
         Item { Layout.fillWidth: true }
         Text { text: root.lastUpgrade; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 9 }
-        Text {
-            text: "󰑐"
-            color: Theme.cyan
-            font.family: Theme.iconFamily
-            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.refresh() }
-        }
     }
     Item { Layout.fillHeight: true }
 
@@ -120,8 +149,9 @@ ColumnLayout {
             }
             Rectangle {
                 visible: card.buttonText !== ""
-                width: 64
-                height: 28
+                Layout.preferredWidth: 72
+                Layout.preferredHeight: 28
+                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                 radius: 7
                 color: maintenanceArea.containsMouse ? Theme.current : Theme.elevated
                 border.color: card.accent
