@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Io
 import Quickshell.Services.SystemTray
 import Quickshell.Wayland
 import ".."
@@ -10,28 +9,34 @@ import "../services"
 
 Pill {
     id: root
-
-    property bool expanded: false
+    property int openPanel: 0 // 0 cerrado, 1 centro, 2 notificaciones, 3 portapapeles
     property int currentTab: 0
+    readonly property bool expanded: openPanel !== 0
     active: expanded
 
-    function openTab(tab) {
+    function openCenter(tab) {
         currentTab = tab
-        expanded = true
-        if (tab === 2)
-            clipboardView.refresh()
+        openPanel = 1
+        if (tab === 1)
+            pacmanView.refresh()
+        else if (tab === 2)
+            maintenanceView.refresh()
+    }
+    function openNotifications() { openPanel = 2 }
+    function openClipboard() {
+        openPanel = 3
+        clipboardView.refresh()
     }
 
     IpcHandler {
         target: "system"
-        function toggle(): void { root.expanded = !root.expanded }
-        function notifications(): void { root.openTab(1) }
-        function clipboard(): void { root.openTab(2) }
+        function toggle(): void { root.openPanel = root.openPanel === 1 ? 0 : 1 }
+        function notifications(): void { root.openNotifications() }
+        function clipboard(): void { root.openClipboard() }
     }
 
     RowLayout {
         spacing: 11
-
         Repeater {
             model: SystemTray.items
             delegate: Image {
@@ -44,24 +49,22 @@ Pill {
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: modelData.activate() }
             }
         }
-
         Text {
             text: "󰅇"
             color: Theme.pink
             font.family: Theme.iconFamily
-            font.pixelSize: 17
-            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.openTab(2) }
+            font.pixelSize: 18
+            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.openClipboard() }
         }
-
         Item {
-            implicitWidth: 22
-            implicitHeight: 20
+            implicitWidth: 23
+            implicitHeight: 21
             Text {
                 anchors.centerIn: parent
                 text: NotificationService.doNotDisturb ? "󰂛" : "󰂚"
-                color: NotificationService.doNotDisturb ? Theme.red : Theme.purple
+                color: NotificationService.doNotDisturb ? Theme.red : Theme.cyan
                 font.family: Theme.iconFamily
-                font.pixelSize: 17
+                font.pixelSize: 18
             }
             Rectangle {
                 visible: NotificationService.count > 0
@@ -70,25 +73,24 @@ Pill {
                 width: 12
                 height: 12
                 radius: 6
-                color: Theme.pink
+                color: Theme.purple
                 Text {
                     anchors.centerIn: parent
                     text: Math.min(99, NotificationService.count)
                     color: Theme.background
-                    font.family: Theme.iconFamily
+                    font.family: Theme.fontFamily
                     font.pixelSize: 7
                     font.bold: true
                 }
             }
-            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.openTab(1) }
+            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.openNotifications() }
         }
-
         Text {
-            text: "󰐥"
-            color: Theme.red
+            text: "󰒓"
+            color: Theme.green
             font.family: Theme.iconFamily
-            font.pixelSize: 17
-            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.openTab(0) }
+            font.pixelSize: 19
+            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.openCenter(0) }
         }
     }
 
@@ -99,19 +101,20 @@ Pill {
         color: "transparent"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
-        MouseArea { anchors.fill: parent; onClicked: root.expanded = false }
+        MouseArea { anchors.fill: parent; onClicked: root.openPanel = 0 }
 
         Rectangle {
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.topMargin: 2
             anchors.rightMargin: 8
-            width: 350
-            height: 430
-            radius: Theme.radius + 2
+            width: root.openPanel === 1 ? 440 : 360
+            height: root.openPanel === 1 ? 475 : 430
+            radius: 12
             color: Theme.background
             border.color: Theme.border
-
+            Behavior on width { NumberAnimation { duration: Theme.animationFast } }
+            Behavior on height { NumberAnimation { duration: Theme.animationFast } }
             MouseArea { anchors.fill: parent }
 
             ColumnLayout {
@@ -120,32 +123,32 @@ Pill {
                 spacing: 11
 
                 RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
+                    visible: root.openPanel === 1
+                    Layout.fillWidth: true
                     spacing: 8
                     Repeater {
                         model: [
-                            { icon: "󰐥", tab: 0, tip: "Sistema" },
-                            { icon: "󰂚", tab: 1, tip: "Notificaciones" },
-                            { icon: "󰅇", tab: 2, tip: "Portapapeles" }
+                            { icon: "󰀄", label: "Sesión", tab: 0, accent: Theme.purple },
+                            { icon: "󰏖", label: "Pacman", tab: 1, accent: Theme.cyan },
+                            { icon: "󰒓", label: "Mantenimiento", tab: 2, accent: Theme.green }
                         ]
                         delegate: Rectangle {
                             required property var modelData
-                            implicitWidth: 72
-                            implicitHeight: 34
-                            radius: 8
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 38
+                            radius: 9
                             color: root.currentTab === modelData.tab ? Theme.current : Theme.surface
-                            border.color: root.currentTab === modelData.tab ? Theme.purple : "transparent"
-                            Text {
+                            border.color: root.currentTab === modelData.tab ? modelData.accent : Theme.border
+                            RowLayout {
                                 anchors.centerIn: parent
-                                text: modelData.icon
-                                color: root.currentTab === modelData.tab ? Theme.purple : Theme.muted
-                                font.family: Theme.iconFamily
-                                font.pixelSize: 16
+                                spacing: 6
+                                Text { text: modelData.icon; color: modelData.accent; font.family: Theme.iconFamily; font.pixelSize: 16 }
+                                Text { text: modelData.label; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 9 }
                             }
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: root.openTab(modelData.tab)
+                                onClicked: root.openCenter(modelData.tab)
                             }
                         }
                     }
@@ -154,25 +157,34 @@ Pill {
                 SessionView {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    visible: root.currentTab === 0
+                    visible: root.openPanel === 1 && root.currentTab === 0
+                }
+                PacmanView {
+                    id: pacmanView
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    visible: root.openPanel === 1 && root.currentTab === 1
+                }
+                MaintenanceView {
+                    id: maintenanceView
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    visible: root.openPanel === 1 && root.currentTab === 2
                 }
                 NotificationsView {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    visible: root.currentTab === 1
+                    visible: root.openPanel === 2
                 }
                 ClipboardView {
                     id: clipboardView
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    visible: root.currentTab === 2
+                    visible: root.openPanel === 3
                 }
             }
         }
 
-        Shortcut {
-            sequence: "Esc"
-            onActivated: root.expanded = false
-        }
+        Shortcut { sequence: "Esc"; onActivated: root.openPanel = 0 }
     }
 }
