@@ -25,7 +25,7 @@ sudo pacman -S --needed \
   kwallet kwallet-pam kwalletmanager \
   quickshell qt6-declarative qt6-svg qt6-imageformats \
   waybar rofi hyprpaper hyprlock hypridle \
-  satty grim slurp wl-clipboard cliphist jq cava \
+  satty grim slurp wl-clipboard cliphist jq cava curl pacman-contrib \
   brightnessctl playerctl pavucontrol network-manager-applet \
   bluez-utils blueman power-profiles-daemon hyprsunset intel-gpu-tools \
   pipewire wireplumber qt5-wayland qt6-wayland \
