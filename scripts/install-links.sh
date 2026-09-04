@@ -17,8 +17,11 @@ mkdir -p "$config_dir"
 mkdir -p "$config_dir/autostart"
 link_config "$root" "$config_dir/hypr"
 link_config "$root/quickshell" "$config_dir/quickshell"
-link_config "$root/waybar" "$config_dir/waybar"
 link_config "$root/rofi" "$config_dir/rofi"
 link_config "$root/autostart/nm-applet.desktop" "$config_dir/autostart/nm-applet.desktop"
+
+find "$root/scripts" -maxdepth 1 -type f -name '*.sh' -exec chmod +x {} +
+
+"$root/scripts/check-dependencies.sh" || true
 
 printf 'Enlaces instalados. Cierra la sesión y entra en Hyprland (uwsm-managed).\n'

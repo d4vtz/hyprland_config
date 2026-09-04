@@ -10,7 +10,8 @@ LaTeX, PDF, Xournal++ y multimedia.
 - Tema Dracula desacoplado y preparado para añadir otras paletas.
 - Layout master con siete espacios persistentes.
 - Quickshell superior, modular y animada, con reloj centrado.
-- Rofi como lanzador y centro de notificaciones nativo de Quickshell.
+- Rofi como búsqueda unificada y centro de notificaciones nativo de Quickshell.
+- Integración de dispositivos extraíbles, KDE Connect y applets de red/Bluetooth.
 - Hyprpaper, Hyprlock e Hypridle.
 - Capturas con Grimblast y edición en Satty.
 - Super + F1 abre una hoja de atajos filtrable.
@@ -25,7 +26,7 @@ sudo pacman -S --needed \
   kwallet kwallet-pam kwalletmanager \
   quickshell qt6-declarative qt6-svg qt6-imageformats \
   waybar rofi hyprpaper hyprlock hypridle \
-  satty grim slurp wl-clipboard cliphist jq cava curl pacman-contrib \
+  satty grim slurp wl-clipboard cliphist jq cava curl pacman-contrib udiskie \
   brightnessctl playerctl pavucontrol network-manager-applet \
   bluez-utils blueman power-profiles-daemon hyprsunset intel-gpu-tools \
   pipewire wireplumber qt5-wayland qt6-wayland \
@@ -80,6 +81,7 @@ Selecciona **Hyprland (uwsm-managed)** en Plasma Login Manager.
 | Super + E | Abrir Dolphin |
 | Super + B | Abrir navegador |
 | Super + N | Abrir las notificaciones de Quickshell |
+| Super + C | Abrir el historial del portapapeles |
 | Super + Escape | Menú de energía |
 | Super + H/J/K/L | Cambiar el foco |
 | Super + flechas | Cambiar el foco |
@@ -122,8 +124,8 @@ Este archivo es local a la máquina y no ensucia el repositorio.
 ## Temas
 
 Dracula es el tema inicial. Quickshell concentra su paleta en
-`quickshell/Theme.qml`; el selector existente sincroniza Hyprland, la Waybar de
-respaldo, Rofi, SwayNC y Hyprlock:
+`quickshell/Theme.qml`; el selector existente sincroniza Hyprland, Rofi y
+Hyprlock:
 
 ```bash
 ~/.config/hypr/scripts/theme-switch.sh dracula
@@ -147,9 +149,7 @@ hyprland.lua           Entrada mínima
 lua/                   Módulos de Hyprland
 themes/                Paletas compartidas
 quickshell/             Shell principal y paneles QML
-waybar/                 Barra anterior, conservada como fallback
 rofi/                  Lanzador
-swaync/                Configuración anterior, conservada como referencia
 scripts/               Utilidades del escritorio
 hyprlock.conf           Pantalla de bloqueo
 hypridle.conf           Inactividad y suspensión
@@ -165,9 +165,8 @@ hyprctl reload
 qs kill && uwsm app -- qs
 ```
 
-Durante la migración puedes alternar sin cerrar la sesión:
+Comprueba en cualquier momento que estén disponibles las integraciones:
 
 ```bash
-~/.config/hypr/scripts/bar-waybar.sh       # fallback
-~/.config/hypr/scripts/bar-quickshell.sh  # volver a Quickshell
+~/.config/hypr/scripts/check-dependencies.sh
 ```
