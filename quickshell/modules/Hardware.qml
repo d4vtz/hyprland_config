@@ -239,7 +239,8 @@ Pill {
                         icon: "󰢮"; title: "GPU Intel"
                         detail: Math.round(SystemStatus.gpuUsage) + "%  ·  " +
                                 (SystemStatus.gpuTemperature > 0 ? Math.round(SystemStatus.gpuTemperature) + "°C  ·  " : "") +
-                                (SystemStatus.gpuFrequency > 0 ? Math.round(SystemStatus.gpuFrequency) + " MHz" : "frecuencia no disponible")
+                                (SystemStatus.gpuFrequency > 0 ? Math.round(SystemStatus.gpuFrequency) + " MHz" :
+                                 SystemStatus.gpuUsage === 0 ? "En reposo" : "Frecuencia no disponible")
                         value: SystemStatus.gpuUsage / 100
                         critical: SystemStatus.gpuTemperature > 85
                     }
