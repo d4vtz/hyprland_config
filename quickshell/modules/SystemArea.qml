@@ -23,10 +23,11 @@ Pill {
         else if (tab === 2)
             maintenanceView.refresh()
     }
-    function openNotifications() { openPanel = 2 }
+    function openNotifications() { openPanel = openPanel === 2 ? 0 : 2 }
     function openClipboard() {
-        openPanel = 3
-        clipboardView.refresh()
+        openPanel = openPanel === 3 ? 0 : 3
+        if (openPanel === 3)
+            clipboardView.refresh()
     }
 
     IpcHandler {
@@ -96,7 +97,7 @@ Pill {
     }
 
     PanelWindow {
-        visible: root.expanded
+        visible: root.openPanel === 1
         anchors { top: true; right: true; bottom: true; left: true }
         exclusiveZone: 0
         color: "transparent"
@@ -109,8 +110,8 @@ Pill {
             anchors.right: parent.right
             anchors.topMargin: 2
             anchors.rightMargin: 8
-            width: root.openPanel === 1 ? 440 : 360
-            height: root.openPanel === 1 ? 475 : 430
+            width: 440
+            height: 475
             radius: 12
             color: Theme.background
             border.color: Theme.border
@@ -124,7 +125,6 @@ Pill {
                 spacing: 11
 
                 RowLayout {
-                    visible: root.openPanel === 1
                     Layout.fillWidth: true
                     spacing: 8
                     Repeater {
@@ -158,34 +158,71 @@ Pill {
                 SessionView {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    visible: root.openPanel === 1 && root.currentTab === 0
+                    visible: root.currentTab === 0
                 }
                 PacmanView {
                     id: pacmanView
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    visible: root.openPanel === 1 && root.currentTab === 1
+                    visible: root.currentTab === 1
                 }
                 MaintenanceView {
                     id: maintenanceView
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    visible: root.openPanel === 1 && root.currentTab === 2
-                }
-                NotificationsView {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    visible: root.openPanel === 2
-                }
-                ClipboardView {
-                    id: clipboardView
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    visible: root.openPanel === 3
+                    visible: root.currentTab === 2
                 }
             }
         }
 
+        Shortcut { sequence: "Esc"; onActivated: root.openPanel = 0 }
+    }
+
+    PanelWindow {
+        visible: root.openPanel === 2
+        anchors { top: true; right: true; bottom: true; left: true }
+        exclusiveZone: 0
+        color: "transparent"
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+
+        MouseArea { anchors.fill: parent; onClicked: root.openPanel = 0 }
+        Rectangle {
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.topMargin: 2
+            anchors.rightMargin: 8
+            width: 360
+            height: 430
+            radius: 12
+            color: Theme.background
+            border.color: Theme.border
+            MouseArea { anchors.fill: parent }
+            NotificationsView { anchors.fill: parent; anchors.margins: 14 }
+        }
+        Shortcut { sequence: "Esc"; onActivated: root.openPanel = 0 }
+    }
+
+    PanelWindow {
+        visible: root.openPanel === 3
+        anchors { top: true; right: true; bottom: true; left: true }
+        exclusiveZone: 0
+        color: "transparent"
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+
+        MouseArea { anchors.fill: parent; onClicked: root.openPanel = 0 }
+        Rectangle {
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.topMargin: 2
+            anchors.rightMargin: 8
+            width: 360
+            height: 430
+            radius: 12
+            color: Theme.background
+            border.color: Theme.border
+            MouseArea { anchors.fill: parent }
+            ClipboardView { id: clipboardView; anchors.fill: parent; anchors.margins: 14 }
+        }
         Shortcut { sequence: "Esc"; onActivated: root.openPanel = 0 }
     }
 }
