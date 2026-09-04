@@ -1,65 +1,71 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
-import Quickshell.Services.SystemTray
 import ".."
 import "../services"
 
 ColumnLayout {
     id: root
-    spacing: 10
+    spacing: 12
 
     Process { id: sessionCommand }
 
-    RowLayout {
-        Layout.fillWidth: true
-        ColumnLayout {
-            spacing: 1
-            Text { text: SystemStatus.userName; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 14; font.bold: true }
-            Text { text: SystemStatus.hostName; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 10 }
-        }
-        Item { Layout.fillWidth: true }
-        Text { text: SystemStatus.uptime ? "Activo " + SystemStatus.uptime : ""; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 9 }
-    }
-
-    Text { text: "Bandeja del sistema"; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 10 }
-
     Rectangle {
         Layout.fillWidth: true
-        Layout.preferredHeight: 54
-        radius: 8
+        Layout.preferredHeight: 112
+        radius: 10
         color: Theme.surface
-        RowLayout {
-            anchors.centerIn: parent
-            spacing: 14
-            Repeater {
-                model: SystemTray.items
-                delegate: Image {
-                    required property var modelData
-                    source: modelData.icon
-                    sourceSize.width: 20
-                    sourceSize.height: 20
-                    width: 20
-                    height: 20
-                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: modelData.activate() }
-                }
+        border.color: Theme.border
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 14
+            spacing: 5
+            Text {
+                text: SystemStatus.userName + "@" + SystemStatus.hostName
+                color: Theme.cyan
+                font.family: Theme.fontFamily
+                font.pixelSize: 16
+                font.bold: true
             }
             Text {
-                visible: SystemTray.items.values.length === 0
-                text: "Sin elementos"
-                color: Theme.muted
+                text: SystemStatus.distribution
+                color: Theme.foreground
                 font.family: Theme.fontFamily
-                font.pixelSize: 10
+                font.pixelSize: 11
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                Text {
+                    Layout.fillWidth: true
+                    text: "Kernel  " + SystemStatus.kernel
+                    color: Theme.muted
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 10
+                    elide: Text.ElideRight
+                }
+                Text {
+                    text: "Activo " + SystemStatus.uptime
+                    color: Theme.green
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 10
+                }
             }
         }
     }
 
-    Text { text: "Sesión"; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 10 }
+    Text {
+        text: "Acciones de sesión"
+        color: Theme.muted
+        font.family: Theme.fontFamily
+        font.pixelSize: 10
+    }
 
     GridLayout {
         Layout.fillWidth: true
         columns: 5
-        columnSpacing: 7
+        columnSpacing: 8
+
         Repeater {
             model: [
                 { icon: "󰌾", color: Theme.cyan, command: "loginctl lock-session", label: "Bloquear" },
@@ -68,30 +74,62 @@ ColumnLayout {
                 { icon: "󰑐", color: Theme.orange, command: "systemctl reboot", label: "Reiniciar" },
                 { icon: "󰐥", color: Theme.red, command: "systemctl poweroff", label: "Apagar" }
             ]
+
             delegate: Rectangle {
                 required property var modelData
                 Layout.fillWidth: true
-                Layout.preferredHeight: 64
-                radius: 8
+                Layout.preferredHeight: 76
+                radius: 9
                 color: actionArea.containsMouse ? Theme.current : Theme.surface
-                border.color: actionArea.containsMouse ? modelData.color : Theme.border
+                border.color: modelData.label === "Apagar" ? Theme.red :
+                              actionArea.containsMouse ? modelData.color : Theme.border
+
                 Column {
                     anchors.centerIn: parent
-                    spacing: 5
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.icon; color: modelData.color; font.family: Theme.iconFamily; font.pixelSize: 17 }
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.label; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 7 }
+                    spacing: 7
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: modelData.icon
+                        color: modelData.color
+                        font.family: Theme.iconFamily
+                        font.pixelSize: 21
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: modelData.label
+                        color: Theme.foreground
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 8
+                    }
                 }
+
                 MouseArea {
                     id: actionArea
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        sessionCommand.command = ["sh", "-c", modelData.command]
+                        sessionCommand.command = ["bash", "-c", modelData.command]
                         sessionCommand.running = true
                     }
                 }
             }
+        }
+    }
+
+    Rectangle {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 52
+        radius: 9
+        color: Theme.elevated
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: 13
+            anchors.rightMargin: 13
+            Text { text: "󰣇"; color: Theme.purple; font.family: Theme.iconFamily; font.pixelSize: 18 }
+            Text { text: "Hyprland sobre Arch Linux"; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 10 }
+            Item { Layout.fillWidth: true }
+            Text { text: SystemStatus.powerProfile; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 9 }
         }
     }
 
