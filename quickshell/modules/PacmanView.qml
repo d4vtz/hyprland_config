@@ -7,9 +7,13 @@ ColumnLayout {
     id: root
     property var updates: []
     property var news: []
+    property string lastChecked: "--:--"
+    readonly property bool refreshing: updatesProcess.running || newsProcess.running
     spacing: 10
 
     function refresh() {
+        if (refreshing)
+            return
         updatesProcess.running = true
         newsProcess.running = true
     }
@@ -20,7 +24,10 @@ ColumnLayout {
         id: updatesProcess
         command: ["bash", "-c", "{ checkupdates 2>/dev/null || true; paru -Qua 2>/dev/null || true; } | sort -u"]
         stdout: StdioCollector {
-            onStreamFinished: root.updates = text.trim() ? text.trim().split("\n") : []
+            onStreamFinished: {
+                root.updates = text.trim() ? text.trim().split("\n") : []
+                root.lastChecked = Qt.formatTime(new Date(), "HH:mm")
+            }
         }
     }
     Process {
@@ -30,7 +37,7 @@ ColumnLayout {
             onStreamFinished: root.news = text.trim() ? text.trim().split("\n") : []
         }
     }
-    Process { id: terminalProcess }
+    Process { id: terminalProcess; onExited: root.refresh() }
 
     Rectangle {
         Layout.fillWidth: true
@@ -75,11 +82,17 @@ ColumnLayout {
                 }
             }
             Text {
-                text: "󰑐"
+                text: root.refreshing ? "󰑓" : "󰑐"
                 color: Theme.cyan
                 font.family: Theme.iconFamily
                 font.pixelSize: 18
-                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.refresh() }
+                opacity: root.refreshing ? 0.55 : 1
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: !root.refreshing
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.refresh()
+                }
             }
         }
     }
@@ -115,7 +128,7 @@ ColumnLayout {
         Layout.fillWidth: true
         Text { text: "Noticias de Arch Linux"; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 11; font.bold: true }
         Item { Layout.fillWidth: true }
-        Text { text: "archlinux.org"; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 8 }
+        Text { text: "Consulta " + root.lastChecked; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 8 }
     }
 
     ColumnLayout {
