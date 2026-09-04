@@ -25,7 +25,7 @@ sudo pacman -S --needed \
   uwsm xdg-desktop-portal-hyprland polkit-kde-agent \
   kwallet kwallet-pam kwalletmanager \
   quickshell qt6-declarative qt6-svg qt6-imageformats \
-  waybar rofi hyprpaper hyprlock hypridle \
+  rofi hyprpaper hyprlock hypridle \
   satty grim slurp wl-clipboard cliphist jq cava curl pacman-contrib udiskie \
   brightnessctl playerctl pavucontrol network-manager-applet \
   bluez-utils blueman power-profiles-daemon hyprsunset intel-gpu-tools \
@@ -52,7 +52,6 @@ Conserva configuraciones previas que no sean enlaces:
 
 ```bash
 mv ~/.config/hypr ~/.config/hypr.backup 2>/dev/null || true
-mv ~/.config/waybar ~/.config/waybar.backup 2>/dev/null || true
 mv ~/.config/quickshell ~/.config/quickshell.backup 2>/dev/null || true
 mv ~/.config/rofi ~/.config/rofi.backup 2>/dev/null || true
 ```
@@ -89,10 +88,10 @@ Selecciona **Hyprland (uwsm-managed)** en Plasma Login Manager.
 | Super + Ctrl + flechas | Redimensionar |
 | Super + 1…7 | Cambiar espacio de trabajo |
 | Super + Shift + 1…7 | Mover ventana |
-| Super + PageUp/PageDown | Recorrer los siete escritorios |
-| Super + Ctrl + PageUp/PageDown | Recorrer solamente escritorios ocupados |
-| Super + rueda | Recorrer los siete escritorios |
-| Super + Ctrl + rueda | Recorrer solamente escritorios ocupados |
+| Super + PageUp/PageDown | Recorrer solamente escritorios ocupados |
+| Super + Ctrl + PageUp/PageDown | Recorrer los siete escritorios |
+| Super + rueda | Recorrer solamente escritorios ocupados |
+| Super + Ctrl + rueda | Recorrer los siete escritorios |
 | Print | Seleccionar región y editarla |
 | Shift + Print | Copiar la pantalla |
 | Ctrl + Print | Capturar y editar la ventana activa |
