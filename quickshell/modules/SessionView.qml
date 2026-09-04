@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Quickshell.Io
 import ".."
 import "../services"
@@ -68,11 +69,11 @@ ColumnLayout {
 
         Repeater {
             model: [
-                { icon: "󰌾", color: Theme.cyan, command: "loginctl lock-session", label: "Bloquear" },
-                { icon: "󰒲", color: Theme.green, command: "systemctl suspend", label: "Suspender" },
-                { icon: "󰍃", color: Theme.purple, command: "hyprctl dispatch 'hl.dsp.exit()'", label: "Salir" },
-                { icon: "󰑐", color: Theme.orange, command: "systemctl reboot", label: "Reiniciar" },
-                { icon: "󰐥", color: Theme.red, command: "systemctl poweroff", label: "Apagar" }
+                { icon: "󰌾", color: Theme.cyan, action: "lock", label: "Bloquear" },
+                { icon: "󰒲", color: Theme.green, action: "suspend", label: "Suspender" },
+                { icon: "󰍃", color: Theme.purple, action: "logout", label: "Salir" },
+                { icon: "󰑐", color: Theme.orange, action: "reboot", label: "Reiniciar" },
+                { icon: "󰐥", color: Theme.red, action: "poweroff", label: "Apagar" }
             ]
 
             delegate: Rectangle {
@@ -109,7 +110,7 @@ ColumnLayout {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        sessionCommand.command = ["bash", "-c", modelData.command]
+                        sessionCommand.command = ["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/session-action.sh", modelData.action]
                         sessionCommand.running = true
                     }
                 }

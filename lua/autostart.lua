@@ -4,12 +4,6 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("systemctl --user start plasma-polkit-agent.service")
     -- Entrega a KWallet las credenciales que pam_kwallet5 recibió de SDDM.
     hl.exec_cmd("systemctl --user start plasma-kwallet-pam.service")
-    -- Quickshell sustituye a Waybar; scripts/bar-waybar.sh permite volver temporalmente.
-    hl.exec_cmd("uwsm app -- qs")
-    -- Quickshell recibe notificaciones; cliphist conserva el historial del portapapeles.
-    hl.exec_cmd("uwsm app -- wl-paste --watch cliphist store")
-    hl.exec_cmd("uwsm app -- hyprpaper")
-    -- Espera al IPC de Hyprpaper y recupera el último fondo elegido.
-    hl.exec_cmd("uwsm app -- ~/.config/hypr/scripts/restore-wallpaper.sh")
-    hl.exec_cmd("uwsm app -- hypridle")
+    -- Inicia una sola instancia de cada componente del escritorio.
+    hl.exec_cmd("~/.config/hypr/scripts/session-services.sh")
 end)

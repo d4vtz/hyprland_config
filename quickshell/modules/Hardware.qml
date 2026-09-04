@@ -66,18 +66,25 @@ Pill {
             font.pixelSize: 14
         }
         Text {
-            visible: root.source && !root.source.audio.muted
+            visible: SystemStatus.microphoneActive
             text: "󰍬"
             color: Theme.red
             font.family: Theme.iconFamily
             font.pixelSize: 16
         }
         Text {
-            visible: SystemStatus.bluetoothEnabled
+            visible: SystemStatus.bluetoothConnected
             text: SystemStatus.bluetoothAudioActive ? "󰋋" : "󰂯"
             color: SystemStatus.bluetoothAudioActive ? Theme.green : Theme.cyan
             font.family: Theme.iconFamily
             font.pixelSize: 16
+        }
+        Text {
+            visible: SystemStatus.vpnActive
+            text: "󰌾"
+            color: Theme.green
+            font.family: Theme.iconFamily
+            font.pixelSize: 15
         }
     }
 
@@ -88,12 +95,12 @@ Pill {
         onClicked: root.expanded = !root.expanded
         onWheel: wheel => {
             if (root.sink)
-                root.sink.audio.volume = Math.max(0, Math.min(1.5, root.sink.audio.volume + (wheel.angleDelta.y > 0 ? .05 : -.05)))
+                root.sink.audio.volume = Math.max(0, Math.min(1, root.sink.audio.volume + (wheel.angleDelta.y > 0 ? .05 : -.05)))
         }
     }
 
     Process { id: command; onExited: SystemStatus.refresh() }
-    Process { id: settingsLauncher }
+    Process { id: settingsLauncher; onExited: SystemStatus.refresh() }
     Process {
         id: profileSetter
         stdout: StdioCollector {
@@ -121,7 +128,7 @@ Pill {
         Rectangle {
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 2
+            anchors.topMargin: Theme.barHeight + 12
             anchors.rightMargin: 102
             width: 390
             height: root.page === 0 ? (root.deviceMenu ? 540 : 445) : 545
@@ -268,11 +275,23 @@ Pill {
                     Layout.fillWidth: true; spacing: 8
                     QuickToggle {
                         text: "Wi-Fi"; icon: "󰖩"; checked: SystemStatus.wifiEnabled; accent: Theme.cyan
-                        onClicked: { settingsLauncher.command = ["nm-connection-editor"]; settingsLauncher.running = true; root.expanded = false }
+                        onClicked: button => {
+                            settingsLauncher.command = button === Qt.RightButton
+                                ? ["nm-connection-editor"]
+                                : ["nmcli", "radio", "wifi", SystemStatus.wifiEnabled ? "off" : "on"]
+                            settingsLauncher.running = true
+                            if (button === Qt.RightButton) root.expanded = false
+                        }
                     }
                     QuickToggle {
                         text: "Bluetooth"; icon: "󰂯"; checked: SystemStatus.bluetoothEnabled; accent: Theme.purple
-                        onClicked: { settingsLauncher.command = ["blueman-manager"]; settingsLauncher.running = true; root.expanded = false }
+                        onClicked: button => {
+                            settingsLauncher.command = button === Qt.RightButton
+                                ? ["blueman-manager"]
+                                : ["bluetoothctl", "power", SystemStatus.bluetoothEnabled ? "off" : "on"]
+                            settingsLauncher.running = true
+                            if (button === Qt.RightButton) root.expanded = false
+                        }
                     }
                     QuickToggle {
                         text: "Luz nocturna"; icon: "󰖔"; checked: SystemStatus.nightLightEnabled; accent: Theme.orange
@@ -389,7 +408,7 @@ Pill {
         property string icon: ""
         property bool checked: false
         property color accent: Theme.purple
-        signal clicked()
+        signal clicked(int button)
         Layout.fillWidth: true; Layout.preferredHeight: 38; radius: 8
         color: checked ? accent : Theme.surface
         RowLayout {
@@ -397,6 +416,13 @@ Pill {
             Text { text: toggle.icon; color: toggle.checked ? Theme.background : toggle.accent; font.family: Theme.iconFamily; font.pixelSize: 16 }
             Text { text: toggle.text; color: toggle.checked ? Theme.background : Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 9 }
         }
-        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: toggle.clicked() }
+        MouseArea {
+            id: toggleArea
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: mouse => toggle.clicked(mouse.button)
+        }
     }
 }

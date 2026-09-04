@@ -10,6 +10,7 @@ bindings=$(
     'SUPER + F1                    Mostrar estos atajos' \
     'SUPER + Escape                Menú de energía' \
     'SUPER + N                     Centro de notificaciones' \
+    'SUPER + C                     Historial del portapapeles' \
     'SUPER + Q                     Cerrar ventana' \
     'SUPER + V                     Alternar ventana flotante' \
     'SUPER + F                     Pantalla completa' \

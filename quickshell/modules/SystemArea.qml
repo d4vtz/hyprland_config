@@ -48,7 +48,18 @@ Pill {
                 sourceSize.height: 19
                 width: 19
                 height: 19
-                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: modelData.activate() }
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: mouse => {
+                        if (mouse.button === Qt.MiddleButton)
+                            modelData.secondaryActivate()
+                        else
+                            modelData.activate()
+                    }
+                    onWheel: wheel => modelData.scroll(wheel.angleDelta.y, false)
+                }
             }
         }
         Text {
@@ -108,7 +119,7 @@ Pill {
         Rectangle {
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 2
+            anchors.topMargin: Theme.barHeight + 12
             anchors.rightMargin: 8
             width: 440
             height: 475
@@ -189,7 +200,7 @@ Pill {
         Rectangle {
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 2
+            anchors.topMargin: Theme.barHeight + 12
             anchors.rightMargin: 8
             width: 360
             height: 430
@@ -213,7 +224,7 @@ Pill {
         Rectangle {
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 2
+            anchors.topMargin: Theme.barHeight + 12
             anchors.rightMargin: 8
             width: 360
             height: 430
@@ -221,7 +232,12 @@ Pill {
             color: Theme.background
             border.color: Theme.border
             MouseArea { anchors.fill: parent }
-            ClipboardView { id: clipboardView; anchors.fill: parent; anchors.margins: 14 }
+            ClipboardView {
+                id: clipboardView
+                anchors.fill: parent
+                anchors.margins: 14
+                onEntryCopied: root.openPanel = 0
+            }
         }
         Shortcut { sequence: "Esc"; onActivated: root.openPanel = 0 }
     }

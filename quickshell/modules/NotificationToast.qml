@@ -10,7 +10,7 @@ PanelWindow {
     property bool showing: false
     visible: showing && NotificationService.latest !== null && !NotificationService.doNotDisturb
     anchors { top: true; right: true }
-    margins { top: 8; right: 8 }
+    margins { top: Theme.barHeight + 12; right: 8 }
     implicitWidth: 350
     implicitHeight: 112
     exclusiveZone: 0
@@ -95,7 +95,11 @@ PanelWindow {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.showing = false
+                    onClicked: {
+                        if (NotificationService.latest)
+                            NotificationService.latest.dismiss()
+                        root.showing = false
+                    }
                 }
             }
         }

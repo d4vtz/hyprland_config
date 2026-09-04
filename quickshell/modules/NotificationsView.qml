@@ -51,62 +51,103 @@ ColumnLayout {
 
         delegate: Rectangle {
             required property var modelData
+            property bool expanded: false
+            readonly property var notificationActions: modelData.actions || []
             width: ListView.view.width
-            height: 82
+            height: notificationActions.length > 0 ? (expanded ? 142 : 108) : (expanded ? 116 : 82)
             radius: 8
             color: Theme.surface
+            Behavior on height { NumberAnimation { duration: Theme.animationFast } }
 
-            RowLayout {
+            ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 10
-                spacing: 9
-                Image {
-                    Layout.preferredWidth: 28
-                    Layout.preferredHeight: 28
-                    source: modelData.appIcon
-                    fillMode: Image.PreserveAspectFit
-                }
-                ColumnLayout {
+                spacing: 5
+                RowLayout {
                     Layout.fillWidth: true
-                    spacing: 2
-                    Text {
+                    spacing: 9
+                    Image {
+                        Layout.preferredWidth: 28
+                        Layout.preferredHeight: 28
+                        source: modelData.appIcon
+                        fillMode: Image.PreserveAspectFit
+                    }
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        text: modelData.appName || "Notificación"
-                        color: Theme.purple
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 9
-                        font.bold: true
-                        elide: Text.ElideRight
+                        spacing: 2
+                        Text {
+                            Layout.fillWidth: true
+                            text: modelData.appName || "Notificación"
+                            color: Theme.purple
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 9
+                            font.bold: true
+                            elide: Text.ElideRight
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            text: modelData.summary
+                            color: Theme.foreground
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 10
+                            font.bold: true
+                            elide: Text.ElideRight
+                        }
                     }
                     Text {
-                        Layout.fillWidth: true
-                        text: modelData.summary
-                        color: Theme.foreground
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 10
-                        font.bold: true
-                        elide: Text.ElideRight
-                    }
-                    Text {
-                        Layout.fillWidth: true
-                        text: modelData.body
+                        visible: String(modelData.body || "").length > 80
+                        text: expanded ? "󰅃" : "󰅀"
                         color: Theme.muted
-                        textFormat: Text.PlainText
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 9
-                        maximumLineCount: 2
-                        elide: Text.ElideRight
-                        wrapMode: Text.Wrap
+                        font.family: Theme.iconFamily
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: expanded = !expanded }
+                    }
+                    Text {
+                        text: "󰅖"
+                        color: Theme.muted
+                        font.family: Theme.iconFamily
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: modelData.dismiss() }
                     }
                 }
                 Text {
-                    text: "󰅖"
+                    Layout.fillWidth: true
+                    text: modelData.body || ""
                     color: Theme.muted
-                    font.family: Theme.iconFamily
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: modelData.dismiss()
+                    textFormat: Text.PlainText
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 9
+                    maximumLineCount: expanded ? 5 : 2
+                    elide: Text.ElideRight
+                    wrapMode: Text.Wrap
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    visible: notificationActions.length > 0
+                    spacing: 6
+                    Repeater {
+                        model: notificationActions
+                        delegate: Rectangle {
+                            required property var modelData
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 25
+                            radius: 6
+                            color: actionArea.containsMouse ? Theme.current : Theme.elevated
+                            border.color: Theme.borderActive
+                            Text {
+                                anchors.centerIn: parent
+                                text: modelData.text || "Abrir"
+                                color: Theme.foreground
+                                font.family: Theme.fontFamily
+                                font.pixelSize: 9
+                                elide: Text.ElideRight
+                            }
+                            MouseArea {
+                                id: actionArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: modelData.invoke()
+                            }
+                        }
                     }
                 }
             }
