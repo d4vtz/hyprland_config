@@ -1,15 +1,15 @@
-# Hyprland Configuration
+# Orion Shell
 
-Escritorio Hyprland modular para Arch Linux, escrito en Lua y probado con
-Hyprland 0.56.2. Está diseñado para una pantalla 1920×1200, trabajo con código,
-LaTeX, PDF, Xournal++ y multimedia.
+Shell de escritorio para Hyprland sobre Arch Linux. Quickshell/QML proporciona la capa visual y Hyprland/Lua conserva la gestión del compositor. El objetivo es una experiencia integrada y configurable con identidad Dracula, superficies tipo Material y módulos reutilizables.
 
 ## Diseño
 
 - Configuración de Hyprland completamente en Lua.
 - Tema Dracula desacoplado y preparado para añadir otras paletas.
 - Layout master con siete espacios persistentes.
-- Quickshell superior, modular y animada, con reloj centrado.
+- Orion Shell sobre Quickshell, modular y animada, con reloj centrado.
+- Sistema visual compartido (`Theme`, `Surface`, `Card`, `SectionTitle`, `ToggleTile`).
+- Dashboard nativo con métricas, conectividad, energía y almacenamiento.
 - Rofi como lanzador y centro de notificaciones nativo de Quickshell.
 - Hyprpaper, Hyprlock e Hypridle.
 - Capturas con Grimblast y edición en Satty.
@@ -75,7 +75,8 @@ Selecciona **Hyprland (uwsm-managed)** en Plasma Login Manager.
 | Atajo | Acción |
 |---|---|
 | Super + F1 | Mostrar y filtrar todos los atajos |
-| Super + Espacio | Abrir Rofi |
+| Super + Espacio | Abrir lanzador (Rofi durante la transición) |
+| Super + D | Abrir/cerrar Orion Dashboard |
 | Super + Enter | Abrir Kitty |
 | Super + E | Abrir Dolphin |
 | Super + B | Abrir navegador |
@@ -146,7 +147,10 @@ y ejecuta theme-switch.sh nord.
 hyprland.lua           Entrada mínima
 lua/                   Módulos de Hyprland
 themes/                Paletas compartidas
-quickshell/             Shell principal y paneles QML
+quickshell/             Orion Shell
+  components/           Primitivas visuales reutilizables
+  modules/              Barra, dashboard y paneles funcionales
+  services/             Estado reactivo del sistema
 waybar/                 Barra anterior, conservada como fallback
 rofi/                  Lanzador
 swaync/                Configuración anterior, conservada como referencia
@@ -171,3 +175,32 @@ Durante la migración puedes alternar sin cerrar la sesión:
 ~/.config/hypr/scripts/bar-waybar.sh       # fallback
 ~/.config/hypr/scripts/bar-quickshell.sh  # volver a Quickshell
 ```
+
+
+## Arquitectura de Orion Shell
+
+La migración mantiene las funciones existentes mientras elimina progresivamente la lógica visual duplicada:
+
+```text
+Hyprland / Lua
+      │
+      ▼
+Orion Shell / Quickshell
+ ├── Core visual
+ │   ├── Theme
+ │   ├── Surface
+ │   ├── Card
+ │   └── controles reutilizables
+ ├── Modules
+ │   ├── Bar
+ │   ├── Dashboard
+ │   ├── Hardware
+ │   ├── Media
+ │   ├── Notifications
+ │   └── Clipboard
+ └── Services
+     ├── SystemStatus
+     └── NotificationService
+```
+
+La primera fase conserva Rofi y los servicios actuales para no romper el escritorio durante la transición. El launcher nativo, centro de control unificado, monitor de procesos y configuración visual se incorporarán sobre este núcleo.
