@@ -14,7 +14,7 @@ Rectangle {
 
     implicitHeight: 64
     radius: Theme.cardRadius
-    color: checked ? Qt.alpha(accent, 0.18) : Theme.surface
+    color: checked ? Qt.rgba(accent.r, accent.g, accent.b, 0.18) : Theme.surface
     border.width: 1
     border.color: checked ? accent : Theme.border
 
