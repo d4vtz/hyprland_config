@@ -7,6 +7,7 @@ import "modules"
 
 ShellRoot {
     NotificationToast {}
+    Dashboard { id: dashboard }
 
     Variants {
         model: Quickshell.screens
@@ -23,17 +24,23 @@ ShellRoot {
                 anchors.fill: parent
                 anchors.margins: 4
                 color: Theme.barBackground
-                radius: 11
+                radius: Theme.cardRadius
                 border.color: "transparent"
 
                 RowLayout {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: 8
+                    anchors.leftMargin: Theme.spacingSm
                     spacing: 7
+
                     Pill {
                         id: launcherPill
-                        Text { text: "󰣇"; color: Theme.purple; font.family: Theme.iconFamily; font.pixelSize: 16 }
+                        Text {
+                            text: "󰣇"
+                            color: Theme.purple
+                            font.family: Theme.iconFamily
+                            font.pixelSize: 16
+                        }
                         MouseArea {
                             parent: launcherPill
                             anchors.fill: parent
@@ -42,6 +49,24 @@ ShellRoot {
                         }
                         Process { id: launcher; command: ["rofi", "-show", "drun"] }
                     }
+
+                    Pill {
+                        id: dashboardPill
+                        active: dashboard.open
+                        Text {
+                            text: "󰕮"
+                            color: Theme.pink
+                            font.family: Theme.iconFamily
+                            font.pixelSize: 16
+                        }
+                        MouseArea {
+                            parent: dashboardPill
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: dashboard.toggle()
+                        }
+                    }
+
                     Workspaces { screen: modelData }
                     ActiveWindow {}
                 }
@@ -51,7 +76,7 @@ ShellRoot {
                 RowLayout {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.rightMargin: 8
+                    anchors.rightMargin: Theme.spacingSm
                     spacing: 7
                     Media {}
                     Hardware {}
