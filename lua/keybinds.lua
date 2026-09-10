@@ -8,11 +8,12 @@ return function(settings)
     hl.bind(mod .. " + B", exec(settings.browser))
     hl.bind(mod .. " + SPACE", exec("qs ipc call launcher toggle"))
     hl.bind(mod .. " + F1", exec("~/.config/hypr/scripts/keybinds-help.sh"))
-    hl.bind(mod .. " + ESCAPE", exec("qs ipc call activity session"))
+    hl.bind(mod .. " + ESCAPE", exec("qs ipc call session toggle"))
     hl.bind(mod .. " + N", exec("qs ipc call activity notifications"))
     hl.bind(mod .. " + D", exec("qs ipc call dashboard toggle"))
     hl.bind(mod .. " + C", exec("qs ipc call controlcenter toggle"))
     hl.bind(mod .. " + SHIFT + V", exec("qs ipc call activity clipboard"))
+    hl.bind(mod .. " + U", exec("qs ipc call activity updates"))
     hl.bind(mod .. " + M", exec("qs ipc call monitor toggle"))
     hl.bind(mod .. " + COMMA", exec("qs ipc call settings toggle"))
 
@@ -50,8 +51,6 @@ return function(settings)
         hl.bind(mod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
     end
 
-    -- Ciclo cerrado entre los escritorios configurados (1…7 por defecto).
-    -- El módulo evita que el desplazamiento relativo cree escritorios 8, 9, etc.
     local function cycle_workspace(step)
         return function()
             local current = hl.get_active_workspace().id
@@ -60,8 +59,6 @@ return function(settings)
         end
     end
 
-    -- Los escritorios persistentes siempre cuentan como existentes para e±1.
-    -- Por eso comprobamos sus ventanas directamente para saltar los vacíos.
     local function cycle_occupied_workspace(step)
         return function()
             local current = hl.get_active_workspace().id
@@ -112,7 +109,6 @@ return function(settings)
     hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
     hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
-    -- Capturas estilo Spectacle: región editable, pantalla y ventana activa.
     hl.bind("PRINT", exec("grimblast --notify edit area"), { locked = true })
     hl.bind("SHIFT + PRINT", exec("grimblast --notify copy output"), { locked = true })
     hl.bind("CTRL + PRINT", exec("grimblast --notify edit active"), { locked = true })
