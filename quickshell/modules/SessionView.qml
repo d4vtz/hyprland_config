@@ -19,6 +19,9 @@ ColumnLayout {
         { icon: "󰑐", color: Theme.orange, command: "systemctl reboot", label: "Reiniciar", destructive: true },
         { icon: "󰐥", color: Theme.red, command: "systemctl poweroff", label: "Apagar", destructive: true }
     ]
+    readonly property var pendingAction: pendingIndex >= 0 && pendingIndex < actions.length
+                                         ? actions[pendingIndex]
+                                         : null
 
     spacing: Theme.spacingMd
     focus: visible
@@ -70,10 +73,11 @@ ColumnLayout {
             return
 
         const action = actions[index]
-        pendingIndex = -1
-        root.closeRequested()
         sessionCommand.command = ["bash", "-lc", action.command]
         sessionCommand.running = true
+        pendingIndex = -1
+        confirmationChoice = 0
+        root.closeRequested()
     }
 
     function cancelConfirmation() {
@@ -261,7 +265,7 @@ ColumnLayout {
         radius: Theme.cardRadius
         color: Theme.surface
         border.width: 1
-        border.color: root.pendingIndex >= 0 ? root.actions[root.pendingIndex].color : Theme.border
+        border.color: root.pendingAction ? root.pendingAction.color : Theme.border
 
         ColumnLayout {
             anchors.centerIn: parent
@@ -270,8 +274,8 @@ ColumnLayout {
 
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                text: root.pendingIndex >= 0 ? root.actions[root.pendingIndex].icon : ""
-                color: root.pendingIndex >= 0 ? root.actions[root.pendingIndex].color : Theme.foreground
+                text: root.pendingAction ? root.pendingAction.icon : ""
+                color: root.pendingAction ? root.pendingAction.color : Theme.foreground
                 font.family: Theme.iconFamily
                 font.pixelSize: 34
             }
@@ -279,7 +283,7 @@ ColumnLayout {
             Text {
                 Layout.fillWidth: true
                 horizontalAlignment: Text.AlignHCenter
-                text: root.pendingIndex >= 0 ? root.actions[root.pendingIndex].label + " el equipo" : ""
+                text: root.pendingAction ? root.pendingAction.label + " el equipo" : ""
                 color: Theme.foreground
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSizeTitle
@@ -331,17 +335,17 @@ ColumnLayout {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 38
                     radius: Theme.cardRadius
-                    color: root.confirmationChoice === 1 || confirmArea.containsMouse
-                           ? root.actions[root.pendingIndex].color
+                    color: (root.confirmationChoice === 1 || confirmArea.containsMouse) && root.pendingAction
+                           ? root.pendingAction.color
                            : Theme.elevated
                     border.width: 1
-                    border.color: root.confirmationChoice === 1
-                                  ? root.actions[root.pendingIndex].color
+                    border.color: root.confirmationChoice === 1 && root.pendingAction
+                                  ? root.pendingAction.color
                                   : Theme.border
 
                     Text {
                         anchors.centerIn: parent
-                        text: root.pendingIndex >= 0 ? root.actions[root.pendingIndex].label : "Confirmar"
+                        text: root.pendingAction ? root.pendingAction.label : "Confirmar"
                         color: root.confirmationChoice === 1 || confirmArea.containsMouse ? Theme.canvas : Theme.foreground
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSizeSmall
@@ -354,7 +358,11 @@ ColumnLayout {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onEntered: root.confirmationChoice = 1
-                        onClicked: root.executeAction(root.pendingIndex)
+                        onClicked: {
+                            const index = root.pendingIndex
+                            if (index >= 0)
+                                root.executeAction(index)
+                        }
                     }
                 }
             }
