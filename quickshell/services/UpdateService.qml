@@ -103,7 +103,7 @@ QtObject {
             }
         }
 
-        onExited: {
+        onExited: function(exitCode, exitStatus) {
             root.refreshing = false
             if (exitCode !== 0 && root.errorText.length === 0)
                 root.errorText = "La comprobación terminó con código " + exitCode
