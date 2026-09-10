@@ -10,7 +10,8 @@ Shell de escritorio para Hyprland sobre Arch Linux. Quickshell/QML proporciona l
 - Orion Shell sobre Quickshell, modular y animada, con reloj centrado.
 - Sistema visual compartido (`Theme`, `Surface`, `Card`, `SectionTitle`, `ToggleTile`).
 - Dashboard nativo con métricas, conectividad, energía y almacenamiento.
-- Rofi como lanzador y centro de notificaciones nativo de Quickshell.
+- Lanzador nativo de Orion Shell, centro de actividad, centro de control, monitor del sistema y ajustes propios.
+- Rofi y Waybar se conservan únicamente como fallback durante la transición.
 - Hyprpaper, Hyprlock e Hypridle.
 - Capturas con Grimblast y edición en Satty.
 - Super + F1 abre una hoja de atajos filtrable.
@@ -75,13 +76,17 @@ Selecciona **Hyprland (uwsm-managed)** en Plasma Login Manager.
 | Atajo | Acción |
 |---|---|
 | Super + F1 | Mostrar y filtrar todos los atajos |
-| Super + Espacio | Abrir lanzador (Rofi durante la transición) |
+| Super + Espacio | Abrir Orion Launcher |
 | Super + D | Abrir/cerrar Orion Dashboard |
 | Super + Enter | Abrir Kitty |
 | Super + E | Abrir Dolphin |
 | Super + B | Abrir navegador |
-| Super + N | Abrir las notificaciones de Quickshell |
-| Super + Escape | Menú de energía |
+| Super + N | Abrir centro de actividad en Notificaciones |
+| Super + Shift + V | Abrir centro de actividad en Portapapeles |
+| Super + C | Abrir Centro de control |
+| Super + M | Abrir Monitor del sistema |
+| Super + , | Abrir ajustes de Orion Shell |
+| Super + Escape | Abrir acciones de sesión |
 | Super + H/J/K/L | Cambiar el foco |
 | Super + flechas | Cambiar el foco |
 | Super + Shift + dirección | Intercambiar ventanas |
@@ -149,7 +154,8 @@ lua/                   Módulos de Hyprland
 themes/                Paletas compartidas
 quickshell/             Orion Shell
   components/           Primitivas visuales reutilizables
-  modules/              Barra, dashboard y paneles funcionales
+  modules/              Launcher, barra, dashboard, centro de control, actividad,
+                        monitor, ajustes y paneles funcionales
   services/             Estado reactivo del sistema
 waybar/                 Barra anterior, conservada como fallback
 rofi/                  Lanzador
@@ -203,4 +209,60 @@ Orion Shell / Quickshell
      └── NotificationService
 ```
 
-La primera fase conserva Rofi y los servicios actuales para no romper el escritorio durante la transición. El launcher nativo, centro de control unificado, monitor de procesos y configuración visual se incorporarán sobre este núcleo.
+La shell ya incluye una primera implementación completa de sus superficies principales:
+
+- `Launcher.qml`: lanzador nativo basado en archivos `.desktop`.
+- `Dashboard.qml`: resumen de sistema, conectividad, energía y almacenamiento.
+- `ControlCenter.qml`: audio, brillo, Wi-Fi, Bluetooth, luz nocturna, perfiles de energía y dispositivos PipeWire.
+- `ActivityCenter.qml`: notificaciones, portapapeles y acciones de sesión.
+- `SystemMonitor.qml`: CPU, GPU, memoria, almacenamiento y procesos.
+- `SettingsPanel.qml`: accesos de personalización, fondo, pantalla, red, Bluetooth y audio.
+- `Tray.qml`: bandeja de sistema.
+- `NotificationToast.qml`: avisos emergentes.
+
+Rofi, Waybar, `Hardware.qml` y `SystemArea.qml` permanecen en el repositorio como fallback o referencia, pero ya no forman parte del flujo principal de Orion Shell.
+
+
+## Control por CLI
+
+Orion expone sus módulos por IPC. El wrapper `orionctl` simplifica el acceso:
+
+```bash
+~/.config/hypr/scripts/orionctl launcher
+~/.config/hypr/scripts/orionctl dashboard
+~/.config/hypr/scripts/orionctl control
+~/.config/hypr/scripts/orionctl notifications
+~/.config/hypr/scripts/orionctl clipboard
+~/.config/hypr/scripts/orionctl monitor
+~/.config/hypr/scripts/orionctl settings
+~/.config/hypr/scripts/orionctl session
+~/.config/hypr/scripts/orionctl reload
+```
+
+## Superficies de Orion
+
+```text
+Bar
+├── Launcher
+├── Dashboard
+├── Workspaces
+├── ActiveWindow
+├── Clock
+├── Media
+├── SystemMonitor
+├── ControlCenter
+├── ActivityCenter
+├── Tray
+└── Settings
+
+Panels
+├── Launcher
+├── Dashboard
+├── Control Center
+├── Activity Center
+│   ├── Notifications
+│   ├── Clipboard
+│   └── Session
+├── System Monitor
+└── Settings
+```
