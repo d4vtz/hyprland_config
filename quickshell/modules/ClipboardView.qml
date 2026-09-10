@@ -17,7 +17,10 @@ ColumnLayout {
     }
 
     function copyEntry(entry) {
-        copyProcess.command = ["sh", "-c", "cliphist decode " + Number(entry.id) + " | wl-copy"]
+        const id = Number(entry.id)
+        if (!Number.isFinite(id))
+            return
+        copyProcess.command = ["bash", "-lc", "printf '%s\\n' " + id + " | cliphist decode | wl-copy"]
         copyProcess.running = true
     }
 
@@ -40,7 +43,13 @@ ColumnLayout {
             }
         }
     }
-    Process { id: copyProcess }
+    Process {
+        id: copyProcess
+        onExited: {
+            if (exitCode === 0)
+                ClipboardStatus.refresh()
+        }
+    }
     Process {
         id: deleteProcess
         onExited: root.refresh()
