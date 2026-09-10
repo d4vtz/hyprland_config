@@ -155,40 +155,38 @@ ShellRoot {
                     Pill {
                         id: activityPill
                         active: activityCenter.open
-                        RowLayout {
-                            spacing: 8
 
-                            Text {
-                                text: NotificationService.doNotDisturb ? "󰂛" : "󰂚"
-                                color: NotificationService.doNotDisturb ? Theme.red : Theme.purple
-                                font.family: Theme.iconFamily
-                                font.pixelSize: 16
-                            }
-
-                            Text {
-                                visible: NotificationService.count > 0
-                                text: NotificationService.count
-                                color: Theme.foreground
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSizeSmall
-                            }
-
-                            Text {
-                                visible: ClipboardStatus.hasEntries
-                                text: "󰅇 " + ClipboardStatus.count
-                                color: Theme.pink
-                                font.family: Theme.iconFamily
-                                font.pixelSize: 14
-                            }
-
-                            Text {
-                                visible: UpdateService.hasUpdates
-                                text: "󰚰 " + UpdateService.totalCount
-                                color: Theme.orange
-                                font.family: Theme.iconFamily
-                                font.pixelSize: 14
-                            }
+                        Text {
+                            text: NotificationService.doNotDisturb ? "󰂛" : "󰂚"
+                            color: NotificationService.doNotDisturb ? Theme.red : Theme.purple
+                            font.family: Theme.iconFamily
+                            font.pixelSize: 16
                         }
+
+                        Text {
+                            visible: NotificationService.count > 0
+                            text: NotificationService.count
+                            color: Theme.foreground
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSizeSmall
+                        }
+
+                        Text {
+                            visible: ClipboardStatus.hasEntries
+                            text: "󰅇 " + ClipboardStatus.count
+                            color: Theme.pink
+                            font.family: Theme.iconFamily
+                            font.pixelSize: 14
+                        }
+
+                        Text {
+                            visible: UpdateService.hasUpdates
+                            text: "󰚰 " + UpdateService.totalCount
+                            color: Theme.orange
+                            font.family: Theme.iconFamily
+                            font.pixelSize: 14
+                        }
+
                         MouseArea {
                             parent: activityPill
                             anchors.fill: parent
