@@ -12,7 +12,7 @@ return function(settings)
     hl.bind(mod .. " + N", exec("qs ipc call activity notifications"))
     hl.bind(mod .. " + D", exec("qs ipc call dashboard toggle"))
     hl.bind(mod .. " + C", exec("qs ipc call controlcenter toggle"))
-    hl.bind(mod .. " + V", exec("qs ipc call activity clipboard"))
+    hl.bind(mod .. " + SHIFT + V", exec("qs ipc call activity clipboard"))
     hl.bind(mod .. " + M", exec("qs ipc call monitor toggle"))
     hl.bind(mod .. " + COMMA", exec("qs ipc call settings toggle"))
 
