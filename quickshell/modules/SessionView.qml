@@ -6,87 +6,176 @@ import "../services"
 
 ColumnLayout {
     id: root
-    spacing: 12
+
+    signal closeRequested()
+
+    property int selectedIndex: 0
+    property int pendingIndex: -1
+    property var actions: [
+        { icon: "󰌾", color: Theme.cyan, command: "loginctl lock-session", label: "Bloquear", destructive: false },
+        { icon: "󰒲", color: Theme.green, command: "systemctl suspend", label: "Suspender", destructive: false },
+        { icon: "󰍃", color: Theme.purple, command: "hyprctl dispatch exit", label: "Salir", destructive: true },
+        { icon: "󰑐", color: Theme.orange, command: "systemctl reboot", label: "Reiniciar", destructive: true },
+        { icon: "󰐥", color: Theme.red, command: "systemctl poweroff", label: "Apagar", destructive: true }
+    ]
+
+    spacing: Theme.spacingMd
+    focus: visible
+
+    function takeFocus() {
+        forceActiveFocus()
+    }
+
+    function moveSelection(delta) {
+        if (pendingIndex >= 0)
+            return
+        selectedIndex = (selectedIndex + delta + actions.length) % actions.length
+    }
+
+    function triggerAction(index) {
+        if (index < 0 || index >= actions.length)
+            return
+
+        selectedIndex = index
+        if (actions[index].destructive) {
+            pendingIndex = index
+            return
+        }
+
+        executeAction(index)
+    }
+
+    function executeAction(index) {
+        if (index < 0 || index >= actions.length)
+            return
+
+        const action = actions[index]
+        pendingIndex = -1
+        root.closeRequested()
+        sessionCommand.command = ["bash", "-lc", action.command]
+        sessionCommand.running = true
+    }
+
+    function cancelConfirmation() {
+        pendingIndex = -1
+        forceActiveFocus()
+    }
+
+    function handleEscape() {
+        if (pendingIndex >= 0) {
+            cancelConfirmation()
+            return true
+        }
+        return false
+    }
 
     Process { id: sessionCommand }
 
+    Keys.onLeftPressed: event => {
+        root.moveSelection(-1)
+        event.accepted = true
+    }
+    Keys.onRightPressed: event => {
+        root.moveSelection(1)
+        event.accepted = true
+    }
+    Keys.onReturnPressed: event => {
+        if (root.pendingIndex >= 0)
+            root.executeAction(root.pendingIndex)
+        else
+            root.triggerAction(root.selectedIndex)
+        event.accepted = true
+    }
+    Keys.onEnterPressed: event => {
+        if (root.pendingIndex >= 0)
+            root.executeAction(root.pendingIndex)
+        else
+            root.triggerAction(root.selectedIndex)
+        event.accepted = true
+    }
+    Keys.onPressed: event => {
+        if (event.key >= Qt.Key_1 && event.key <= Qt.Key_5 && root.pendingIndex < 0) {
+            root.triggerAction(event.key - Qt.Key_1)
+            event.accepted = true
+        }
+    }
+
     Rectangle {
         Layout.fillWidth: true
-        Layout.preferredHeight: 112
-        radius: 10
+        Layout.preferredHeight: 88
+        radius: Theme.cardRadius
         color: Theme.surface
+        border.width: 1
         border.color: Theme.border
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 14
+            anchors.margins: Theme.spacingMd
             spacing: 5
+
             Text {
                 text: SystemStatus.userName + "@" + SystemStatus.hostName
                 color: Theme.cyan
                 font.family: Theme.fontFamily
-                font.pixelSize: 16
+                font.pixelSize: Theme.fontSizeTitle
                 font.bold: true
             }
-            Text {
-                text: SystemStatus.distribution
-                color: Theme.foreground
-                font.family: Theme.fontFamily
-                font.pixelSize: 11
-            }
+
             RowLayout {
                 Layout.fillWidth: true
+
                 Text {
                     Layout.fillWidth: true
-                    text: "Kernel  " + SystemStatus.kernel
-                    color: Theme.muted
+                    text: SystemStatus.distribution
+                    color: Theme.foreground
                     font.family: Theme.fontFamily
-                    font.pixelSize: 10
+                    font.pixelSize: Theme.fontSizeSmall
                     elide: Text.ElideRight
                 }
+
                 Text {
                     text: "Activo " + SystemStatus.uptime
                     color: Theme.green
                     font.family: Theme.fontFamily
-                    font.pixelSize: 10
+                    font.pixelSize: Theme.fontSizeSmall
                 }
             }
         }
     }
 
     Text {
+        visible: root.pendingIndex < 0
         text: "Acciones de sesión"
         color: Theme.muted
         font.family: Theme.fontFamily
-        font.pixelSize: 10
+        font.pixelSize: Theme.fontSizeSmall
     }
 
     GridLayout {
+        visible: root.pendingIndex < 0
         Layout.fillWidth: true
         columns: 5
-        columnSpacing: 8
+        columnSpacing: Theme.spacingSm
 
         Repeater {
-            model: [
-                { icon: "󰌾", color: Theme.cyan, command: "loginctl lock-session", label: "Bloquear" },
-                { icon: "󰒲", color: Theme.green, command: "systemctl suspend", label: "Suspender" },
-                { icon: "󰍃", color: Theme.purple, command: "hyprctl dispatch 'hl.dsp.exit()'", label: "Salir" },
-                { icon: "󰑐", color: Theme.orange, command: "systemctl reboot", label: "Reiniciar" },
-                { icon: "󰐥", color: Theme.red, command: "systemctl poweroff", label: "Apagar" }
-            ]
+            model: root.actions
 
             delegate: Rectangle {
+                id: actionTile
                 required property var modelData
+                required property int index
+
                 Layout.fillWidth: true
-                Layout.preferredHeight: 76
-                radius: 9
-                color: actionArea.containsMouse ? Theme.current : Theme.surface
-                border.color: modelData.label === "Apagar" ? Theme.red :
-                              actionArea.containsMouse ? modelData.color : Theme.border
+                Layout.preferredHeight: 78
+                radius: Theme.cardRadius
+                color: index === root.selectedIndex || actionArea.containsMouse ? Theme.current : Theme.surface
+                border.width: 1
+                border.color: index === root.selectedIndex ? modelData.color : Theme.border
 
                 Column {
                     anchors.centerIn: parent
                     spacing: 7
+
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: modelData.icon
@@ -94,6 +183,7 @@ ColumnLayout {
                         font.family: Theme.iconFamily
                         font.pixelSize: 21
                     }
+
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: modelData.label
@@ -108,30 +198,190 @@ ColumnLayout {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        sessionCommand.command = ["bash", "-c", modelData.command]
-                        sessionCommand.running = true
-                    }
+                    onPressed: root.selectedIndex = index
+                    onClicked: root.triggerAction(index)
                 }
             }
         }
     }
 
     Rectangle {
+        visible: root.pendingIndex < 0
         Layout.fillWidth: true
-        Layout.preferredHeight: 52
-        radius: 9
-        color: Theme.elevated
+        Layout.preferredHeight: 62
+        radius: Theme.cardRadius
+        color: CaffeineService.active ? Qt.rgba(Theme.yellow.r, Theme.yellow.g, Theme.yellow.b, 0.14) : Theme.surface
+        border.width: 1
+        border.color: CaffeineService.active ? Theme.yellow : Theme.border
+
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 13
-            anchors.rightMargin: 13
-            Text { text: "󰣇"; color: Theme.purple; font.family: Theme.iconFamily; font.pixelSize: 18 }
-            Text { text: "Hyprland sobre Arch Linux"; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 10 }
-            Item { Layout.fillWidth: true }
-            Text { text: SystemStatus.powerProfile; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 9 }
+            anchors.leftMargin: Theme.spacingMd
+            anchors.rightMargin: Theme.spacingMd
+            spacing: Theme.spacingMd
+
+            Text {
+                text: "󰅶"
+                color: CaffeineService.active ? Theme.yellow : Theme.muted
+                font.family: Theme.iconFamily
+                font.pixelSize: 20
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 1
+
+                Text {
+                    text: "Cafeína"
+                    color: Theme.foreground
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSizeSmall
+                    font.bold: true
+                }
+
+                Text {
+                    text: CaffeineService.active ? "Mantener despierto" : "Suspensión automática disponible"
+                    color: Theme.muted
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 9
+                }
+            }
+
+            Rectangle {
+                Layout.preferredWidth: 46
+                Layout.preferredHeight: 24
+                radius: 12
+                color: CaffeineService.active ? Theme.yellow : Theme.elevated
+
+                Rectangle {
+                    width: 18
+                    height: 18
+                    radius: 9
+                    anchors.verticalCenter: parent.verticalCenter
+                    x: CaffeineService.active ? parent.width - width - 3 : 3
+                    color: CaffeineService.active ? Theme.canvas : Theme.muted
+
+                    Behavior on x {
+                        NumberAnimation { duration: Theme.animationFast; easing.type: Easing.OutCubic }
+                    }
+                }
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: CaffeineService.toggle()
         }
     }
 
-    Item { Layout.fillHeight: true }
+    Rectangle {
+        visible: root.pendingIndex >= 0
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        radius: Theme.cardRadius
+        color: Theme.surface
+        border.width: 1
+        border.color: root.pendingIndex >= 0 ? root.actions[root.pendingIndex].color : Theme.border
+
+        ColumnLayout {
+            anchors.centerIn: parent
+            width: parent.width - Theme.spacingXl * 2
+            spacing: Theme.spacingLg
+
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: root.pendingIndex >= 0 ? root.actions[root.pendingIndex].icon : ""
+                color: root.pendingIndex >= 0 ? root.actions[root.pendingIndex].color : Theme.foreground
+                font.family: Theme.iconFamily
+                font.pixelSize: 34
+            }
+
+            Text {
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+                text: root.pendingIndex >= 0 ? root.actions[root.pendingIndex].label + " el equipo" : ""
+                color: Theme.foreground
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSizeTitle
+                font.bold: true
+            }
+
+            Text {
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+                text: "Esta acción cerrará tu sesión o interrumpirá el trabajo actual."
+                wrapMode: Text.WordWrap
+                color: Theme.muted
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSizeSmall
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.spacingSm
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 38
+                    radius: Theme.cardRadius
+                    color: cancelArea.containsMouse ? Theme.current : Theme.elevated
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Cancelar"
+                        color: Theme.foreground
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeSmall
+                    }
+
+                    MouseArea {
+                        id: cancelArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.cancelConfirmation()
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 38
+                    radius: Theme.cardRadius
+                    color: confirmArea.containsMouse
+                           ? root.actions[root.pendingIndex].color
+                           : Theme.elevated
+                    border.width: 1
+                    border.color: root.actions[root.pendingIndex].color
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: root.pendingIndex >= 0 ? root.actions[root.pendingIndex].label : "Confirmar"
+                        color: confirmArea.containsMouse ? Theme.canvas : Theme.foreground
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeSmall
+                        font.bold: true
+                    }
+
+                    MouseArea {
+                        id: confirmArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.executeAction(root.pendingIndex)
+                    }
+                }
+            }
+        }
+    }
+
+    Text {
+        visible: root.pendingIndex < 0
+        Layout.alignment: Qt.AlignHCenter
+        text: "←  → seleccionar  ·  Enter ejecutar  ·  1–5 acceso directo"
+        color: Theme.subtle
+        font.family: Theme.fontFamily
+        font.pixelSize: 8
+    }
 }
