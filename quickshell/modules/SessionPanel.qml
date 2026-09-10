@@ -11,12 +11,23 @@ Item {
     id: root
     property bool open: false
 
-    function toggle() { open = !open }
+    function showPanel() {
+        open = true
+        Qt.callLater(sessionView.takeFocus)
+    }
+
+    function toggle() {
+        if (open) {
+            open = false
+            return
+        }
+        showPanel()
+    }
 
     IpcHandler {
         target: "session"
         function toggle(): void { root.toggle() }
-        function show(): void { root.open = true }
+        function show(): void { root.showPanel() }
         function hide(): void { root.open = false }
     }
 
@@ -27,11 +38,14 @@ Item {
         color: "transparent"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
-        MouseArea { anchors.fill: parent; onClicked: root.open = false }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.open = false
+        }
 
         Surface {
             width: 470
-            height: 360
+            height: 370
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
 
@@ -40,23 +54,31 @@ Item {
             ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: Theme.spacingXl
-                spacing: Theme.spacingLg
+                spacing: Theme.spacingMd
 
                 SectionTitle {
                     Layout.fillWidth: true
                     icon: "󰐥"
                     title: "Sesión"
-                    subtitle: SystemStatus.userName + "@" + SystemStatus.hostName
+                    subtitle: "Orion · " + SystemStatus.distribution
                     accent: Theme.purple
                 }
 
                 SessionView {
+                    id: sessionView
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    onCloseRequested: root.open = false
                 }
             }
         }
 
-        Shortcut { sequence: "Esc"; onActivated: root.open = false }
+        Shortcut {
+            sequence: "Esc"
+            onActivated: {
+                if (!sessionView.handleEscape())
+                    root.open = false
+            }
+        }
     }
 }
