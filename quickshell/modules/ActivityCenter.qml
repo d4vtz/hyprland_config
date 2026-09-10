@@ -22,13 +22,15 @@ Item {
         open = true
         if (tab === 1)
             clipboard.refresh()
+        else if (tab === 2)
+            UpdateService.refresh()
     }
 
     IpcHandler {
         target: "activity"
         function notifications(): void { root.toggle(0) }
         function clipboard(): void { root.toggle(1) }
-        function session(): void { root.toggle(2) }
+        function updates(): void { root.toggle(2) }
         function hide(): void { root.open = false }
     }
 
@@ -42,8 +44,8 @@ Item {
         MouseArea { anchors.fill: parent; onClicked: root.open = false }
 
         Surface {
-            width: 410
-            height: 520
+            width: 430
+            height: 540
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.topMargin: 54
@@ -64,7 +66,7 @@ Item {
                         model: [
                             { icon: "󰂚", label: "Avisos", page: 0, accent: Theme.cyan },
                             { icon: "󰅇", label: "Portapapeles", page: 1, accent: Theme.pink },
-                            { icon: "󰐥", label: "Sesión", page: 2, accent: Theme.purple }
+                            { icon: "󰚰", label: "Actualizaciones", page: 2, accent: Theme.orange }
                         ]
 
                         delegate: Rectangle {
@@ -90,6 +92,8 @@ Item {
                                     root.tab = modelData.page
                                     if (root.tab === 1)
                                         clipboard.refresh()
+                                    else if (root.tab === 2)
+                                        UpdateService.refresh()
                                 }
                             }
                         }
@@ -109,7 +113,7 @@ Item {
                     visible: root.tab === 1
                 }
 
-                SessionView {
+                UpdatesView {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     visible: root.tab === 2
