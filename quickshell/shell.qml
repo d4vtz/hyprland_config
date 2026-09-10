@@ -13,6 +13,7 @@ ShellRoot {
     Dashboard { id: dashboard }
     ControlCenter { id: controlCenter }
     ActivityCenter { id: activityCenter }
+    SessionPanel { id: sessionPanel }
     SystemMonitor { id: systemMonitor }
     SettingsPanel { id: settingsPanel }
 
@@ -110,23 +111,37 @@ ShellRoot {
                         active: controlCenter.open
                         RowLayout {
                             spacing: 8
+
+                            Text {
+                                text: SystemStatus.battery === "CA"
+                                      ? "󰚥"
+                                      : (SystemStatus.batteryState === "Cargando" ? "󰂄" : "󰁹")
+                                color: SystemStatus.batteryState === "Cargando" ? Theme.green
+                                     : SystemStatus.acConnected ? Theme.yellow
+                                     : Theme.orange
+                                font.family: Theme.iconFamily
+                                font.pixelSize: 15
+                            }
+
+                            Text {
+                                text: SystemStatus.battery + (SystemStatus.battery === "CA" ? "" : "%")
+                                color: Theme.foreground
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSizeSmall
+                            }
+
                             Text {
                                 text: SystemStatus.wifiEnabled ? "󰖩" : "󰖪"
                                 color: SystemStatus.wifiEnabled ? Theme.cyan : Theme.muted
                                 font.family: Theme.iconFamily
                                 font.pixelSize: 15
                             }
+
                             Text {
                                 text: "󰕾"
                                 color: Theme.cyan
                                 font.family: Theme.iconFamily
                                 font.pixelSize: 15
-                            }
-                            Text {
-                                text: SystemStatus.battery + (SystemStatus.battery === "CA" ? "" : "%")
-                                color: SystemStatus.acConnected ? Theme.green : Theme.orange
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSizeSmall
                             }
                         }
                         MouseArea {
@@ -142,18 +157,36 @@ ShellRoot {
                         active: activityCenter.open
                         RowLayout {
                             spacing: 8
+
                             Text {
                                 text: NotificationService.doNotDisturb ? "󰂛" : "󰂚"
                                 color: NotificationService.doNotDisturb ? Theme.red : Theme.purple
                                 font.family: Theme.iconFamily
                                 font.pixelSize: 16
                             }
+
                             Text {
                                 visible: NotificationService.count > 0
                                 text: NotificationService.count
                                 color: Theme.foreground
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSizeSmall
+                            }
+
+                            Text {
+                                visible: ClipboardStatus.hasEntries
+                                text: "󰅇 " + ClipboardStatus.count
+                                color: Theme.pink
+                                font.family: Theme.iconFamily
+                                font.pixelSize: 14
+                            }
+
+                            Text {
+                                visible: UpdateService.hasUpdates
+                                text: "󰚰 " + UpdateService.totalCount
+                                color: Theme.orange
+                                font.family: Theme.iconFamily
+                                font.pixelSize: 14
                             }
                         }
                         MouseArea {
@@ -164,7 +197,22 @@ ShellRoot {
                         }
                     }
 
-                    Tray {}
+                    Pill {
+                        id: sessionPill
+                        active: sessionPanel.open
+                        Text {
+                            text: "󰐥"
+                            color: Theme.red
+                            font.family: Theme.iconFamily
+                            font.pixelSize: 16
+                        }
+                        MouseArea {
+                            parent: sessionPill
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: sessionPanel.toggle()
+                        }
+                    }
 
                     Pill {
                         id: settingsPill
