@@ -173,7 +173,7 @@ ShellRoot {
 
                         Text {
                             visible: ClipboardStatus.hasEntries
-                            text: "󰅇 " + ClipboardStatus.count
+                            text: "󰅇"
                             color: Theme.pink
                             font.family: Theme.iconFamily
                             font.pixelSize: 14
@@ -181,7 +181,7 @@ ShellRoot {
 
                         Text {
                             visible: UpdateService.hasUpdates
-                            text: "󰚰 " + UpdateService.totalCount
+                            text: "󰏔 " + UpdateService.totalCount
                             color: Theme.orange
                             font.family: Theme.iconFamily
                             font.pixelSize: 14
