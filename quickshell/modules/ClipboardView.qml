@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
 import ".."
+import "../services"
 
 ColumnLayout {
     id: root
@@ -35,6 +36,7 @@ ColumnLayout {
                         preview: separator >= 0 ? line.slice(separator + 1) : line
                     }
                 })
+                ClipboardStatus.count = root.entries.length
             }
         }
     }
