@@ -11,6 +11,12 @@ ColumnLayout {
     property var entries: []
     readonly property var filteredEntries: entries.filter(entry =>
         entry.preview.toLowerCase().includes(query.toLowerCase()))
+    property int selectedIndex: filteredEntries.length > 0 ? 0 : -1
+
+    function activateSelected() {
+        if (selectedIndex >= 0 && selectedIndex < filteredEntries.length)
+            copyEntry(filteredEntries[selectedIndex])
+    }
 
     function refresh() {
         listProcess.running = true
@@ -105,29 +111,73 @@ ColumnLayout {
             selectionColor: Theme.purple
             font.family: Theme.fontFamily
             font.pixelSize: 10
-            onTextChanged: root.query = text
+            onTextChanged: {
+                root.query = text
+                root.selectedIndex = root.filteredEntries.length > 0 ? 0 : -1
+            }
+            Keys.onDownPressed: {
+                if (root.filteredEntries.length > 0)
+                    root.selectedIndex = Math.min(root.filteredEntries.length - 1, root.selectedIndex + 1)
+            }
+            Keys.onUpPressed: {
+                if (root.filteredEntries.length > 0)
+                    root.selectedIndex = Math.max(0, root.selectedIndex - 1)
+            }
+            Keys.onReturnPressed: root.activateSelected()
+            Keys.onEnterPressed: root.activateSelected()
         }
     }
 
     ListView {
+        id: clipboardList
         Layout.fillWidth: true
         Layout.fillHeight: true
         spacing: 6
         clip: true
         model: root.filteredEntries
+        currentIndex: root.selectedIndex
+        keyNavigationEnabled: true
+        focus: visible
+
+        onCurrentIndexChanged: {
+            if (currentIndex >= 0)
+                root.selectedIndex = currentIndex
+        }
+
+        Keys.onReturnPressed: root.activateSelected()
+        Keys.onEnterPressed: root.activateSelected()
 
         delegate: Rectangle {
+            id: entryDelegate
             required property var modelData
+            required property int index
+
             width: ListView.view.width
             height: 38
             radius: 7
-            color: entryArea.containsMouse ? Theme.current : Theme.surface
+            color: index === root.selectedIndex || entryArea.containsMouse ? Theme.current : Theme.surface
+            border.width: index === root.selectedIndex ? 1 : 0
+            border.color: Theme.purple
+
+            MouseArea {
+                id: entryArea
+                anchors.fill: parent
+                z: 1
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    root.selectedIndex = index
+                    root.copyEntry(modelData)
+                }
+            }
 
             RowLayout {
-                z: 1
+                z: 2
                 anchors.fill: parent
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
+                spacing: 8
+
                 Text {
                     Layout.fillWidth: true
                     text: modelData.preview
@@ -135,13 +185,26 @@ ColumnLayout {
                     font.family: Theme.fontFamily
                     font.pixelSize: 9
                     elide: Text.ElideRight
-                }
-                Text {
-                    text: "󰅖"
-                    color: Theme.muted
-                    font.family: Theme.fontFamily
+
                     MouseArea {
                         anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            root.selectedIndex = index
+                            root.copyEntry(modelData)
+                        }
+                    }
+                }
+
+                Text {
+                    id: deleteIcon
+                    text: "󰅖"
+                    color: Theme.muted
+                    font.family: Theme.iconFamily
+
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.margins: -6
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             deleteProcess.command = ["cliphist", "delete-query", modelData.preview]
@@ -149,15 +212,6 @@ ColumnLayout {
                         }
                     }
                 }
-            }
-
-            MouseArea {
-                id: entryArea
-                anchors.fill: parent
-                z: 0
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.copyEntry(modelData)
             }
         }
     }
