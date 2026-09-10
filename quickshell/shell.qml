@@ -196,6 +196,26 @@ ShellRoot {
                     }
 
                     Pill {
+                        id: caffeinePill
+                        visible: CaffeineService.active
+                        active: true
+
+                        Text {
+                            text: "󰅶"
+                            color: Theme.yellow
+                            font.family: Theme.iconFamily
+                            font.pixelSize: 16
+                        }
+
+                        MouseArea {
+                            parent: caffeinePill
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: CaffeineService.toggle()
+                        }
+                    }
+
+                    Pill {
                         id: sessionPill
                         active: sessionPanel.open
                         Text {
