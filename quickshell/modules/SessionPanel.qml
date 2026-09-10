@@ -45,7 +45,7 @@ Item {
 
         Surface {
             width: 470
-            height: 370
+            height: 300
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
 
@@ -56,12 +56,38 @@ Item {
                 anchors.margins: Theme.spacingXl
                 spacing: Theme.spacingMd
 
-                SectionTitle {
+                RowLayout {
                     Layout.fillWidth: true
-                    icon: "󰐥"
-                    title: "Sesión"
-                    subtitle: "Orion · " + SystemStatus.distribution
-                    accent: Theme.purple
+                    spacing: Theme.spacingLg
+
+                    SectionTitle {
+                        Layout.fillWidth: true
+                        icon: "󰐥"
+                        title: "Sesión"
+                        subtitle: "Orion Shell"
+                        accent: Theme.purple
+                    }
+
+                    ColumnLayout {
+                        Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                        spacing: 2
+
+                        Text {
+                            Layout.alignment: Qt.AlignRight
+                            text: SystemStatus.distribution
+                            color: Theme.foreground
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSizeSmall
+                        }
+
+                        Text {
+                            Layout.alignment: Qt.AlignRight
+                            text: "Activo " + SystemStatus.uptime
+                            color: Theme.green
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSizeSmall
+                        }
+                    }
                 }
 
                 SessionView {
