@@ -11,6 +11,7 @@ ColumnLayout {
 
     property int selectedIndex: 0
     property int pendingIndex: -1
+    property int confirmationChoice: 0 // 0 cancelar, 1 confirmar
     property var actions: [
         { icon: "󰌾", color: Theme.cyan, command: "loginctl lock-session", label: "Bloquear", destructive: false },
         { icon: "󰒲", color: Theme.green, command: "systemctl suspend", label: "Suspender", destructive: false },
@@ -32,6 +33,12 @@ ColumnLayout {
         selectedIndex = (selectedIndex + delta + actions.length) % actions.length
     }
 
+    function moveConfirmation(delta) {
+        if (pendingIndex < 0)
+            return
+        confirmationChoice = Math.max(0, Math.min(1, confirmationChoice + delta))
+    }
+
     function triggerAction(index) {
         if (index < 0 || index >= actions.length)
             return
@@ -39,10 +46,23 @@ ColumnLayout {
         selectedIndex = index
         if (actions[index].destructive) {
             pendingIndex = index
+            confirmationChoice = 0
+            forceActiveFocus()
             return
         }
 
         executeAction(index)
+    }
+
+    function activateCurrent() {
+        if (pendingIndex >= 0) {
+            if (confirmationChoice === 0)
+                cancelConfirmation()
+            else
+                executeAction(pendingIndex)
+            return
+        }
+        triggerAction(selectedIndex)
     }
 
     function executeAction(index) {
@@ -58,6 +78,7 @@ ColumnLayout {
 
     function cancelConfirmation() {
         pendingIndex = -1
+        confirmationChoice = 0
         forceActiveFocus()
     }
 
@@ -72,74 +93,31 @@ ColumnLayout {
     Process { id: sessionCommand }
 
     Keys.onLeftPressed: event => {
-        root.moveSelection(-1)
+        if (root.pendingIndex >= 0)
+            root.moveConfirmation(-1)
+        else
+            root.moveSelection(-1)
         event.accepted = true
     }
     Keys.onRightPressed: event => {
-        root.moveSelection(1)
+        if (root.pendingIndex >= 0)
+            root.moveConfirmation(1)
+        else
+            root.moveSelection(1)
         event.accepted = true
     }
     Keys.onReturnPressed: event => {
-        if (root.pendingIndex >= 0)
-            root.executeAction(root.pendingIndex)
-        else
-            root.triggerAction(root.selectedIndex)
+        root.activateCurrent()
         event.accepted = true
     }
     Keys.onEnterPressed: event => {
-        if (root.pendingIndex >= 0)
-            root.executeAction(root.pendingIndex)
-        else
-            root.triggerAction(root.selectedIndex)
+        root.activateCurrent()
         event.accepted = true
     }
     Keys.onPressed: event => {
         if (event.key >= Qt.Key_1 && event.key <= Qt.Key_5 && root.pendingIndex < 0) {
             root.triggerAction(event.key - Qt.Key_1)
             event.accepted = true
-        }
-    }
-
-    Rectangle {
-        Layout.fillWidth: true
-        Layout.preferredHeight: 88
-        radius: Theme.cardRadius
-        color: Theme.surface
-        border.width: 1
-        border.color: Theme.border
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Theme.spacingMd
-            spacing: 5
-
-            Text {
-                text: SystemStatus.userName + "@" + SystemStatus.hostName
-                color: Theme.cyan
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSizeTitle
-                font.bold: true
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-
-                Text {
-                    Layout.fillWidth: true
-                    text: SystemStatus.distribution
-                    color: Theme.foreground
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSizeSmall
-                    elide: Text.ElideRight
-                }
-
-                Text {
-                    text: "Activo " + SystemStatus.uptime
-                    color: Theme.green
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSizeSmall
-                }
-            }
         }
     }
 
@@ -326,7 +304,9 @@ ColumnLayout {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 38
                     radius: Theme.cardRadius
-                    color: cancelArea.containsMouse ? Theme.current : Theme.elevated
+                    color: root.confirmationChoice === 0 || cancelArea.containsMouse ? Theme.current : Theme.elevated
+                    border.width: 1
+                    border.color: root.confirmationChoice === 0 ? Theme.purple : Theme.border
 
                     Text {
                         anchors.centerIn: parent
@@ -334,6 +314,7 @@ ColumnLayout {
                         color: Theme.foreground
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSizeSmall
+                        font.bold: root.confirmationChoice === 0
                     }
 
                     MouseArea {
@@ -341,6 +322,7 @@ ColumnLayout {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
+                        onEntered: root.confirmationChoice = 0
                         onClicked: root.cancelConfirmation()
                     }
                 }
@@ -349,16 +331,18 @@ ColumnLayout {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 38
                     radius: Theme.cardRadius
-                    color: confirmArea.containsMouse
+                    color: root.confirmationChoice === 1 || confirmArea.containsMouse
                            ? root.actions[root.pendingIndex].color
                            : Theme.elevated
                     border.width: 1
-                    border.color: root.actions[root.pendingIndex].color
+                    border.color: root.confirmationChoice === 1
+                                  ? root.actions[root.pendingIndex].color
+                                  : Theme.border
 
                     Text {
                         anchors.centerIn: parent
                         text: root.pendingIndex >= 0 ? root.actions[root.pendingIndex].label : "Confirmar"
-                        color: confirmArea.containsMouse ? Theme.canvas : Theme.foreground
+                        color: root.confirmationChoice === 1 || confirmArea.containsMouse ? Theme.canvas : Theme.foreground
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSizeSmall
                         font.bold: true
@@ -369,9 +353,18 @@ ColumnLayout {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
+                        onEntered: root.confirmationChoice = 1
                         onClicked: root.executeAction(root.pendingIndex)
                     }
                 }
+            }
+
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: "←  → elegir  ·  Enter ejecutar  ·  Esc cancelar"
+                color: Theme.subtle
+                font.family: Theme.fontFamily
+                font.pixelSize: 8
             }
         }
     }
