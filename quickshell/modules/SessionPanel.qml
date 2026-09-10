@@ -69,20 +69,23 @@ Item {
                     }
 
                     ColumnLayout {
+                        Layout.preferredWidth: 135
                         Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                         spacing: 2
 
                         Text {
-                            Layout.alignment: Qt.AlignRight
-                            text: SystemStatus.distribution
+                            Layout.fillWidth: true
+                            text: SystemStatus.userName
+                            horizontalAlignment: Text.AlignRight
                             color: Theme.foreground
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSizeSmall
                         }
 
                         Text {
-                            Layout.alignment: Qt.AlignRight
+                            Layout.fillWidth: true
                             text: "Activo " + SystemStatus.uptime
+                            horizontalAlignment: Text.AlignRight
                             color: Theme.green
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSizeSmall
