@@ -8,6 +8,7 @@ ColumnLayout {
     id: root
 
     signal closeRequested()
+    signal panelCloseRequested()
 
     property int selectedIndex: 0
     property int pendingIndex: -1
@@ -116,6 +117,11 @@ ColumnLayout {
     }
     Keys.onEnterPressed: event => {
         root.activateCurrent()
+        event.accepted = true
+    }
+    Keys.onEscapePressed: event => {
+        if (!root.handleEscape())
+            root.panelCloseRequested()
         event.accepted = true
     }
     Keys.onPressed: event => {
