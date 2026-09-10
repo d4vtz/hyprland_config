@@ -10,7 +10,7 @@ ColumnLayout {
 
     SectionTitle {
         Layout.fillWidth: true
-        icon: "󰚰"
+        icon: "󰏔"
         title: UpdateService.hasUpdates ? "Actualizaciones disponibles" : "Sistema actualizado"
         subtitle: "Última consulta " + UpdateService.lastChecked
         accent: UpdateService.hasUpdates ? Theme.orange : Theme.green
@@ -44,7 +44,7 @@ ColumnLayout {
         ActionButton {
             Layout.fillWidth: true
             label: "Actualizar"
-            icon: "󰚰"
+            icon: "󰏔"
             accent: Theme.purple
             enabled: !UpdateService.refreshing
             onClicked: UpdateService.runFullUpgrade()
