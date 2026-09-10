@@ -15,7 +15,7 @@ ColumnLayout {
     property var actions: [
         { icon: "󰌾", color: Theme.cyan, command: "loginctl lock-session", label: "Bloquear", destructive: false },
         { icon: "󰒲", color: Theme.green, command: "systemctl suspend", label: "Suspender", destructive: false },
-        { icon: "󰍃", color: Theme.purple, command: "hyprctl dispatch exit", label: "Salir", destructive: true },
+        { icon: "󰍃", color: Theme.purple, command: "uwsm stop", label: "Salir", destructive: true },
         { icon: "󰑐", color: Theme.orange, command: "systemctl reboot", label: "Reiniciar", destructive: true },
         { icon: "󰐥", color: Theme.red, command: "systemctl poweroff", label: "Apagar", destructive: true }
     ]
