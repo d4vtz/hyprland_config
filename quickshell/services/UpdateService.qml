@@ -11,9 +11,9 @@ QtObject {
     property var aurUpdates: []
     property var flatpakUpdates: []
     property var firmwareUpdates: []
-    property var archNews: []
     property string lastChecked: "--:--"
     property bool refreshing: false
+    property string errorText: ""
 
     readonly property int archCount: archUpdates.length
     readonly property int aurCount: aurUpdates.length
@@ -26,25 +26,13 @@ QtObject {
         if (refreshing)
             return
         refreshing = true
-        pending = 4
-        archProcess.running = true
-        aurProcess.running = true
-        flatpakProcess.running = true
-        firmwareProcess.running = true
-        newsProcess.running = true
-    }
-
-    function finishOne() {
-        pending = Math.max(0, pending - 1)
-        if (pending === 0) {
-            refreshing = false
-            lastChecked = Qt.formatTime(new Date(), "HH:mm")
-        }
+        errorText = ""
+        checkProcess.running = true
     }
 
     function runFullUpgrade() {
         upgradeProcess.command = ["kitty", "--title", "Orion · Actualización del sistema", "-e", "bash", "-lc",
-            "systemd-inhibit --what=idle:sleep:shutdown --who='Orion Shell' --why='Actualización del sistema' paru; printf '\\nPulsa Enter para cerrar...'; read -r"]
+            "systemd-inhibit --what=idle:sleep:shutdown --who='Orion Shell' --why='Actualización del sistema' sh -c 'if command -v paru >/dev/null; then paru -Syu; elif command -v yay >/dev/null; then yay -Syu; else sudo pacman -Syu; fi'; printf '\\nPulsa Enter para cerrar...'; read -r"]
         upgradeProcess.running = true
     }
 
@@ -56,11 +44,9 @@ QtObject {
 
     function runFirmwareUpgrade() {
         upgradeProcess.command = ["kitty", "--title", "Orion · Firmware", "-e", "bash", "-lc",
-            "sudo fwupdmgr update; printf '\\nPulsa Enter para cerrar...'; read -r"]
+            "fwupdmgr refresh --force; fwupdmgr update; printf '\\nPulsa Enter para cerrar...'; read -r"]
         upgradeProcess.running = true
     }
-
-    property int pending: 0
 
     property Timer timer: Timer {
         interval: 1800000
@@ -70,50 +56,72 @@ QtObject {
         onTriggered: root.refresh()
     }
 
-    property Process archProcess: Process {
-        command: ["bash", "-lc", "checkupdates 2>/dev/null || true"]
+    property Process checkProcess: Process {
+        command: ["bash", "-lc", "
+            set +e
+            printf '__ORION_ARCH__\\n'
+            if command -v checkupdates >/dev/null 2>&1; then
+                checkupdates 2>/dev/null
+            else
+                printf '__ERR__ checkupdates no disponible\\n'
+            fi
+
+            printf '__ORION_AUR__\\n'
+            if command -v paru >/dev/null 2>&1; then
+                paru -Qua 2>/dev/null
+            elif command -v yay >/dev/null 2>&1; then
+                yay -Qua 2>/dev/null
+            fi
+
+            printf '__ORION_FLATPAK__\\n'
+            if command -v flatpak >/dev/null 2>&1; then
+                flatpak remote-ls --updates --columns=application 2>/dev/null
+            fi
+
+            printf '__ORION_FIRMWARE__\\n'
+            if command -v fwupdmgr >/dev/null 2>&1; then
+                fwupdmgr get-updates 2>/dev/null | awk '/^[[:space:]]*[A-Za-z0-9].*→/ {gsub(/^[[:space:]]+/, ""); print}'
+            fi
+        "]
+
         stdout: StdioCollector {
             onStreamFinished: {
-                root.archUpdates = text.trim() ? text.trim().split("\n") : []
-                root.finishOne()
+                let section = ""
+                let arch = []
+                let aur = []
+                let flatpak = []
+                let firmware = []
+                let errors = []
+
+                for (const raw of text.split("\n")) {
+                    const line = raw.trim()
+                    if (!line)
+                        continue
+                    if (line === "__ORION_ARCH__") { section = "arch"; continue }
+                    if (line === "__ORION_AUR__") { section = "aur"; continue }
+                    if (line === "__ORION_FLATPAK__") { section = "flatpak"; continue }
+                    if (line === "__ORION_FIRMWARE__") { section = "firmware"; continue }
+                    if (line.startsWith("__ERR__")) { errors.push(line.slice(7).trim()); continue }
+
+                    if (section === "arch") arch.push(line)
+                    else if (section === "aur") aur.push(line)
+                    else if (section === "flatpak") flatpak.push(line)
+                    else if (section === "firmware") firmware.push(line)
+                }
+
+                root.archUpdates = arch
+                root.aurUpdates = aur
+                root.flatpakUpdates = flatpak
+                root.firmwareUpdates = firmware
+                root.errorText = errors.join(" · ")
+                root.lastChecked = Qt.formatTime(new Date(), "HH:mm")
             }
         }
-    }
 
-    property Process aurProcess: Process {
-        command: ["bash", "-lc", "if command -v paru >/dev/null; then paru -Qua 2>/dev/null || true; elif command -v yay >/dev/null; then yay -Qua 2>/dev/null || true; fi"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                root.aurUpdates = text.trim() ? text.trim().split("\n") : []
-                root.finishOne()
-            }
-        }
-    }
-
-    property Process flatpakProcess: Process {
-        command: ["bash", "-lc", "if command -v flatpak >/dev/null; then flatpak remote-ls --updates --columns=application 2>/dev/null || true; fi"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                root.flatpakUpdates = text.trim() ? text.trim().split("\n") : []
-                root.finishOne()
-            }
-        }
-    }
-
-    property Process firmwareProcess: Process {
-        command: ["bash", "-lc", "if command -v fwupdmgr >/dev/null; then fwupdmgr get-updates --json 2>/dev/null | jq -r '.Devices[]?.Releases[]?.Name // empty' 2>/dev/null || true; fi"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                root.firmwareUpdates = text.trim() ? text.trim().split("\n") : []
-                root.finishOne()
-            }
-        }
-    }
-
-    property Process newsProcess: Process {
-        command: ["bash", "-lc", "curl -m 6 -fsSL https://archlinux.org/feeds/news/ 2>/dev/null | sed -n 's:.*<title>\\(.*\\)</title>.*:\\1:p' | sed '1d' | head -n 3"]
-        stdout: StdioCollector {
-            onStreamFinished: root.archNews = text.trim() ? text.trim().split("\n") : []
+        onExited: {
+            root.refreshing = false
+            if (exitCode !== 0 && root.errorText.length === 0)
+                root.errorText = "La comprobación terminó con código " + exitCode
         }
     }
 
