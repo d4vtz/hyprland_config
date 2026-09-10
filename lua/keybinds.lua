@@ -11,6 +11,7 @@ return function(settings)
     hl.bind(mod .. " + ESCAPE", exec("~/.config/hypr/scripts/powermenu.sh"))
     hl.bind(mod .. " + N", exec("qs ipc call system notifications"))
     hl.bind(mod .. " + D", exec("qs ipc call dashboard toggle"))
+    hl.bind(mod .. " + C", exec("qs ipc call controlcenter toggle"))
 
     hl.bind(mod .. " + Q", hl.dsp.window.close())
     hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
