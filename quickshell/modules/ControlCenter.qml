@@ -315,10 +315,9 @@ Item {
                                 color: Theme.muted
                                 font.family: Theme.iconFamily
                             }
-                            MouseArea {
-                                anchors.fill: parent
+                            TapHandler {
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: root.audioMenu = root.audioMenu === 1 ? 0 : 1
+                                onTapped: root.audioMenu = root.audioMenu === 1 ? 0 : 1
                             }
                         }
 
@@ -343,10 +342,9 @@ Item {
                                 color: Theme.muted
                                 font.family: Theme.iconFamily
                             }
-                            MouseArea {
-                                anchors.fill: parent
+                            TapHandler {
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: root.audioMenu = root.audioMenu === 2 ? 0 : 2
+                                onTapped: root.audioMenu = root.audioMenu === 2 ? 0 : 2
                             }
                         }
                     }
