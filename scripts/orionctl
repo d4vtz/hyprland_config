@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Uso: orionctl <comando>
+
+Comandos:
+  launcher       Abrir/cerrar lanzador
+  dashboard      Abrir/cerrar dashboard
+  control        Abrir/cerrar centro de control
+  notifications Abrir notificaciones
+  clipboard      Abrir portapapeles
+  monitor        Abrir/cerrar monitor del sistema
+  settings       Abrir/cerrar ajustes de Orion
+  session        Abrir acciones de sesión
+  reload         Reiniciar Orion Shell
+  status         Mostrar procesos de Quickshell
+EOF
+}
+
+cmd="${1:-}"
+case "$cmd" in
+    launcher)       exec qs ipc call launcher toggle ;;
+    dashboard)      exec qs ipc call dashboard toggle ;;
+    control)        exec qs ipc call controlcenter toggle ;;
+    notifications)  exec qs ipc call activity notifications ;;
+    clipboard)      exec qs ipc call activity clipboard ;;
+    monitor)        exec qs ipc call monitor toggle ;;
+    settings)       exec qs ipc call settings toggle ;;
+    session)        exec qs ipc call activity session ;;
+    reload)
+        qs kill || true
+        exec uwsm app -- qs
+        ;;
+    status)
+        exec pgrep -af quickshell
+        ;;
+    ""|-h|--help|help)
+        usage
+        ;;
+    *)
+        printf 'Comando desconocido: %s\n\n' "$cmd" >&2
+        usage >&2
+        exit 2
+        ;;
+esac
