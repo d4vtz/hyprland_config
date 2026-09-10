@@ -21,4 +21,6 @@ link_config "$root/waybar" "$config_dir/waybar"
 link_config "$root/rofi" "$config_dir/rofi"
 link_config "$root/autostart/nm-applet.desktop" "$config_dir/autostart/nm-applet.desktop"
 
+chmod +x "$root/scripts/orionctl" "$root/scripts/wallpaper-menu.sh" 2>/dev/null || true
+
 printf 'Enlaces instalados. Cierra la sesión y entra en Hyprland (uwsm-managed).\n'
