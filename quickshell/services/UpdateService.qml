@@ -57,32 +57,17 @@ QtObject {
     }
 
     property Process checkProcess: Process {
-        command: ["bash", "-lc", "
-            set +e
-            printf '__ORION_ARCH__\\n'
-            if command -v checkupdates >/dev/null 2>&1; then
-                checkupdates 2>/dev/null
-            else
-                printf '__ERR__ checkupdates no disponible\\n'
-            fi
-
-            printf '__ORION_AUR__\\n'
-            if command -v paru >/dev/null 2>&1; then
-                paru -Qua 2>/dev/null
-            elif command -v yay >/dev/null 2>&1; then
-                yay -Qua 2>/dev/null
-            fi
-
-            printf '__ORION_FLATPAK__\\n'
-            if command -v flatpak >/dev/null 2>&1; then
-                flatpak remote-ls --updates --columns=application 2>/dev/null
-            fi
-
-            printf '__ORION_FIRMWARE__\\n'
-            if command -v fwupdmgr >/dev/null 2>&1; then
-                fwupdmgr get-updates 2>/dev/null | awk '/^[[:space:]]*[A-Za-z0-9].*→/ {gsub(/^[[:space:]]+/, ""); print}'
-            fi
-        "]
+        command: ["bash", "-lc",
+            "set +e; " +
+            "printf '__ORION_ARCH__\\n'; " +
+            "if command -v checkupdates >/dev/null 2>&1; then checkupdates 2>/dev/null; else printf '__ERR__ checkupdates no disponible\\n'; fi; " +
+            "printf '__ORION_AUR__\\n'; " +
+            "if command -v paru >/dev/null 2>&1; then paru -Qua 2>/dev/null; elif command -v yay >/dev/null 2>&1; then yay -Qua 2>/dev/null; fi; " +
+            "printf '__ORION_FLATPAK__\\n'; " +
+            "if command -v flatpak >/dev/null 2>&1; then flatpak remote-ls --updates --columns=application 2>/dev/null; fi; " +
+            "printf '__ORION_FIRMWARE__\\n'; " +
+            "if command -v fwupdmgr >/dev/null 2>&1; then fwupdmgr get-updates 2>/dev/null | sed -n '/→/p' | sed 's/^[[:space:]]*//'; fi"
+        ]
 
         stdout: StdioCollector {
             onStreamFinished: {
