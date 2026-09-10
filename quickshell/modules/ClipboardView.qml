@@ -110,7 +110,7 @@ ColumnLayout {
 
     Process {
         id: copyProcess
-        onExited: {
+        onExited: function(exitCode, exitStatus) {
             if (exitCode === 0) {
                 ClipboardStatus.refresh()
                 root.copied()
