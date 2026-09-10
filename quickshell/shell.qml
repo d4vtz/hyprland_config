@@ -8,6 +8,7 @@ import "modules"
 ShellRoot {
     NotificationToast {}
     Dashboard { id: dashboard }
+    ControlCenter { id: controlCenter }
 
     Variants {
         model: Quickshell.screens
@@ -79,6 +80,22 @@ ShellRoot {
                     anchors.rightMargin: Theme.spacingSm
                     spacing: 7
                     Media {}
+                    Pill {
+                        id: controlCenterPill
+                        active: controlCenter.open
+                        Text {
+                            text: "󰒓"
+                            color: Theme.purple
+                            font.family: Theme.iconFamily
+                            font.pixelSize: 17
+                        }
+                        MouseArea {
+                            parent: controlCenterPill
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: controlCenter.toggle()
+                        }
+                    }
                     Hardware {}
                     SystemArea {}
                 }
