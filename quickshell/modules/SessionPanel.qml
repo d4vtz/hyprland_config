@@ -98,15 +98,8 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     onCloseRequested: root.open = false
+                    onPanelCloseRequested: root.open = false
                 }
-            }
-        }
-
-        Shortcut {
-            sequence: "Esc"
-            onActivated: {
-                if (!sessionView.handleEscape())
-                    root.open = false
             }
         }
     }
