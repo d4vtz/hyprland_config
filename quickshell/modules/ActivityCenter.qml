@@ -13,17 +13,23 @@ Item {
     property bool open: false
     property int tab: 0
 
+    function activatePage(page) {
+        tab = page
+        if (tab === 1) {
+            clipboard.refresh()
+            Qt.callLater(clipboard.takeFocus)
+        } else if (tab === 2) {
+            UpdateService.refresh()
+        }
+    }
+
     function toggle(page) {
         if (open && tab === page) {
             open = false
             return
         }
-        tab = page
         open = true
-        if (tab === 1)
-            clipboard.refresh()
-        else if (tab === 2)
-            UpdateService.refresh()
+        activatePage(page)
     }
 
     IpcHandler {
@@ -88,13 +94,7 @@ Item {
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    root.tab = modelData.page
-                                    if (root.tab === 1)
-                                        clipboard.refresh()
-                                    else if (root.tab === 2)
-                                        UpdateService.refresh()
-                                }
+                                onClicked: root.activatePage(modelData.page)
                             }
                         }
                     }
@@ -111,6 +111,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     visible: root.tab === 1
+                    onCopied: root.open = false
                 }
 
                 UpdatesView {
