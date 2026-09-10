@@ -16,6 +16,16 @@ PanelWindow {
     exclusiveZone: 0
     color: "transparent"
 
+    function iconSource(icon) {
+        if (!icon || icon.length === 0)
+            return ""
+        if (icon.startsWith("file:") || icon.startsWith("image:") || icon.startsWith("qrc:"))
+            return icon
+        if (icon.startsWith("/"))
+            return "file://" + icon
+        return ""
+    }
+
     Connections {
         target: NotificationService
         function onNotificationArrived() {
@@ -47,11 +57,26 @@ PanelWindow {
                 Layout.preferredHeight: 42
                 radius: 10
                 color: Theme.surface
+
+                property string resolvedIcon: NotificationService.latest
+                                              ? root.iconSource(NotificationService.latest.appIcon)
+                                              : ""
+
                 Image {
                     anchors.fill: parent
                     anchors.margins: 7
-                    source: NotificationService.latest ? NotificationService.latest.appIcon : ""
+                    visible: parent.resolvedIcon.length > 0
+                    source: parent.resolvedIcon
                     fillMode: Image.PreserveAspectFit
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    visible: parent.resolvedIcon.length === 0
+                    text: "󰂚"
+                    color: Theme.purple
+                    font.family: Theme.iconFamily
+                    font.pixelSize: 20
                 }
             }
 
