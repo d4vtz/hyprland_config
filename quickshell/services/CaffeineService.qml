@@ -21,7 +21,7 @@ QtObject {
         inhibitor.running = value
     }
 
-    IpcHandler {
+    property IpcHandler ipc: IpcHandler {
         target: "caffeine"
         function toggle(): void { root.toggle() }
         function enable(): void { root.setActive(true) }
