@@ -66,7 +66,7 @@ Item {
                         model: [
                             { icon: "󰂚", label: "Avisos", page: 0, accent: Theme.cyan },
                             { icon: "󰅇", label: "Portapapeles", page: 1, accent: Theme.pink },
-                            { icon: "󰚰", label: "Actualizaciones", page: 2, accent: Theme.orange }
+                            { icon: "󰏔", label: "Actualizaciones", page: 2, accent: Theme.orange }
                         ]
 
                         delegate: Rectangle {
