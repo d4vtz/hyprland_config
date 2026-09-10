@@ -11,7 +11,15 @@ ColumnLayout {
     property var entries: []
     readonly property var filteredEntries: entries.filter(entry =>
         entry.preview.toLowerCase().includes(query.toLowerCase()))
-    property int selectedIndex: filteredEntries.length > 0 ? 0 : -1
+    property int selectedIndex: -1
+    signal copied()
+
+    function clampSelection() {
+        if (filteredEntries.length === 0)
+            selectedIndex = -1
+        else if (selectedIndex < 0 || selectedIndex >= filteredEntries.length)
+            selectedIndex = 0
+    }
 
     function activateSelected() {
         if (selectedIndex >= 0 && selectedIndex < filteredEntries.length)
@@ -32,6 +40,7 @@ ColumnLayout {
 
     spacing: 9
     Component.onCompleted: refresh()
+    onFilteredEntriesChanged: clampSelection()
 
     Process {
         id: listProcess
@@ -46,20 +55,26 @@ ColumnLayout {
                     }
                 })
                 ClipboardStatus.count = root.entries.length
+                root.clampSelection()
             }
         }
     }
+
     Process {
         id: copyProcess
         onExited: {
-            if (exitCode === 0)
+            if (exitCode === 0) {
                 ClipboardStatus.refresh()
+                root.copied()
+            }
         }
     }
+
     Process {
         id: deleteProcess
         onExited: root.refresh()
     }
+
     Process {
         id: wipeProcess
         command: ["cliphist", "wipe"]
@@ -68,19 +83,24 @@ ColumnLayout {
 
     RowLayout {
         Layout.fillWidth: true
+
         Text {
             text: root.filteredEntries.length + (root.filteredEntries.length === 1 ? " elemento" : " elementos")
             color: Theme.foreground
             font.family: Theme.fontFamily
             font.bold: true
         }
+
         Item { Layout.fillWidth: true }
+
         Text {
             text: "󰆴"
             color: Theme.muted
-            font.family: Theme.fontFamily
+            font.family: Theme.iconFamily
+
             MouseArea {
                 anchors.fill: parent
+                anchors.margins: -6
                 cursorShape: Qt.PointingHandCursor
                 onClicked: wipeProcess.running = true
             }
@@ -93,6 +113,7 @@ ColumnLayout {
         radius: 8
         color: Theme.surface
         border.color: search.activeFocus ? Theme.purple : Theme.border
+
         Text {
             anchors.left: parent.left
             anchors.leftMargin: 10
@@ -101,6 +122,7 @@ ColumnLayout {
             color: Theme.muted
             font.family: Theme.iconFamily
         }
+
         TextInput {
             id: search
             anchors.fill: parent
@@ -111,18 +133,26 @@ ColumnLayout {
             selectionColor: Theme.purple
             font.family: Theme.fontFamily
             font.pixelSize: 10
+
             onTextChanged: {
                 root.query = text
                 root.selectedIndex = root.filteredEntries.length > 0 ? 0 : -1
             }
+
             Keys.onDownPressed: {
-                if (root.filteredEntries.length > 0)
+                if (root.filteredEntries.length > 0) {
                     root.selectedIndex = Math.min(root.filteredEntries.length - 1, root.selectedIndex + 1)
+                    clipboardList.positionViewAtIndex(root.selectedIndex, ListView.Contain)
+                }
             }
+
             Keys.onUpPressed: {
-                if (root.filteredEntries.length > 0)
+                if (root.filteredEntries.length > 0) {
                     root.selectedIndex = Math.max(0, root.selectedIndex - 1)
+                    clipboardList.positionViewAtIndex(root.selectedIndex, ListView.Contain)
+                }
             }
+
             Keys.onReturnPressed: root.activateSelected()
             Keys.onEnterPressed: root.activateSelected()
         }
@@ -136,16 +166,6 @@ ColumnLayout {
         clip: true
         model: root.filteredEntries
         currentIndex: root.selectedIndex
-        keyNavigationEnabled: true
-        focus: visible
-
-        onCurrentIndexChanged: {
-            if (currentIndex >= 0)
-                root.selectedIndex = currentIndex
-        }
-
-        Keys.onReturnPressed: root.activateSelected()
-        Keys.onEnterPressed: root.activateSelected()
 
         delegate: Rectangle {
             id: entryDelegate
@@ -153,26 +173,13 @@ ColumnLayout {
             required property int index
 
             width: ListView.view.width
-            height: 38
-            radius: 7
+            height: 40
+            radius: 8
             color: index === root.selectedIndex || entryArea.containsMouse ? Theme.current : Theme.surface
             border.width: index === root.selectedIndex ? 1 : 0
             border.color: Theme.purple
 
-            MouseArea {
-                id: entryArea
-                anchors.fill: parent
-                z: 1
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    root.selectedIndex = index
-                    root.copyEntry(modelData)
-                }
-            }
-
             RowLayout {
-                z: 2
                 anchors.fill: parent
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
@@ -185,32 +192,45 @@ ColumnLayout {
                     font.family: Theme.fontFamily
                     font.pixelSize: 9
                     elide: Text.ElideRight
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            root.selectedIndex = index
-                            root.copyEntry(modelData)
-                        }
-                    }
                 }
 
-                Text {
-                    id: deleteIcon
-                    text: "󰅖"
-                    color: Theme.muted
-                    font.family: Theme.iconFamily
+                Item {
+                    Layout.preferredWidth: 24
+                    Layout.preferredHeight: 24
+                    z: 3
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "󰅖"
+                        color: deleteArea.containsMouse ? Theme.red : Theme.muted
+                        font.family: Theme.iconFamily
+                    }
 
                     MouseArea {
+                        id: deleteArea
                         anchors.fill: parent
-                        anchors.margins: -6
+                        hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
+                            mouse.accepted = true
                             deleteProcess.command = ["cliphist", "delete-query", modelData.preview]
                             deleteProcess.running = true
                         }
                     }
+                }
+            }
+
+            MouseArea {
+                id: entryArea
+                anchors.fill: parent
+                anchors.rightMargin: 34
+                z: 2
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onPressed: root.selectedIndex = index
+                onClicked: {
+                    root.selectedIndex = index
+                    root.copyEntry(modelData)
                 }
             }
         }
