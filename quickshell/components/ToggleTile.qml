@@ -7,12 +7,14 @@ Rectangle {
 
     property string icon: ""
     property string iconName: ""
+    property string iconCategory: ""
     property string title: ""
     property string subtitle: ""
     property bool checked: false
     property bool interactive: true
     property string actionIcon: ""
     property string actionIconName: ""
+    property string actionIconCategory: ""
     property color accent: Theme.purple
     signal clicked()
     signal actionClicked()
@@ -40,6 +42,7 @@ Rectangle {
             OrionIcon {
                 anchors.centerIn: parent
                 name: root.iconName
+                category: root.iconCategory
                 fallback: root.icon
                 fallbackColor: checked ? Theme.background : root.accent
                 size: 20
@@ -91,6 +94,7 @@ Rectangle {
         OrionIcon {
             anchors.centerIn: parent
             name: root.actionIconName
+            category: root.actionIconCategory
             fallback: root.actionIcon
             fallbackColor: root.accent
             size: 16

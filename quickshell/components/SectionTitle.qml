@@ -9,6 +9,7 @@ RowLayout {
     property string subtitle: ""
     property string icon: ""
     property string iconName: ""
+    property string iconCategory: ""
     property color accent: Theme.purple
 
     spacing: Theme.spacingSm
@@ -16,6 +17,7 @@ RowLayout {
     OrionIcon {
         visible: root.icon.length > 0 || root.iconName.length > 0
         name: root.iconName
+        category: root.iconCategory
         fallback: root.icon
         fallbackColor: root.accent
         size: 18
