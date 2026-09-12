@@ -186,11 +186,15 @@ Item {
                                 Layout.preferredHeight: 36
                                 radius: 10
                                 color: Theme.elevated
-                                IconImage {
+                                Image {
                                     anchors.centerIn: parent
                                     width: 24
                                     height: 24
                                     source: Quickshell.iconPath(modelData.icon || "application-x-executable", true)
+                                    sourceSize.width: 24
+                                    sourceSize.height: 24
+                                    fillMode: Image.PreserveAspectFit
+                                    smooth: true
                                 }
                             }
 
