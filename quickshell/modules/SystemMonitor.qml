@@ -184,6 +184,7 @@ Item {
 
                         delegate: Rectangle {
                             required property var modelData
+                            required property int index
                             width: ListView.view.width
                             height: 32
                             radius: 8
