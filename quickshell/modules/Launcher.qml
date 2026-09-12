@@ -127,14 +127,13 @@ Item {
                     border.width: 1
                     border.color: search.activeFocus ? Theme.purple : Theme.border
 
-                    Text {
+                    OrionIcon {
                         anchors.left: parent.left
                         anchors.leftMargin: Theme.spacingMd
                         anchors.verticalCenter: parent.verticalCenter
-                        text: "󰍉"
-                        color: Theme.purple
-                        font.family: Theme.iconFamily
-                        font.pixelSize: 17
+                        name: "search"
+                        category: "actions"
+                        size: 17
                     }
 
                     TextInput {
@@ -185,15 +184,12 @@ Item {
                                 Layout.preferredHeight: 36
                                 radius: 10
                                 color: Theme.elevated
-                                Image {
+                                OrionIcon {
                                     anchors.centerIn: parent
-                                    width: 24
-                                    height: 24
-                                    source: Quickshell.iconPath(modelData.icon || "application-x-executable", true)
-                                    sourceSize.width: 24
-                                    sourceSize.height: 24
-                                    fillMode: Image.PreserveAspectFit
-                                    smooth: true
+                                    name: modelData.icon || "application-x-executable"
+                                    category: "apps"
+                                    fallbackName: "application-x-executable"
+                                    size: 24
                                 }
                             }
 
@@ -219,11 +215,7 @@ Item {
                                 }
                             }
 
-                            Text {
-                                text: "󰜴"
-                                color: Theme.subtle
-                                font.family: Theme.iconFamily
-                            }
+                            OrionIcon { name: "go-next"; category: "actions"; size: 14 }
                         }
 
                         MouseArea {

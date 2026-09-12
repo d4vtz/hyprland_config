@@ -44,7 +44,7 @@ ShellRoot {
                     Pill {
                         id: launcherPill
                         active: launcher.open
-                        OrionIcon { name: "start-here"; category: "apps"; fallback: "󰣇"; fallbackColor: Theme.purple; size: 20 }
+                        OrionIcon { name: "application-menu"; category: "actions"; size: 20 }
                         MouseArea {
                             parent: launcherPill
                             anchors.fill: parent
@@ -56,7 +56,7 @@ ShellRoot {
                     Pill {
                         id: dashboardPill
                         active: dashboard.open
-                        OrionIcon { name: "view-dashboard"; category: "apps"; fallback: "󰕮"; fallbackColor: Theme.pink; size: 20 }
+                        OrionIcon { name: "dashboard-show"; category: "actions"; size: 20 }
                         MouseArea {
                             parent: dashboardPill
                             anchors.fill: parent
