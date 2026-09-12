@@ -1,0 +1,230 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: caelestia-shell-orion\n"
+"Language: es_MX\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "now"
+msgstr "ahora"
+
+msgid "Now"
+msgstr "Ahora"
+
+msgid "Now playing"
+msgstr "Reproduciendo ahora"
+
+msgid "Notifications"
+msgstr "Notificaciones"
+
+msgid "No notifications"
+msgstr "Sin notificaciones"
+
+msgid "Do not disturb enabled"
+msgstr "No molestar activado"
+
+msgid "Do not disturb disabled"
+msgstr "No molestar desactivado"
+
+msgid "Nothing playing"
+msgstr "No hay nada reproduciéndose"
+
+msgid "Unknown track"
+msgstr "Pista desconocida"
+
+msgid "Unknown artist"
+msgstr "Artista desconocido"
+
+msgid "Try playing some music!"
+msgstr "¡Prueba reproducir algo de música!"
+
+msgid "Open"
+msgstr "Abrir"
+
+msgid "Files"
+msgstr "Archivos"
+
+msgid "This folder is empty"
+msgstr "Esta carpeta está vacía"
+
+msgid "Filter:"
+msgstr "Filtro:"
+
+msgid "Select"
+msgstr "Seleccionar"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "All files"
+msgstr "Todos los archivos"
+
+msgid "Select a file"
+msgstr "Seleccionar un archivo"
+
+msgid "Battery warning"
+msgstr "Advertencia de batería"
+
+msgid "Battery level is low"
+msgstr "El nivel de batería es bajo"
+
+msgid "Charger unplugged"
+msgstr "Cargador desconectado"
+
+msgid "Battery is discharging"
+msgstr "La batería se está descargando"
+
+msgid "Charger plugged in"
+msgstr "Cargador conectado"
+
+msgid "Battery is charging"
+msgstr "La batería se está cargando"
+
+msgid "Loading..."
+msgstr "Cargando..."
+
+msgid "Enter your password"
+msgstr "Ingresa tu contraseña"
+
+msgid "Incorrect password. Please try again."
+msgstr "Contraseña incorrecta. Inténtalo de nuevo."
+
+msgid "Caps lock is ON."
+msgstr "Bloq Mayús está activado."
+
+msgid "Num lock is ON."
+msgstr "Bloq Num está activado."
+
+msgid "Screenshot taken"
+msgstr "Captura de pantalla realizada"
+
+msgid "Screenshot copied to clipboard"
+msgstr "Captura copiada al portapapeles"
+
+msgid "No wallpapers found"
+msgstr "No se encontraron fondos de pantalla"
+
+msgid "No results"
+msgstr "Sin resultados"
+
+msgid "Select a wallpaper"
+msgstr "Seleccionar un fondo de pantalla"
+
+msgid "Set it now!"
+msgstr "¡Aplicar ahora!"
+
+msgid "Connect"
+msgstr "Conectar"
+
+msgid "Connecting..."
+msgstr "Conectando..."
+
+msgid "Password"
+msgstr "Contraseña"
+
+msgid "Authentication required"
+msgstr "Se requiere autenticación"
+
+msgid "Unknown network"
+msgstr "Red desconocida"
+
+msgid "Open settings"
+msgstr "Abrir configuración"
+
+msgid "Output device"
+msgstr "Dispositivo de salida"
+
+msgid "Input device"
+msgstr "Dispositivo de entrada"
+
+msgid "Volume (muted)"
+msgstr "Volumen (silenciado)"
+
+msgid "Keyboard layouts"
+msgstr "Distribuciones de teclado"
+
+msgid "Desktop"
+msgstr "Escritorio"
+
+msgid "Move to workspace"
+msgstr "Mover al espacio de trabajo"
+
+msgid "Tile"
+msgstr "Mosaico"
+
+msgid "Float"
+msgstr "Flotante"
+
+msgid "Pin"
+msgstr "Fijar"
+
+msgid "Unpin"
+msgstr "Desfijar"
+
+msgid "Kill"
+msgstr "Cerrar"
+
+msgid "Unknown"
+msgstr "Desconocido"
+
+msgid "Clear"
+msgstr "Despejado"
+
+msgid "Partly cloudy"
+msgstr "Parcialmente nublado"
+
+msgid "Overcast"
+msgstr "Nublado"
+
+msgid "Fog"
+msgstr "Niebla"
+
+msgid "Rain"
+msgstr "Lluvia"
+
+msgid "Snow"
+msgstr "Nieve"
+
+msgid "Hourly forecast"
+msgstr "Pronóstico por hora"
+
+msgid "Feels like %1"
+msgstr "Sensación de %1"
+
+msgid "UI language"
+msgstr "Idioma de la interfaz"
+
+msgid "The language used in the shell UI"
+msgstr "El idioma usado en la interfaz de la shell"
+
+msgid "General"
+msgstr "General"
+
+msgid "Appearance"
+msgstr "Apariencia"
+
+msgid "Network"
+msgstr "Red"
+
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+msgid "Audio"
+msgstr "Audio"
+
+msgid "Power"
+msgstr "Energía"
+
+msgid "Lock"
+msgstr "Bloquear"
+
+msgid "Logout"
+msgstr "Cerrar sesión"
+
+msgid "Restart"
+msgstr "Reiniciar"
+
+msgid "Shutdown"
+msgstr "Apagar"
