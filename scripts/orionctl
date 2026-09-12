@@ -20,6 +20,29 @@ Comandos:
 EOF
 }
 
+quickshell_is_running() {
+    ps -C quickshell -o stat= 2>/dev/null | grep -qv '^[[:space:]]*Z'
+}
+
+dbus_name_is_owned() {
+    busctl --user status "$1" >/dev/null 2>&1
+}
+
+wait_for_shutdown() {
+    local attempt
+    for attempt in {1..60}; do
+        if ! quickshell_is_running \
+            && ! dbus_name_is_owned org.freedesktop.Notifications \
+            && ! dbus_name_is_owned org.kde.StatusNotifierWatcher; then
+            return 0
+        fi
+        sleep 0.05
+    done
+
+    printf 'Advertencia: Quickshell no liberó completamente sus servicios D-Bus.\n' >&2
+    return 1
+}
+
 cmd="${1:-}"
 case "$cmd" in
     launcher)       exec qs ipc call launcher toggle ;;
@@ -33,10 +56,7 @@ case "$cmd" in
     close)          exec qs ipc call panels closeAll ;;
     reload)
         qs kill || true
-        for _ in {1..20}; do
-            pgrep -x quickshell >/dev/null 2>&1 || break
-            sleep 0.05
-        done
+        wait_for_shutdown || true
         exec uwsm app -- qs
         ;;
     status)
