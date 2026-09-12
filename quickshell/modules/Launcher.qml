@@ -18,12 +18,20 @@ Item {
         entry.name.toLowerCase().includes(query.toLowerCase())
         || entry.id.toLowerCase().includes(query.toLowerCase()))
 
+    function focusSearch() {
+        Qt.callLater(function() {
+            search.forceActiveFocus()
+            search.cursorPosition = search.length
+        })
+    }
+
     function showPanel(screen) {
         if (screen) targetScreen = screen
         PanelCoordinator.request("launcher")
         open = true
         query = ""
         appList.running = true
+        focusSearch()
     }
 
     function toggle(screen) {
@@ -38,6 +46,7 @@ Item {
         if (open) {
             query = ""
             appList.running = true
+            focusSearch()
         }
     }
 
@@ -72,16 +81,22 @@ Item {
     PanelWindow {
         screen: root.targetScreen
         visible: root.open
+        onVisibleChanged: if (visible) root.focusSearch()
         anchors { top: true; right: true; bottom: true; left: true }
         exclusiveZone: 0
         color: "transparent"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
-        MouseArea { anchors.fill: parent; onClicked: root.open = false }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                root.open = false
+                PanelCoordinator.close("launcher")
+            }
+        }
 
         Surface {
             id: panelSurface
-            focus: root.open
             Keys.onEscapePressed: event => { root.open = false; PanelCoordinator.close("launcher"); event.accepted = true }
             width: 620
             height: 500
@@ -133,9 +148,12 @@ Item {
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSizeBody
                         text: root.query
-                        focus: root.open
                         onTextChanged: root.query = text
-                        Keys.onEscapePressed: root.open = false
+                        Keys.onEscapePressed: event => {
+                            root.open = false
+                            PanelCoordinator.close("launcher")
+                            event.accepted = true
+                        }
                         Keys.onReturnPressed: {
                             if (root.filteredEntries.length > 0)
                                 root.launch(root.filteredEntries[0])
@@ -168,12 +186,11 @@ Item {
                                 Layout.preferredHeight: 36
                                 radius: 10
                                 color: Theme.elevated
-                                Text {
+                                IconImage {
                                     anchors.centerIn: parent
-                                    text: "󰣆"
-                                    color: Theme.purple
-                                    font.family: Theme.iconFamily
-                                    font.pixelSize: 17
+                                    width: 24
+                                    height: 24
+                                    source: Quickshell.iconPath(modelData.icon || "application-x-executable", true)
                                 }
                             }
 
