@@ -15,6 +15,7 @@ link_config() {
 }
 
 git -C "$root" submodule update --init --recursive
+"$root/scripts/apply-caelestia-overlay.sh"
 mkdir -p "$config_dir" "$config_dir/autostart"
 
 # Orion clásico enlazaba todo ~/.config/quickshell al repositorio. Caelestia
