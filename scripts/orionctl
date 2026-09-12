@@ -35,7 +35,9 @@ dbus_name_is_owned() {
 
 wait_for_shutdown() {
     local attempt
-    for attempt in {1..60}; do
+    # En sesiones con servicios KDE, el bus puede tardar varios segundos en
+    # retirar Notifications y StatusNotifierWatcher tras cerrar Quickshell.
+    for attempt in {1..200}; do
         if ! quickshell_is_running \
             && ! dbus_name_is_owned org.freedesktop.Notifications \
             && ! dbus_name_is_owned org.kde.StatusNotifierWatcher; then
