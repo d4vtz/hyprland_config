@@ -84,7 +84,7 @@ Item {
                 ColumnLayout {
                     id: contentColumn
                     x: Theme.spacingLg; y: Theme.spacingLg; width: parent.width - Theme.spacingLg * 2; spacing: Theme.spacingMd
-                    SectionTitle { Layout.fillWidth: true; icon: "󰒓"; title: "Centro de control"; subtitle: SystemStatus.userName + "@" + SystemStatus.hostName; accent: Theme.purple }
+                    SectionTitle { Layout.fillWidth: true; iconName: "preferences-system-symbolic"; icon: "󰒓"; title: "Centro de control"; subtitle: SystemStatus.userName + "@" + SystemStatus.hostName; accent: Theme.purple }
                     Rectangle {
                         visible: root.statusMessage.length > 0
                         Layout.fillWidth: true; Layout.preferredHeight: visible ? 30 : 0; radius: Theme.cardRadius

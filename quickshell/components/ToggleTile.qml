@@ -6,11 +6,13 @@ Rectangle {
     id: root
 
     property string icon: ""
+    property string iconName: ""
     property string title: ""
     property string subtitle: ""
     property bool checked: false
     property bool interactive: true
     property string actionIcon: ""
+    property string actionIconName: ""
     property color accent: Theme.purple
     signal clicked()
     signal actionClicked()
@@ -35,12 +37,12 @@ Rectangle {
             radius: 11
             color: checked ? accent : Theme.elevated
 
-            Text {
+            OrionIcon {
                 anchors.centerIn: parent
-                text: root.icon
-                color: checked ? Theme.background : root.accent
-                font.family: Theme.iconFamily
-                font.pixelSize: 18
+                name: root.iconName
+                fallback: root.icon
+                fallbackColor: checked ? Theme.background : root.accent
+                size: 20
             }
         }
 
@@ -70,14 +72,14 @@ Rectangle {
 
     MouseArea {
         anchors.fill: parent
-        anchors.rightMargin: root.actionIcon.length > 0 ? 34 : 0
+        anchors.rightMargin: root.actionIcon.length > 0 || root.actionIconName.length > 0 ? 34 : 0
         enabled: root.interactive
         cursorShape: root.interactive ? Qt.PointingHandCursor : Qt.ArrowCursor
         onClicked: root.clicked()
     }
 
     Rectangle {
-        visible: root.actionIcon.length > 0
+        visible: root.actionIcon.length > 0 || root.actionIconName.length > 0
         anchors.right: parent.right
         anchors.rightMargin: 8
         anchors.verticalCenter: parent.verticalCenter
@@ -86,12 +88,12 @@ Rectangle {
         radius: 9
         color: actionArea.containsMouse ? Theme.current : "transparent"
 
-        Text {
+        OrionIcon {
             anchors.centerIn: parent
-            text: root.actionIcon
-            color: root.accent
-            font.family: Theme.iconFamily
-            font.pixelSize: 15
+            name: root.actionIconName
+            fallback: root.actionIcon
+            fallbackColor: root.accent
+            size: 16
         }
         MouseArea {
             id: actionArea

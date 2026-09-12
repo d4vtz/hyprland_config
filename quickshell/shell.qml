@@ -44,12 +44,7 @@ ShellRoot {
                     Pill {
                         id: launcherPill
                         active: launcher.open
-                        Text {
-                            text: "󰣇"
-                            color: Theme.purple
-                            font.family: Theme.iconFamily
-                            font.pixelSize: 16
-                        }
+                        OrionIcon { name: "start-here-symbolic"; fallback: "󰣇"; fallbackColor: Theme.purple; size: 18 }
                         MouseArea {
                             parent: launcherPill
                             anchors.fill: parent
@@ -61,12 +56,7 @@ ShellRoot {
                     Pill {
                         id: dashboardPill
                         active: dashboard.open
-                        Text {
-                            text: "󰕮"
-                            color: Theme.pink
-                            font.family: Theme.iconFamily
-                            font.pixelSize: 16
-                        }
+                        OrionIcon { name: "view-dashboard-symbolic"; fallback: "󰕮"; fallbackColor: Theme.pink; size: 18 }
                         MouseArea {
                             parent: dashboardPill
                             anchors.fill: parent
@@ -93,11 +83,10 @@ ShellRoot {
                     Pill {
                         id: monitorPill
                         active: systemMonitor.open
-                        Text {
-                            text: "󰍛 " + Math.round(SystemStatus.cpuUsage) + "%"
-                            color: Theme.green
-                            font.family: Theme.iconFamily
-                            font.pixelSize: 13
+                        RowLayout {
+                            spacing: 5
+                            OrionIcon { name: "utilities-system-monitor-symbolic"; fallback: "󰍛"; fallbackColor: Theme.green; size: 16 }
+                            Text { text: Math.round(SystemStatus.cpuUsage) + "%"; color: Theme.green; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
                         }
                         MouseArea {
                             parent: monitorPill
@@ -113,15 +102,13 @@ ShellRoot {
                         RowLayout {
                             spacing: 8
 
-                            Text {
-                                text: SystemStatus.battery === "CA"
-                                      ? "󰚥"
-                                      : (SystemStatus.batteryState === "Cargando" ? "󰂄" : "󰁹")
-                                color: SystemStatus.batteryState === "Cargando" ? Theme.green
-                                     : SystemStatus.acConnected ? Theme.yellow
-                                     : Theme.orange
-                                font.family: Theme.iconFamily
-                                font.pixelSize: 15
+                            OrionIcon {
+                                name: SystemStatus.battery === "CA" ? "ac-adapter-symbolic"
+                                    : SystemStatus.batteryState === "Cargando" ? "battery-charging-symbolic"
+                                    : "battery-symbolic"
+                                fallback: SystemStatus.battery === "CA" ? "󰚥" : (SystemStatus.batteryState === "Cargando" ? "󰂄" : "󰁹")
+                                fallbackColor: SystemStatus.batteryState === "Cargando" ? Theme.green : SystemStatus.acConnected ? Theme.yellow : Theme.orange
+                                size: 17
                             }
 
                             Text {
@@ -131,19 +118,9 @@ ShellRoot {
                                 font.pixelSize: Theme.fontSizeSmall
                             }
 
-                            Text {
-                                text: SystemStatus.wifiEnabled ? "󰖩" : "󰖪"
-                                color: SystemStatus.wifiEnabled ? Theme.cyan : Theme.muted
-                                font.family: Theme.iconFamily
-                                font.pixelSize: 15
-                            }
+                            OrionIcon { name: SystemStatus.wifiEnabled ? "network-wireless-symbolic" : "network-wireless-offline-symbolic"; fallback: SystemStatus.wifiEnabled ? "󰖩" : "󰖪"; fallbackColor: SystemStatus.wifiEnabled ? Theme.cyan : Theme.muted; size: 17 }
 
-                            Text {
-                                text: "󰕾"
-                                color: Theme.cyan
-                                font.family: Theme.iconFamily
-                                font.pixelSize: 15
-                            }
+                            OrionIcon { name: "audio-volume-high-symbolic"; fallback: "󰕾"; fallbackColor: Theme.cyan; size: 17 }
                         }
                         MouseArea {
                             parent: controlCenterPill
@@ -160,12 +137,7 @@ ShellRoot {
                         id: activityPill
                         active: activityCenter.open
 
-                        Text {
-                            text: NotificationService.doNotDisturb ? "󰂛" : "󰂚"
-                            color: NotificationService.doNotDisturb ? Theme.red : Theme.purple
-                            font.family: Theme.iconFamily
-                            font.pixelSize: 16
-                        }
+                        OrionIcon { name: NotificationService.doNotDisturb ? "notifications-disabled-symbolic" : "preferences-system-notifications-symbolic"; fallback: NotificationService.doNotDisturb ? "󰂛" : "󰂚"; fallbackColor: NotificationService.doNotDisturb ? Theme.red : Theme.purple; size: 18 }
 
                         Text {
                             visible: NotificationService.count > 0
@@ -175,20 +147,16 @@ ShellRoot {
                             font.pixelSize: Theme.fontSizeSmall
                         }
 
-                        Text {
+                        OrionIcon {
                             visible: ClipboardStatus.hasEntries
-                            text: "󰅇"
-                            color: Theme.pink
-                            font.family: Theme.iconFamily
-                            font.pixelSize: 14
+                            name: "edit-paste-symbolic"; fallback: "󰅇"; fallbackColor: Theme.pink; size: 16
                         }
 
-                        Text {
+                        RowLayout {
                             visible: UpdateService.hasUpdates
-                            text: "󰏔 " + UpdateService.totalCount
-                            color: Theme.orange
-                            font.family: Theme.iconFamily
-                            font.pixelSize: 14
+                            spacing: 4
+                            OrionIcon { name: "system-software-update-symbolic"; fallback: "󰏔"; fallbackColor: Theme.orange; size: 16 }
+                            Text { text: UpdateService.totalCount; color: Theme.orange; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
                         }
 
                         MouseArea {
@@ -204,12 +172,7 @@ ShellRoot {
                         visible: CaffeineService.active
                         active: true
 
-                        Text {
-                            text: "󰅶"
-                            color: Theme.yellow
-                            font.family: Theme.iconFamily
-                            font.pixelSize: 16
-                        }
+                        OrionIcon { name: "caffeine-cup-full-symbolic"; fallback: "󰅶"; fallbackColor: Theme.yellow; size: 18 }
 
                         MouseArea {
                             parent: caffeinePill
@@ -222,12 +185,7 @@ ShellRoot {
                     Pill {
                         id: sessionPill
                         active: sessionPanel.open
-                        Text {
-                            text: "󰐥"
-                            color: Theme.red
-                            font.family: Theme.iconFamily
-                            font.pixelSize: 16
-                        }
+                        OrionIcon { name: "system-shutdown-symbolic"; fallback: "󰐥"; fallbackColor: Theme.red; size: 18 }
                         MouseArea {
                             parent: sessionPill
                             anchors.fill: parent
@@ -239,12 +197,7 @@ ShellRoot {
                     Pill {
                         id: settingsPill
                         active: settingsPanel.open
-                        Text {
-                            text: "󰒓"
-                            color: Theme.muted
-                            font.family: Theme.iconFamily
-                            font.pixelSize: 16
-                        }
+                        OrionIcon { name: "preferences-system-symbolic"; fallback: "󰒓"; fallbackColor: Theme.muted; size: 18 }
                         MouseArea {
                             parent: settingsPill
                             anchors.fill: parent

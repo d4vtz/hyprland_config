@@ -8,16 +8,17 @@ RowLayout {
     property string title: ""
     property string subtitle: ""
     property string icon: ""
+    property string iconName: ""
     property color accent: Theme.purple
 
     spacing: Theme.spacingSm
 
-    Text {
-        visible: root.icon.length > 0
-        text: root.icon
-        color: root.accent
-        font.family: Theme.iconFamily
-        font.pixelSize: 17
+    OrionIcon {
+        visible: root.icon.length > 0 || root.iconName.length > 0
+        name: root.iconName
+        fallback: root.icon
+        fallbackColor: root.accent
+        size: 18
     }
 
     ColumnLayout {

@@ -19,10 +19,11 @@ ColumnLayout {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: Theme.spacingMd
-                Text {
-                    text: controller.sink && controller.sink.audio.muted ? "󰝟" : "󰕾"
-                    color: controller.sink && controller.sink.audio.muted ? Theme.muted : Theme.cyan
-                    font.family: Theme.iconFamily; font.pixelSize: 18
+                OrionIcon {
+                    name: controller.sink && controller.sink.audio.muted ? "audio-volume-muted-symbolic" : "audio-volume-high-symbolic"
+                    fallback: controller.sink && controller.sink.audio.muted ? "󰝟" : "󰕾"
+                    fallbackColor: controller.sink && controller.sink.audio.muted ? Theme.muted : Theme.cyan
+                    size: 20
                     MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: if (controller.sink) controller.sink.audio.muted = !controller.sink.audio.muted }
                 }
                 ValueSlider {
@@ -35,7 +36,7 @@ ColumnLayout {
             }
             RowLayout {
                 Layout.fillWidth: true; spacing: Theme.spacingMd
-                Text { text: "󰃠"; color: Theme.yellow; font.family: Theme.iconFamily; font.pixelSize: 18 }
+                OrionIcon { name: "display-brightness-symbolic"; fallback: "󰃠"; fallbackColor: Theme.yellow; size: 20 }
                 ValueSlider {
                     Layout.fillWidth: true; icon: ""; value: controller.brightness; accent: Theme.yellow
                     onValueRequested: value => controller.requestBrightness(value)
@@ -53,7 +54,7 @@ ColumnLayout {
             DeviceRow { input: false; title: "Salida"; node: controller.sink; menuId: 1; accent: Theme.cyan }
             RowLayout {
                 Layout.fillWidth: true; spacing: Theme.spacingMd
-                Text { text: controller.source && controller.source.audio.muted ? "󰍭" : "󰍬"; color: controller.source && controller.source.audio.muted ? Theme.muted : Theme.pink; font.family: Theme.iconFamily; font.pixelSize: 16 }
+                OrionIcon { name: controller.source && controller.source.audio.muted ? "microphone-sensitivity-muted-symbolic" : "audio-input-microphone-symbolic"; fallback: controller.source && controller.source.audio.muted ? "󰍭" : "󰍬"; fallbackColor: controller.source && controller.source.audio.muted ? Theme.muted : Theme.pink; size: 18 }
                 ValueSlider { Layout.fillWidth: true; value: controller.source ? Math.min(1, controller.source.audio.volume) : 0; accent: Theme.pink; onValueRequested: value => { if (controller.source) { controller.source.audio.muted = false; controller.source.audio.volume = value } } }
                 Text { Layout.preferredWidth: 38; horizontalAlignment: Text.AlignRight; text: controller.source ? Math.round(controller.source.audio.volume * 100) + "%" : "--"; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
             }
@@ -84,10 +85,11 @@ ColumnLayout {
         required property int menuId
         required property color accent
         Layout.fillWidth: true
-        Text {
-            text: node && node.audio.muted ? (input ? "󰍭" : "󰝟") : (input ? "󰍬" : "󰓃")
-            color: node && node.audio.muted ? Theme.muted : accent
-            font.family: Theme.iconFamily; font.pixelSize: 16
+        OrionIcon {
+            name: input ? (node && node.audio.muted ? "microphone-sensitivity-muted-symbolic" : "audio-input-microphone-symbolic") : (node && node.audio.muted ? "audio-volume-muted-symbolic" : "audio-speakers-symbolic")
+            fallback: node && node.audio.muted ? (input ? "󰍭" : "󰝟") : (input ? "󰍬" : "󰓃")
+            fallbackColor: node && node.audio.muted ? Theme.muted : accent
+            size: 18
             MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: if (node) node.audio.muted = !node.audio.muted }
         }
         Text { Layout.fillWidth: true; text: title + " · " + controller.deviceName(node, input); color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall; elide: Text.ElideRight }
