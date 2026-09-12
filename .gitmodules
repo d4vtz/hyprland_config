@@ -1,0 +1,4 @@
+[submodule "quickshell"]
+	path = quickshell
+	url = https://github.com/caelestia-dots/shell.git
+	branch = main
