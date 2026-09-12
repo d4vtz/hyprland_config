@@ -24,6 +24,11 @@ quickshell_is_running() {
     ps -C quickshell -o stat= 2>/dev/null | grep -qv '^[[:space:]]*Z'
 }
 
+running_quickshell_pids() {
+    ps -C quickshell -o pid=,stat= 2>/dev/null \
+        | awk '$2 !~ /^Z/ { print $1 }'
+}
+
 dbus_name_is_owned() {
     busctl --user status "$1" >/dev/null 2>&1
 }
@@ -43,6 +48,25 @@ wait_for_shutdown() {
     return 1
 }
 
+stop_quickshell() {
+    local old_pids pid
+    old_pids="$(running_quickshell_pids)"
+    qs kill >/dev/null 2>&1 || true
+
+    for _ in {1..20}; do
+        quickshell_is_running || return 0
+        sleep 0.05
+    done
+
+    # Quickshell 0.3.x puede dejar viva la instancia cuando falla el cierre IPC
+    # después de una recarga QML. Termina solo los PID vivos capturados arriba.
+    for pid in $old_pids; do
+        if kill -0 "$pid" 2>/dev/null; then
+            kill -TERM "$pid" 2>/dev/null || true
+        fi
+    done
+}
+
 cmd="${1:-}"
 case "$cmd" in
     launcher)       exec qs ipc call launcher toggle ;;
@@ -55,8 +79,11 @@ case "$cmd" in
     session)        exec qs ipc call session toggle ;;
     close)          exec qs ipc call panels closeAll ;;
     reload)
-        qs kill || true
-        wait_for_shutdown || true
+        stop_quickshell
+        if ! wait_for_shutdown; then
+            printf 'No se iniciará otra instancia para evitar conflictos D-Bus.\n' >&2
+            exit 1
+        fi
         exec uwsm app -- qs
         ;;
     status)
