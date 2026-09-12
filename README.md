@@ -1,16 +1,17 @@
-# Hyprland Configuration
+# Orion Shell
 
-Escritorio Hyprland modular para Arch Linux, escrito en Lua y probado con
-Hyprland 0.56.2. Está diseñado para una pantalla 1920×1200, trabajo con código,
-LaTeX, PDF, Xournal++ y multimedia.
+Shell de escritorio para Hyprland sobre Arch Linux. Quickshell/QML proporciona la capa visual y Hyprland/Lua conserva la gestión del compositor. El objetivo es una experiencia integrada y configurable con identidad Dracula, superficies tipo Material y módulos reutilizables.
 
 ## Diseño
 
 - Configuración de Hyprland completamente en Lua.
 - Tema Dracula desacoplado y preparado para añadir otras paletas.
 - Layout master con siete espacios persistentes.
-- Quickshell superior, modular y animada, con reloj centrado.
-- Rofi como lanzador y centro de notificaciones nativo de Quickshell.
+- Orion Shell sobre Quickshell, modular y animada, con reloj centrado.
+- Sistema visual compartido (`Theme`, `Surface`, `Card`, `SectionTitle`, `ToggleTile`).
+- Dashboard nativo con métricas, conectividad, energía y almacenamiento.
+- Lanzador nativo de Orion Shell, centro de actividad, centro de control, monitor del sistema y ajustes propios.
+- Rofi y Waybar se conservan únicamente como fallback durante la transición.
 - Hyprpaper, Hyprlock e Hypridle.
 - Capturas con Grimblast y edición en Satty.
 - Super + F1 abre una hoja de atajos filtrable.
@@ -75,12 +76,17 @@ Selecciona **Hyprland (uwsm-managed)** en Plasma Login Manager.
 | Atajo | Acción |
 |---|---|
 | Super + F1 | Mostrar y filtrar todos los atajos |
-| Super + Espacio | Abrir Rofi |
+| Super + Espacio | Abrir Orion Launcher |
+| Super + D | Abrir/cerrar Orion Dashboard |
 | Super + Enter | Abrir Kitty |
 | Super + E | Abrir Dolphin |
 | Super + B | Abrir navegador |
-| Super + N | Abrir las notificaciones de Quickshell |
-| Super + Escape | Menú de energía |
+| Super + N | Abrir centro de actividad en Notificaciones |
+| Super + Shift + V | Abrir centro de actividad en Portapapeles |
+| Super + C | Abrir Centro de control |
+| Super + M | Abrir Monitor del sistema |
+| Super + , | Abrir ajustes de Orion Shell |
+| Super + Escape | Abrir acciones de sesión |
 | Super + H/J/K/L | Cambiar el foco |
 | Super + flechas | Cambiar el foco |
 | Super + Shift + dirección | Intercambiar ventanas |
@@ -146,7 +152,11 @@ y ejecuta theme-switch.sh nord.
 hyprland.lua           Entrada mínima
 lua/                   Módulos de Hyprland
 themes/                Paletas compartidas
-quickshell/             Shell principal y paneles QML
+quickshell/             Orion Shell
+  components/           Primitivas visuales reutilizables
+  modules/              Launcher, barra, dashboard, centro de control, actividad,
+                        monitor, ajustes y paneles funcionales
+  services/             Estado reactivo del sistema
 waybar/                 Barra anterior, conservada como fallback
 rofi/                  Lanzador
 swaync/                Configuración anterior, conservada como referencia
@@ -170,4 +180,89 @@ Durante la migración puedes alternar sin cerrar la sesión:
 ```bash
 ~/.config/hypr/scripts/bar-waybar.sh       # fallback
 ~/.config/hypr/scripts/bar-quickshell.sh  # volver a Quickshell
+```
+
+
+## Arquitectura de Orion Shell
+
+La migración mantiene las funciones existentes mientras elimina progresivamente la lógica visual duplicada:
+
+```text
+Hyprland / Lua
+      │
+      ▼
+Orion Shell / Quickshell
+ ├── Core visual
+ │   ├── Theme
+ │   ├── Surface
+ │   ├── Card
+ │   └── controles reutilizables
+ ├── Modules
+ │   ├── Bar
+ │   ├── Dashboard
+ │   ├── Hardware
+ │   ├── Media
+ │   ├── Notifications
+ │   └── Clipboard
+ └── Services
+     ├── SystemStatus
+     └── NotificationService
+```
+
+La shell ya incluye una primera implementación completa de sus superficies principales:
+
+- `Launcher.qml`: lanzador nativo basado en archivos `.desktop`.
+- `Dashboard.qml`: resumen de sistema, conectividad, energía y almacenamiento.
+- `ControlCenter.qml`: audio, brillo, Wi-Fi, Bluetooth, luz nocturna, perfiles de energía y dispositivos PipeWire.
+- `ActivityCenter.qml`: notificaciones, portapapeles y acciones de sesión.
+- `SystemMonitor.qml`: CPU, GPU, memoria, almacenamiento y procesos.
+- `SettingsPanel.qml`: accesos de personalización, fondo, pantalla, red, Bluetooth y audio.
+- `Tray.qml`: bandeja de sistema.
+- `NotificationToast.qml`: avisos emergentes.
+
+Rofi, Waybar, `Hardware.qml` y `SystemArea.qml` permanecen en el repositorio como fallback o referencia, pero ya no forman parte del flujo principal de Orion Shell.
+
+
+## Control por CLI
+
+Orion expone sus módulos por IPC. El wrapper `orionctl` simplifica el acceso:
+
+```bash
+~/.config/hypr/scripts/orionctl launcher
+~/.config/hypr/scripts/orionctl dashboard
+~/.config/hypr/scripts/orionctl control
+~/.config/hypr/scripts/orionctl notifications
+~/.config/hypr/scripts/orionctl clipboard
+~/.config/hypr/scripts/orionctl monitor
+~/.config/hypr/scripts/orionctl settings
+~/.config/hypr/scripts/orionctl session
+~/.config/hypr/scripts/orionctl reload
+```
+
+## Superficies de Orion
+
+```text
+Bar
+├── Launcher
+├── Dashboard
+├── Workspaces
+├── ActiveWindow
+├── Clock
+├── Media
+├── SystemMonitor
+├── ControlCenter
+├── ActivityCenter
+├── Tray
+└── Settings
+
+Panels
+├── Launcher
+├── Dashboard
+├── Control Center
+├── Activity Center
+│   ├── Notifications
+│   ├── Clipboard
+│   └── Session
+├── System Monitor
+└── Settings
 ```
