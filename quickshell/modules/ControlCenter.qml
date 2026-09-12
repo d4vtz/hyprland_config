@@ -89,7 +89,12 @@ Item {
                         visible: root.statusMessage.length > 0
                         Layout.fillWidth: true; Layout.preferredHeight: visible ? 30 : 0; radius: Theme.cardRadius
                         color: root.statusError ? Qt.rgba(1, 0.33, 0.33, 0.14) : Qt.rgba(0.31, 0.98, 0.48, 0.12)
-                        Text { anchors.centerIn: parent; text: (root.busy ? "󰔟  " : root.statusError ? "󰅙  " : "󰄬  ") + root.statusMessage; color: root.statusError ? Theme.red : Theme.green; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
+                        Row {
+                            anchors.centerIn: parent
+                            spacing: 7
+                            OrionIcon { name: root.busy ? "content-loading" : root.statusError ? "dialog-error" : "dialog-ok"; category: "status"; size: 16 }
+                            Text { text: root.statusMessage; color: root.statusError ? Theme.red : Theme.green; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
+                        }
                     }
                     AudioSection { controller: root }
                     ConnectivitySection { controller: root }

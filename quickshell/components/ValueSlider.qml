@@ -5,21 +5,11 @@ import ".."
 RowLayout {
     id: root
 
-    property string icon: ""
     property real value: 0
     property color accent: Theme.purple
     signal valueRequested(real value)
 
     spacing: 10
-
-    Text {
-        Layout.preferredWidth: 20
-        horizontalAlignment: Text.AlignHCenter
-        text: root.icon
-        color: root.accent
-        font.family: Theme.iconFamily
-        font.pixelSize: 15
-    }
 
     Rectangle {
         id: track

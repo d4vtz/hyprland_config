@@ -15,6 +15,7 @@ Rectangle {
     property string actionIcon: ""
     property string actionIconName: ""
     property string actionIconCategory: ""
+    property bool rightClickAction: false
     property color accent: Theme.purple
     signal clicked()
     signal actionClicked()
@@ -37,7 +38,9 @@ Rectangle {
             Layout.preferredWidth: 36
             Layout.preferredHeight: 36
             radius: 11
-            color: checked ? accent : Theme.elevated
+            color: checked ? accent : Qt.rgba(accent.r, accent.g, accent.b, 0.13)
+            border.width: checked ? 0 : 1
+            border.color: Qt.rgba(accent.r, accent.g, accent.b, 0.28)
 
             OrionIcon {
                 anchors.centerIn: parent
@@ -77,8 +80,12 @@ Rectangle {
         anchors.fill: parent
         anchors.rightMargin: root.actionIcon.length > 0 || root.actionIconName.length > 0 ? 34 : 0
         enabled: root.interactive
+        acceptedButtons: root.rightClickAction ? Qt.LeftButton | Qt.RightButton : Qt.LeftButton
         cursorShape: root.interactive ? Qt.PointingHandCursor : Qt.ArrowCursor
-        onClicked: root.clicked()
+        onClicked: mouse => {
+            if (mouse.button === Qt.RightButton) root.actionClicked()
+            else root.clicked()
+        }
     }
 
     Rectangle {

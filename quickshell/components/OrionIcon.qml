@@ -8,6 +8,7 @@ Item {
     property string name: ""
     property string category: ""
     property string fallback: ""
+    property string fallbackName: "image-missing"
     property real size: 18
     property color fallbackColor: Theme.foreground
     property bool smooth: true
@@ -40,12 +41,15 @@ Item {
     onNameChanged: localFailed = false
     onCategoryChanged: localFailed = false
 
-    Text {
+    Image {
         anchors.centerIn: parent
+        width: root.size
+        height: root.size
         visible: !themedIcon.visible
-        text: root.fallback
-        color: root.fallbackColor
-        font.family: Theme.iconFamily
-        font.pixelSize: root.size
+        source: Quickshell.iconPath(root.fallbackName, true)
+        sourceSize.width: Math.ceil(root.size)
+        sourceSize.height: Math.ceil(root.size)
+        fillMode: Image.PreserveAspectFit
+        smooth: root.smooth
     }
 }

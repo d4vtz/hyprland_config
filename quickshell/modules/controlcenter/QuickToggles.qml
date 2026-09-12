@@ -21,7 +21,7 @@ Card {
         signal clicked()
         Layout.fillWidth: true; Layout.fillHeight: true; radius: Theme.cardRadius
         color: active ? Qt.rgba(accent.r, accent.g, accent.b, 0.18) : Theme.surface
-        Row { anchors.centerIn: parent; spacing: 5; OrionIcon { name: action.iconName; category: action.iconCategory; fallback: action.icon; fallbackColor: action.accent; size: 17 } Text { text: action.label; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 9 } }
+        Row { anchors.centerIn: parent; spacing: 6; OrionIcon { name: action.iconName; category: action.iconCategory; fallback: action.icon; fallbackColor: action.accent; size: 20 } Text { text: action.label; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 9 } }
         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: action.clicked() }
     }
 }
