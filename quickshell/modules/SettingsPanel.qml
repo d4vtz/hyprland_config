@@ -13,14 +13,15 @@ Item {
     property bool open: false
     property var targetScreen: null
 
+    function closePanel() { open = false; PanelCoordinator.close("settings") }
     function showPanel(screen) { if (screen) targetScreen = screen; PanelCoordinator.request("settings"); open = true }
-    function toggle(screen) { if (open) { open = false; PanelCoordinator.close("settings") } else showPanel(screen) }
+    function toggle(screen) { if (open) closePanel(); else showPanel(screen) }
 
     IpcHandler {
         target: "settings"
         function toggle(): void { root.toggle() }
         function show(): void { root.showPanel(null) }
-        function hide(): void { root.open = false; PanelCoordinator.close("settings") }
+        function hide(): void { root.closePanel() }
     }
 
     Process { id: command }
@@ -33,12 +34,12 @@ Item {
         color: "transparent"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
-        MouseArea { anchors.fill: parent; onClicked: root.open = false }
+        MouseArea { anchors.fill: parent; onClicked: root.closePanel() }
 
         Surface {
             id: panelSurface
             focus: root.open
-            Keys.onEscapePressed: event => { root.open = false; PanelCoordinator.close("settings"); event.accepted = true }
+            Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
             width: 440
             height: 470
             anchors.top: parent.top
@@ -107,7 +108,7 @@ Item {
 
     }
 
-    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "settings") root.open = false } }
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "settings") root.closePanel() } }
 
     component ActionTile: Rectangle {
         id: tile
@@ -145,7 +146,7 @@ Item {
             onClicked: {
                 command.command = ["bash", "-lc", tile.commandLine]
                 command.running = true
-                root.open = false
+                root.closePanel()
             }
         }
     }

@@ -18,6 +18,8 @@ Item {
         entry.name.toLowerCase().includes(query.toLowerCase())
         || entry.id.toLowerCase().includes(query.toLowerCase()))
 
+    function closePanel() { open = false; PanelCoordinator.close("launcher") }
+
     function focusSearch() {
         Qt.callLater(function() {
             search.forceActiveFocus()
@@ -36,8 +38,7 @@ Item {
 
     function toggle(screen) {
         if (open) {
-            open = false
-            PanelCoordinator.close("launcher")
+            closePanel()
             return
         }
         if (screen) targetScreen = screen
@@ -53,14 +54,14 @@ Item {
     function launch(entry) {
         launchProcess.command = ["gtk-launch", entry.id]
         launchProcess.running = true
-        open = false
+        closePanel()
     }
 
     IpcHandler {
         target: "launcher"
         function toggle(): void { root.toggle() }
         function show(): void { root.showPanel(null) }
-        function hide(): void { root.open = false; PanelCoordinator.close("launcher") }
+        function hide(): void { root.closePanel() }
     }
 
     Process {
@@ -90,14 +91,13 @@ Item {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                root.open = false
-                PanelCoordinator.close("launcher")
+                root.closePanel()
             }
         }
 
         Surface {
             id: panelSurface
-            Keys.onEscapePressed: event => { root.open = false; PanelCoordinator.close("launcher"); event.accepted = true }
+            Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
             width: 620
             height: 500
             anchors.horizontalCenter: parent.horizontalCenter
@@ -150,8 +150,7 @@ Item {
                         text: root.query
                         onTextChanged: root.query = text
                         Keys.onEscapePressed: event => {
-                            root.open = false
-                            PanelCoordinator.close("launcher")
+                            root.closePanel()
                             event.accepted = true
                         }
                         Keys.onReturnPressed: {
@@ -249,5 +248,5 @@ Item {
 
     }
 
-    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "launcher") root.open = false } }
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "launcher") root.closePanel() } }
 }

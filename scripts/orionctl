@@ -14,6 +14,7 @@ Comandos:
   monitor        Abrir/cerrar monitor del sistema
   settings       Abrir/cerrar ajustes de Orion
   session        Abrir acciones de sesión
+  close          Cerrar todos los paneles
   reload         Reiniciar Orion Shell
   status         Mostrar procesos de Quickshell
 EOF
@@ -29,6 +30,7 @@ case "$cmd" in
     monitor)        exec qs ipc call monitor toggle ;;
     settings)       exec qs ipc call settings toggle ;;
     session)        exec qs ipc call session toggle ;;
+    close)          exec qs ipc call panels closeAll ;;
     reload)
         qs kill || true
         for _ in {1..20}; do

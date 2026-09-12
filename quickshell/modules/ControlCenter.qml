@@ -19,6 +19,8 @@ Item {
     readonly property var sinks: Pipewire.nodes.values.filter(n => n.audio !== null && n.isSink && !n.isStream)
     readonly property var sources: Pipewire.nodes.values.filter(n => n.audio !== null && !n.isSink && !n.isStream)
 
+    function closePanel() { audioMenu = 0; open = false; PanelCoordinator.close("controlcenter") }
+
     function showPanel(screen) {
         if (screen) targetScreen = screen
         PanelCoordinator.request("controlcenter")
@@ -60,7 +62,7 @@ Item {
         target: "controlcenter"
         function toggle(): void { root.toggle() }
         function show(): void { root.showPanel(null) }
-        function hide(): void { root.open = false; root.audioMenu = 0; PanelCoordinator.close("controlcenter") }
+        function hide(): void { root.closePanel() }
     }
 
     PwObjectTracker {
@@ -83,7 +85,7 @@ Item {
             anchors.fill: parent
             onClicked: {
                 root.audioMenu = 0
-                root.open = false
+                root.closePanel()
             }
         }
 
@@ -92,7 +94,7 @@ Item {
             focus: root.open
             Keys.onEscapePressed: event => {
                 if (root.audioMenu !== 0) root.audioMenu = 0
-                else { root.open = false; PanelCoordinator.close("controlcenter") }
+                else root.closePanel()
                 event.accepted = true
             }
             width: 430
@@ -444,7 +446,7 @@ Item {
                             onClicked: {
                                 command.command = ["systemsettings", "kcm_kscreen"]
                                 command.running = true
-                                root.open = false
+                                root.closePanel()
                             }
                         }
                     }
@@ -468,7 +470,7 @@ Item {
                             onClicked: {
                                 command.command = ["systemsettings"]
                                 command.running = true
-                                root.open = false
+                                root.closePanel()
                             }
                         }
                     }
@@ -477,5 +479,5 @@ Item {
         }
 
     }
-    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "controlcenter") root.open = false } }
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "controlcenter") root.closePanel() } }
 }

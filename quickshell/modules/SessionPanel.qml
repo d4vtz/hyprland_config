@@ -12,6 +12,8 @@ Item {
     property bool open: false
     property var targetScreen: null
 
+    function closePanel() { open = false; PanelCoordinator.close("session") }
+
     function showPanel(screen) {
         if (screen) targetScreen = screen
         PanelCoordinator.request("session")
@@ -21,8 +23,7 @@ Item {
 
     function toggle(screen) {
         if (open) {
-            open = false
-            PanelCoordinator.close("session")
+            closePanel()
             return
         }
         showPanel(screen)
@@ -32,7 +33,7 @@ Item {
         target: "session"
         function toggle(): void { root.toggle() }
         function show(): void { root.showPanel(null) }
-        function hide(): void { root.open = false; PanelCoordinator.close("session") }
+        function hide(): void { root.closePanel() }
     }
 
     PanelWindow {
@@ -45,13 +46,13 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: root.open = false
+            onClicked: root.closePanel()
         }
 
         Surface {
             id: panelSurface
             focus: root.open
-            Keys.onEscapePressed: event => { root.open = false; PanelCoordinator.close("session"); event.accepted = true }
+            Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
             width: 470
             height: 300
             anchors.horizontalCenter: parent.horizontalCenter
@@ -105,12 +106,12 @@ Item {
                     id: sessionView
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    onCloseRequested: root.open = false
-                    onPanelCloseRequested: root.open = false
+                    onCloseRequested: root.closePanel()
+                    onPanelCloseRequested: root.closePanel()
                 }
             }
         }
     }
 
-    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "session") root.open = false } }
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "session") root.closePanel() } }
 }

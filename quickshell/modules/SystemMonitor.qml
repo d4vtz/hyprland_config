@@ -15,6 +15,8 @@ Item {
     property int tab: 0
     property var processes: []
 
+    function closePanel() { open = false; PanelCoordinator.close("monitor") }
+
     function showPanel(screen) {
         if (screen) targetScreen = screen
         PanelCoordinator.request("monitor")
@@ -37,7 +39,7 @@ Item {
         target: "monitor"
         function toggle(): void { root.toggle() }
         function show(): void { root.showPanel(null) }
-        function hide(): void { root.open = false; PanelCoordinator.close("monitor") }
+        function hide(): void { root.closePanel() }
     }
 
     Process {
@@ -71,12 +73,12 @@ Item {
         color: "transparent"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
-        MouseArea { anchors.fill: parent; onClicked: root.open = false }
+        MouseArea { anchors.fill: parent; onClicked: root.closePanel() }
 
         Surface {
             id: panelSurface
             focus: root.open
-            Keys.onEscapePressed: event => { root.open = false; PanelCoordinator.close("monitor"); event.accepted = true }
+            Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
             width: 690
             height: 520
             anchors.horizontalCenter: parent.horizontalCenter
@@ -204,7 +206,7 @@ Item {
 
     }
 
-    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "monitor") root.open = false } }
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "monitor") root.closePanel() } }
 
     component MetricCard: Card {
         id: metric

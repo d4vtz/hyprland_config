@@ -46,7 +46,8 @@ if pgrep -af quickshell >/dev/null 2>&1; then
     ipc_failed=0
     for call in \
         "launcher hide" "dashboard hide" "controlcenter hide" \
-        "activity hide" "monitor hide" "settings hide" "session hide"; do
+        "activity hide" "monitor hide" "settings hide" "session hide" \
+        "panels closeAll"; do
         read -r target function <<<"$call"
         if ! qs ipc call "$target" "$function" >/dev/null 2>&1; then
             bad "IPC no responde: $target $function"

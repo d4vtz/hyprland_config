@@ -14,14 +14,15 @@ Item {
     property var targetScreen: null
     property date now: new Date()
 
+    function closePanel() { open = false; PanelCoordinator.close("dashboard") }
     function showPanel(screen) { if (screen) targetScreen = screen; PanelCoordinator.request("dashboard"); open = true }
-    function toggle(screen) { if (open) { open = false; PanelCoordinator.close("dashboard") } else showPanel(screen) }
+    function toggle(screen) { if (open) closePanel(); else showPanel(screen) }
 
     IpcHandler {
         target: "dashboard"
         function toggle(): void { root.toggle() }
         function show(): void { root.showPanel(null) }
-        function hide(): void { root.open = false; PanelCoordinator.close("dashboard") }
+        function hide(): void { root.closePanel() }
     }
 
     PanelWindow {
@@ -34,13 +35,13 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: root.open = false
+            onClicked: root.closePanel()
         }
 
         Surface {
             id: panelSurface
             focus: root.open
-            Keys.onEscapePressed: event => { root.open = false; PanelCoordinator.close("dashboard"); event.accepted = true }
+            Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
             width: Math.min(760, parent.width - 40)
             height: Math.min(520, parent.height - 80)
             anchors.horizontalCenter: parent.horizontalCenter
@@ -226,5 +227,5 @@ Item {
     }
 
     Timer { interval: 1000; repeat: true; running: root.open; onTriggered: root.now = new Date() }
-    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "dashboard") root.open = false } }
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "dashboard") root.closePanel() } }
 }
