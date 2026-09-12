@@ -43,11 +43,17 @@ fi
 printf '\nIPC\n'
 if pgrep -af quickshell >/dev/null 2>&1; then
     ok "Quickshell está ejecutándose"
-    if qs ipc call dashboard hide >/dev/null 2>&1; then
-        ok "IPC de Orion responde"
-    else
-        bad "Quickshell corre, pero el IPC de Orion no responde"
-    fi
+    ipc_failed=0
+    for call in \
+        "launcher hide" "dashboard hide" "controlcenter hide" \
+        "activity hide" "monitor hide" "settings hide" "session hide"; do
+        read -r target function <<<"$call"
+        if ! qs ipc call "$target" "$function" >/dev/null 2>&1; then
+            bad "IPC no responde: $target $function"
+            ipc_failed=1
+        fi
+    done
+    (( ipc_failed == 0 )) && ok "Todos los destinos IPC de Orion responden"
 else
     note "Quickshell no está ejecutándose; inicia con: qs"
 fi

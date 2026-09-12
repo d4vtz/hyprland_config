@@ -5,24 +5,28 @@ import Quickshell.Io
 import Quickshell.Wayland
 import ".."
 import "../components"
+import "../services"
 
 Item {
     id: root
 
     property bool open: false
+    property var targetScreen: null
 
-    function toggle() { open = !open }
+    function showPanel(screen) { if (screen) targetScreen = screen; PanelCoordinator.request("settings"); open = true }
+    function toggle(screen) { if (open) { open = false; PanelCoordinator.close("settings") } else showPanel(screen) }
 
     IpcHandler {
         target: "settings"
         function toggle(): void { root.toggle() }
-        function show(): void { root.open = true }
-        function hide(): void { root.open = false }
+        function show(): void { root.showPanel(null) }
+        function hide(): void { root.open = false; PanelCoordinator.close("settings") }
     }
 
     Process { id: command }
 
     PanelWindow {
+        screen: root.targetScreen
         visible: root.open
         anchors { top: true; right: true; bottom: true; left: true }
         exclusiveZone: 0
@@ -32,6 +36,9 @@ Item {
         MouseArea { anchors.fill: parent; onClicked: root.open = false }
 
         Surface {
+            id: panelSurface
+            focus: root.open
+            Keys.onEscapePressed: event => { root.open = false; PanelCoordinator.close("settings"); event.accepted = true }
             width: 440
             height: 470
             anchors.top: parent.top
@@ -98,8 +105,9 @@ Item {
             }
         }
 
-        Shortcut { sequence: "Esc"; onActivated: root.open = false }
     }
+
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "settings") root.open = false } }
 
     component ActionTile: Rectangle {
         id: tile

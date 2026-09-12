@@ -3,3 +3,4 @@ singleton NotificationService 1.0 NotificationService.qml
 singleton UpdateService 1.0 UpdateService.qml
 singleton ClipboardStatus 1.0 ClipboardStatus.qml
 singleton CaffeineService 1.0 CaffeineService.qml
+singleton PanelCoordinator 1.0 PanelCoordinator.qml

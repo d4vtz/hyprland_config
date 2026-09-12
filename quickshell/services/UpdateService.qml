@@ -44,7 +44,7 @@ QtObject {
 
     function runFirmwareUpgrade() {
         upgradeProcess.command = ["kitty", "--title", "Orion · Firmware", "-e", "bash", "-lc",
-            "fwupdmgr refresh --force; fwupdmgr update; printf '\\nPulsa Enter para cerrar...'; read -r"]
+            "fwupdmgr refresh; fwupdmgr update; printf '\\nPulsa Enter para cerrar...'; read -r"]
         upgradeProcess.running = true
     }
 

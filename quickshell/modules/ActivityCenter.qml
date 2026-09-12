@@ -11,6 +11,7 @@ Item {
     id: root
 
     property bool open: false
+    property var targetScreen: null
     property int tab: 0
 
     function activatePage(page) {
@@ -20,14 +21,19 @@ Item {
             Qt.callLater(clipboard.takeFocus)
         } else if (tab === 2) {
             UpdateService.refresh()
+        } else if (tab === 3) {
+            maintenance.refresh()
         }
     }
 
-    function toggle(page) {
+    function toggle(page, screen) {
         if (open && tab === page) {
             open = false
+            PanelCoordinator.close("activity")
             return
         }
+        if (screen) targetScreen = screen
+        PanelCoordinator.request("activity")
         open = true
         activatePage(page)
     }
@@ -37,10 +43,11 @@ Item {
         function notifications(): void { root.toggle(0) }
         function clipboard(): void { root.toggle(1) }
         function updates(): void { root.toggle(2) }
-        function hide(): void { root.open = false }
+        function hide(): void { root.open = false; PanelCoordinator.close("activity") }
     }
 
     PanelWindow {
+        screen: root.targetScreen
         visible: root.open
         anchors { top: true; right: true; bottom: true; left: true }
         exclusiveZone: 0
@@ -50,6 +57,9 @@ Item {
         MouseArea { anchors.fill: parent; onClicked: root.open = false }
 
         Surface {
+            id: panelSurface
+            focus: root.open
+            Keys.onEscapePressed: event => { root.open = false; PanelCoordinator.close("activity"); event.accepted = true }
             width: 430
             height: 540
             anchors.top: parent.top
@@ -72,7 +82,8 @@ Item {
                         model: [
                             { icon: "󰂚", label: "Avisos", page: 0, accent: Theme.cyan },
                             { icon: "󰅇", label: "Portapapeles", page: 1, accent: Theme.pink },
-                            { icon: "󰏔", label: "Actualizaciones", page: 2, accent: Theme.orange }
+                            { icon: "󰏔", label: "Actualizaciones", page: 2, accent: Theme.orange },
+                            { icon: "󰒓", label: "Mantenimiento", page: 3, accent: Theme.green }
                         ]
 
                         delegate: Rectangle {
@@ -119,9 +130,15 @@ Item {
                     Layout.fillHeight: true
                     visible: root.tab === 2
                 }
+                MaintenanceView {
+                    id: maintenance
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    visible: root.tab === 3
+                }
             }
         }
 
-        Shortcut { sequence: "Esc"; onActivated: root.open = false }
     }
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "activity") root.open = false } }
 }

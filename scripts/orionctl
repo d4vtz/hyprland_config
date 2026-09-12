@@ -28,13 +28,18 @@ case "$cmd" in
     clipboard)      exec qs ipc call activity clipboard ;;
     monitor)        exec qs ipc call monitor toggle ;;
     settings)       exec qs ipc call settings toggle ;;
-    session)        exec qs ipc call activity session ;;
+    session)        exec qs ipc call session toggle ;;
     reload)
         qs kill || true
+        for _ in {1..20}; do
+            pgrep -x quickshell >/dev/null 2>&1 || break
+            sleep 0.05
+        done
         exec uwsm app -- qs
         ;;
     status)
-        exec pgrep -af quickshell
+        pgrep -af quickshell
+        exec qs ipc show
         ;;
     ""|-h|--help|help)
         usage

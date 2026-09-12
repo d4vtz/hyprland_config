@@ -11,10 +11,21 @@ Item {
     id: root
 
     property bool open: false
+    property var targetScreen: null
     property int tab: 0
     property var processes: []
 
-    function toggle() {
+    function showPanel(screen) {
+        if (screen) targetScreen = screen
+        PanelCoordinator.request("monitor")
+        open = true
+        SystemStatus.refresh()
+        processList.running = true
+    }
+
+    function toggle(screen) {
+        if (!open && screen) targetScreen = screen
+        if (!open) PanelCoordinator.request("monitor")
         open = !open
         if (open) {
             SystemStatus.refresh()
@@ -25,8 +36,8 @@ Item {
     IpcHandler {
         target: "monitor"
         function toggle(): void { root.toggle() }
-        function show(): void { root.open = true; SystemStatus.refresh(); processList.running = true }
-        function hide(): void { root.open = false }
+        function show(): void { root.showPanel(null) }
+        function hide(): void { root.open = false; PanelCoordinator.close("monitor") }
     }
 
     Process {
@@ -53,6 +64,7 @@ Item {
     }
 
     PanelWindow {
+        screen: root.targetScreen
         visible: root.open
         anchors { top: true; right: true; bottom: true; left: true }
         exclusiveZone: 0
@@ -62,6 +74,9 @@ Item {
         MouseArea { anchors.fill: parent; onClicked: root.open = false }
 
         Surface {
+            id: panelSurface
+            focus: root.open
+            Keys.onEscapePressed: event => { root.open = false; PanelCoordinator.close("monitor"); event.accepted = true }
             width: 690
             height: 520
             anchors.horizontalCenter: parent.horizontalCenter
@@ -187,8 +202,9 @@ Item {
             }
         }
 
-        Shortcut { sequence: "Esc"; onActivated: root.open = false }
     }
+
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "monitor") root.open = false } }
 
     component MetricCard: Card {
         id: metric

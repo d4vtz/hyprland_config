@@ -12,18 +12,33 @@ Item {
     id: root
 
     property bool open: false
+    property var targetScreen: null
     property int audioMenu: 0 // 0 ninguno, 1 salida, 2 entrada
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
     readonly property var sinks: Pipewire.nodes.values.filter(n => n.audio !== null && n.isSink && !n.isStream)
     readonly property var sources: Pipewire.nodes.values.filter(n => n.audio !== null && !n.isSink && !n.isStream)
 
-    function toggle() {
+    function showPanel(screen) {
+        if (screen) targetScreen = screen
+        PanelCoordinator.request("controlcenter")
+        open = true
+        SystemStatus.refresh()
+    }
+
+    function toggle(screen) {
+        if (!open && screen) targetScreen = screen
+        if (!open) PanelCoordinator.request("controlcenter")
         open = !open
         if (open)
             SystemStatus.refresh()
         else
             audioMenu = 0
+    }
+
+    function adjustVolume(delta) {
+        if (sink)
+            sink.audio.volume = Math.max(0, Math.min(1.5, sink.audio.volume + delta))
     }
 
     function deviceName(node, input) {
@@ -44,8 +59,8 @@ Item {
     IpcHandler {
         target: "controlcenter"
         function toggle(): void { root.toggle() }
-        function show(): void { root.open = true; SystemStatus.refresh() }
-        function hide(): void { root.open = false; root.audioMenu = 0 }
+        function show(): void { root.showPanel(null) }
+        function hide(): void { root.open = false; root.audioMenu = 0; PanelCoordinator.close("controlcenter") }
     }
 
     PwObjectTracker {
@@ -57,6 +72,7 @@ Item {
     Process { id: profileSetter; onExited: SystemStatus.refresh() }
 
     PanelWindow {
+        screen: root.targetScreen
         visible: root.open
         anchors { top: true; right: true; bottom: true; left: true }
         exclusiveZone: 0
@@ -72,6 +88,13 @@ Item {
         }
 
         Surface {
+            id: panelSurface
+            focus: root.open
+            Keys.onEscapePressed: event => {
+                if (root.audioMenu !== 0) root.audioMenu = 0
+                else { root.open = false; PanelCoordinator.close("controlcenter") }
+                event.accepted = true
+            }
             width: 430
             height: root.audioMenu === 0 ? 565 : 650
             anchors.top: parent.top
@@ -453,14 +476,6 @@ Item {
             }
         }
 
-        Shortcut {
-            sequence: "Esc"
-            onActivated: {
-                if (root.audioMenu !== 0)
-                    root.audioMenu = 0
-                else
-                    root.open = false
-            }
-        }
     }
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "controlcenter") root.open = false } }
 }

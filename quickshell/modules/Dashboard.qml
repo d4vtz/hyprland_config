@@ -11,17 +11,21 @@ Item {
     id: root
 
     property bool open: false
+    property var targetScreen: null
+    property date now: new Date()
 
-    function toggle() { open = !open }
+    function showPanel(screen) { if (screen) targetScreen = screen; PanelCoordinator.request("dashboard"); open = true }
+    function toggle(screen) { if (open) { open = false; PanelCoordinator.close("dashboard") } else showPanel(screen) }
 
     IpcHandler {
         target: "dashboard"
         function toggle(): void { root.toggle() }
-        function show(): void { root.open = true }
-        function hide(): void { root.open = false }
+        function show(): void { root.showPanel(null) }
+        function hide(): void { root.open = false; PanelCoordinator.close("dashboard") }
     }
 
     PanelWindow {
+        screen: root.targetScreen
         visible: root.open
         anchors { top: true; right: true; bottom: true; left: true }
         exclusiveZone: 0
@@ -34,6 +38,9 @@ Item {
         }
 
         Surface {
+            id: panelSurface
+            focus: root.open
+            Keys.onEscapePressed: event => { root.open = false; PanelCoordinator.close("dashboard"); event.accepted = true }
             width: Math.min(760, parent.width - 40)
             height: Math.min(520, parent.height - 80)
             anchors.horizontalCenter: parent.horizontalCenter
@@ -54,14 +61,14 @@ Item {
                     ColumnLayout {
                         spacing: 2
                         Text {
-                            text: Qt.formatDateTime(new Date(), "hh:mm")
+                            text: Qt.formatDateTime(root.now, "hh:mm")
                             color: Theme.foreground
                             font.family: Theme.fontFamily
                             font.pixelSize: 34
                             font.weight: Font.DemiBold
                         }
                         Text {
-                            text: Qt.formatDateTime(new Date(), "dddd d 'de' MMMM")
+                            text: Qt.formatDateTime(root.now, "dddd d 'de' MMMM")
                             color: Theme.muted
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSizeBody
@@ -216,6 +223,8 @@ Item {
             }
         }
 
-        Shortcut { sequence: "Esc"; onActivated: root.open = false }
     }
+
+    Timer { interval: 1000; repeat: true; running: root.open; onTriggered: root.now = new Date() }
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "dashboard") root.open = false } }
 }

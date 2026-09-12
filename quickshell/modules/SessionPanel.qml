@@ -10,28 +10,33 @@ import "../services"
 Item {
     id: root
     property bool open: false
+    property var targetScreen: null
 
-    function showPanel() {
+    function showPanel(screen) {
+        if (screen) targetScreen = screen
+        PanelCoordinator.request("session")
         open = true
         Qt.callLater(sessionView.takeFocus)
     }
 
-    function toggle() {
+    function toggle(screen) {
         if (open) {
             open = false
+            PanelCoordinator.close("session")
             return
         }
-        showPanel()
+        showPanel(screen)
     }
 
     IpcHandler {
         target: "session"
         function toggle(): void { root.toggle() }
-        function show(): void { root.showPanel() }
-        function hide(): void { root.open = false }
+        function show(): void { root.showPanel(null) }
+        function hide(): void { root.open = false; PanelCoordinator.close("session") }
     }
 
     PanelWindow {
+        screen: root.targetScreen
         visible: root.open
         anchors { top: true; right: true; bottom: true; left: true }
         exclusiveZone: 0
@@ -44,6 +49,9 @@ Item {
         }
 
         Surface {
+            id: panelSurface
+            focus: root.open
+            Keys.onEscapePressed: event => { root.open = false; PanelCoordinator.close("session"); event.accepted = true }
             width: 470
             height: 300
             anchors.horizontalCenter: parent.horizontalCenter
@@ -103,4 +111,6 @@ Item {
             }
         }
     }
+
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "session") root.open = false } }
 }

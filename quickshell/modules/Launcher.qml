@@ -5,18 +5,35 @@ import Quickshell.Io
 import Quickshell.Wayland
 import ".."
 import "../components"
+import "../services"
 
 Item {
     id: root
 
     property bool open: false
+    property var targetScreen: null
     property string query: ""
     property var entries: []
     readonly property var filteredEntries: entries.filter(entry =>
         entry.name.toLowerCase().includes(query.toLowerCase())
         || entry.id.toLowerCase().includes(query.toLowerCase()))
 
-    function toggle() {
+    function showPanel(screen) {
+        if (screen) targetScreen = screen
+        PanelCoordinator.request("launcher")
+        open = true
+        query = ""
+        appList.running = true
+    }
+
+    function toggle(screen) {
+        if (open) {
+            open = false
+            PanelCoordinator.close("launcher")
+            return
+        }
+        if (screen) targetScreen = screen
+        PanelCoordinator.request("launcher")
         open = !open
         if (open) {
             query = ""
@@ -33,8 +50,8 @@ Item {
     IpcHandler {
         target: "launcher"
         function toggle(): void { root.toggle() }
-        function show(): void { root.open = true; root.query = ""; appList.running = true }
-        function hide(): void { root.open = false }
+        function show(): void { root.showPanel(null) }
+        function hide(): void { root.open = false; PanelCoordinator.close("launcher") }
     }
 
     Process {
@@ -53,6 +70,7 @@ Item {
     Process { id: launchProcess }
 
     PanelWindow {
+        screen: root.targetScreen
         visible: root.open
         anchors { top: true; right: true; bottom: true; left: true }
         exclusiveZone: 0
@@ -62,6 +80,9 @@ Item {
         MouseArea { anchors.fill: parent; onClicked: root.open = false }
 
         Surface {
+            id: panelSurface
+            focus: root.open
+            Keys.onEscapePressed: event => { root.open = false; PanelCoordinator.close("launcher"); event.accepted = true }
             width: 620
             height: 500
             anchors.horizontalCenter: parent.horizontalCenter
@@ -205,6 +226,7 @@ Item {
             }
         }
 
-        Shortcut { sequence: "Esc"; onActivated: root.open = false }
     }
+
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "launcher") root.open = false } }
 }

@@ -54,7 +54,7 @@ ShellRoot {
                             parent: launcherPill
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: launcher.toggle()
+                            onClicked: launcher.toggle(modelData)
                         }
                     }
 
@@ -71,7 +71,7 @@ ShellRoot {
                             parent: dashboardPill
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: dashboard.toggle()
+                            onClicked: dashboard.toggle(modelData)
                         }
                     }
 
@@ -88,6 +88,7 @@ ShellRoot {
                     spacing: 7
 
                     Media {}
+                    Tray {}
 
                     Pill {
                         id: monitorPill
@@ -102,7 +103,7 @@ ShellRoot {
                             parent: monitorPill
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: systemMonitor.toggle()
+                            onClicked: systemMonitor.toggle(modelData)
                         }
                     }
 
@@ -148,7 +149,10 @@ ShellRoot {
                             parent: controlCenterPill
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: controlCenter.toggle()
+                            onClicked: controlCenter.toggle(modelData)
+                            onWheel: wheel => {
+                                controlCenter.adjustVolume(wheel.angleDelta.y > 0 ? .05 : -.05)
+                            }
                         }
                     }
 
@@ -191,7 +195,7 @@ ShellRoot {
                             parent: activityPill
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: activityCenter.toggle(0)
+                            onClicked: activityCenter.toggle(0, modelData)
                         }
                     }
 
@@ -228,7 +232,7 @@ ShellRoot {
                             parent: sessionPill
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: sessionPanel.toggle()
+                            onClicked: sessionPanel.toggle(modelData)
                         }
                     }
 
@@ -245,7 +249,7 @@ ShellRoot {
                             parent: settingsPill
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: settingsPanel.toggle()
+                            onClicked: settingsPanel.toggle(modelData)
                         }
                     }
                 }
