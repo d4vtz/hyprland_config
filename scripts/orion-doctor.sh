@@ -30,8 +30,10 @@ done
 printf '\nServicios opcionales\n'
 if command -v powerprofilesctl >/dev/null 2>&1; then
     ok "powerprofilesctl"
+elif command -v tuned-adm >/dev/null 2>&1; then
+    ok "tuned-adm"
 else
-    note "powerprofilesctl no está disponible; los perfiles de energía quedarán deshabilitados"
+    note "No hay backend de energía; instala power-profiles-daemon o tuned"
 fi
 
 if command -v kdialog >/dev/null 2>&1 || command -v zenity >/dev/null 2>&1; then

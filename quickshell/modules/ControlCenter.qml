@@ -139,6 +139,12 @@ Item {
                                 color: root.sink && root.sink.audio.muted ? Theme.muted : Theme.cyan
                                 font.family: Theme.iconFamily
                                 font.pixelSize: 18
+                                MouseArea {
+                                    anchors.fill: parent
+                                    anchors.margins: -6
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: if (root.sink) root.sink.audio.muted = !root.sink.audio.muted
+                                }
                             }
                             ValueSlider {
                                 Layout.fillWidth: true
@@ -178,7 +184,7 @@ Item {
                                 accent: Theme.yellow
                                 onValueRequested: value => {
                                     SystemStatus.brightness = value
-                                    brightnessSetter.command = ["brightnessctl", "set", Math.round(value * 100) + "%"]
+                                    brightnessSetter.command = ["brightnessctl", "set", Math.max(2, Math.round(value * 100)) + "%"]
                                     brightnessSetter.running = true
                                 }
                             }
@@ -247,6 +253,7 @@ Item {
                                   ? "Alimentación externa"
                                   : SystemStatus.battery + "% · " + SystemStatus.batteryState
                         checked: SystemStatus.acConnected
+                        interactive: false
                         accent: Theme.green
                         onClicked: {}
                     }
@@ -280,7 +287,7 @@ Item {
 
                                 delegate: Rectangle {
                                     required property var modelData
-                                    readonly property bool available: SystemStatus.powerProfiles.indexOf(modelData.id) >= 0
+                                    readonly property bool available: SystemStatus.powerProfiles.split(",").indexOf(modelData.id) >= 0
 
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 36
@@ -301,7 +308,14 @@ Item {
                                         enabled: parent.available
                                         cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                                         onClicked: {
-                                            profileSetter.command = ["powerprofilesctl", "set", modelData.id]
+                                            const tunedProfiles = {
+                                                "performance": "throughput-performance",
+                                                "balanced": "balanced",
+                                                "power-saver": "powersave"
+                                            }
+                                            profileSetter.command = SystemStatus.powerBackend === "tuned"
+                                                ? ["pkexec", "tuned-adm", "profile", tunedProfiles[modelData.id]]
+                                                : ["powerprofilesctl", "set", modelData.id]
                                             profileSetter.running = true
                                         }
                                     }
@@ -322,10 +336,16 @@ Item {
                         RowLayout {
                             Layout.fillWidth: true
                             Text {
-                                text: "󰓃"
-                                color: Theme.cyan
+                                text: root.sink && root.sink.audio.muted ? "󰝟" : "󰓃"
+                                color: root.sink && root.sink.audio.muted ? Theme.muted : Theme.cyan
                                 font.family: Theme.iconFamily
                                 font.pixelSize: 16
+                                MouseArea {
+                                    anchors.fill: parent
+                                    anchors.margins: -6
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: if (root.sink) root.sink.audio.muted = !root.sink.audio.muted
+                                }
                             }
                             Text {
                                 Layout.fillWidth: true
@@ -353,6 +373,12 @@ Item {
                                 color: root.source && root.source.audio.muted ? Theme.muted : Theme.pink
                                 font.family: Theme.iconFamily
                                 font.pixelSize: 16
+                                MouseArea {
+                                    anchors.fill: parent
+                                    anchors.margins: -6
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: if (root.source) root.source.audio.muted = !root.source.audio.muted
+                                }
                             }
                             Text {
                                 Layout.fillWidth: true

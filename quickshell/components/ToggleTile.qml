@@ -9,6 +9,7 @@ Rectangle {
     property string title: ""
     property string subtitle: ""
     property bool checked: false
+    property bool interactive: true
     property color accent: Theme.purple
     signal clicked()
 
@@ -67,7 +68,8 @@ Rectangle {
 
     MouseArea {
         anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
+        enabled: root.interactive
+        cursorShape: root.interactive ? Qt.PointingHandCursor : Qt.ArrowCursor
         onClicked: root.clicked()
     }
 }

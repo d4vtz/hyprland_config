@@ -27,6 +27,7 @@ QtObject {
     property real gpuFrequency: 0
     property string powerProfile: "balanced"
     property string powerProfiles: ""
+    property string powerBackend: "none"
     property bool nightLightEnabled: false
     property string userName: ""
     property string hostName: ""
@@ -95,7 +96,7 @@ QtObject {
     }
 
     property Process stateProcess: Process {
-        command: ["bash", "-c", "bt=$(bluetoothctl show 2>/dev/null | awk '/Powered:/{print $2;exit}'); profile=$(powerprofilesctl get 2>/dev/null || echo unavailable); profiles=$(powerprofilesctl list 2>/dev/null | sed -nE 's/^[[:space:]]*\\*?[[:space:]]*(performance|balanced|power-saver):.*/\\1/p' | paste -sd,); pgrep -x hyprsunset >/dev/null && night=1 || night=0; pactl list sinks 2>/dev/null | awk 'BEGIN{RS=\"\"} /State: RUNNING/ && /Name: bluez_output/{active=1} END{exit !active}' && bta=1 || bta=0; printf '%s|%s|%s|%s|%s' \"$bt\" \"$profile\" \"$night\" \"$bta\" \"$profiles\""]
+        command: ["bash", "-c", "bt=$(bluetoothctl show 2>/dev/null | awk '/Powered:/{print $2;exit}'); backend=none; profile=unavailable; profiles=; if command -v powerprofilesctl >/dev/null 2>&1; then backend=powerprofilesctl; profile=$(powerprofilesctl get 2>/dev/null || echo unavailable); profiles=$(powerprofilesctl list 2>/dev/null | sed -nE 's/^[[:space:]]*\\*?[[:space:]]*(performance|balanced|power-saver):.*/\\1/p' | paste -sd,); elif command -v tuned-adm >/dev/null 2>&1; then backend=tuned; raw=$(tuned-adm active 2>/dev/null | sed -n 's/^Current active profile: //p'); case $raw in throughput-performance) profile=performance;; powersave) profile=power-saver;; balanced) profile=balanced;; *) profile=$raw;; esac; available=$(tuned-adm list 2>/dev/null); profiles=; grep -q 'throughput-performance' <<<\"$available\" && profiles=performance; grep -qE '(^|[[:space:]])balanced([[:space:]]|$)' <<<\"$available\" && profiles=${profiles:+$profiles,}balanced; grep -qE '(^|[[:space:]])powersave([[:space:]]|$)' <<<\"$available\" && profiles=${profiles:+$profiles,}power-saver; fi; pgrep -x hyprsunset >/dev/null && night=1 || night=0; pactl list sinks 2>/dev/null | awk 'BEGIN{RS=\"\"} /State: RUNNING/ && /Name: bluez_output/{active=1} END{exit !active}' && bta=1 || bta=0; printf '%s|%s|%s|%s|%s|%s' \"$bt\" \"$profile\" \"$night\" \"$bta\" \"$profiles\" \"$backend\""]
         stdout: StdioCollector {
             onStreamFinished: {
                 const fields = text.trim().split("|")
@@ -104,6 +105,7 @@ QtObject {
                 root.nightLightEnabled = fields[2] === "1"
                 root.bluetoothAudioActive = fields[3] === "1"
                 root.powerProfiles = fields[4] || ""
+                root.powerBackend = fields[5] || "none"
             }
         }
     }
