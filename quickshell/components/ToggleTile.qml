@@ -10,8 +10,10 @@ Rectangle {
     property string subtitle: ""
     property bool checked: false
     property bool interactive: true
+    property string actionIcon: ""
     property color accent: Theme.purple
     signal clicked()
+    signal actionClicked()
 
     implicitHeight: 64
     radius: Theme.cardRadius
@@ -68,8 +70,36 @@ Rectangle {
 
     MouseArea {
         anchors.fill: parent
+        anchors.rightMargin: root.actionIcon.length > 0 ? 34 : 0
         enabled: root.interactive
         cursorShape: root.interactive ? Qt.PointingHandCursor : Qt.ArrowCursor
         onClicked: root.clicked()
+    }
+
+    Rectangle {
+        visible: root.actionIcon.length > 0
+        anchors.right: parent.right
+        anchors.rightMargin: 8
+        anchors.verticalCenter: parent.verticalCenter
+        width: 28
+        height: 28
+        radius: 9
+        color: actionArea.containsMouse ? Theme.current : "transparent"
+
+        Text {
+            anchors.centerIn: parent
+            text: root.actionIcon
+            color: root.accent
+            font.family: Theme.iconFamily
+            font.pixelSize: 15
+        }
+        MouseArea {
+            id: actionArea
+            anchors.fill: parent
+            enabled: root.interactive
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.actionClicked()
+        }
     }
 }

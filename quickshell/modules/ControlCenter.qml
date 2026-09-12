@@ -14,6 +14,10 @@ Item {
     property bool open: false
     property var targetScreen: null
     property int audioMenu: 0 // 0 ninguno, 1 salida, 2 entrada
+    property bool busy: false
+    property string statusMessage: ""
+    property bool statusError: false
+    property real pendingBrightness: SystemStatus.brightness
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
     readonly property var sinks: Pipewire.nodes.values.filter(n => n.audio !== null && n.isSink && !n.isStream)
@@ -43,6 +47,21 @@ Item {
             sink.audio.volume = Math.max(0, Math.min(1.5, sink.audio.volume + delta))
     }
 
+    function runCommand(args, label) {
+        if (busy) return
+        busy = true
+        statusError = false
+        statusMessage = label
+        command.command = args
+        command.running = true
+    }
+
+    function launchExternal(args) {
+        externalLauncher.command = args
+        externalLauncher.running = true
+        closePanel()
+    }
+
     function deviceName(node, input) {
         if (!node) return input ? "Sin entrada" : "Sin salida"
         const raw = String(node.description || node.nickname || node.name || "")
@@ -69,9 +88,37 @@ Item {
         objects: [root.sink, root.source].concat(root.sinks).concat(root.sources)
     }
 
-    Process { id: command; onExited: SystemStatus.refresh() }
+    Process {
+        id: command
+        onExited: function(exitCode, exitStatus) {
+            root.busy = false
+            root.statusError = exitCode !== 0
+            root.statusMessage = exitCode === 0 ? "Cambio aplicado" : "No se pudo aplicar el cambio"
+            statusTimer.restart()
+            SystemStatus.refresh()
+        }
+    }
     Process { id: brightnessSetter; onExited: SystemStatus.refresh() }
-    Process { id: profileSetter; onExited: SystemStatus.refresh() }
+    Process { id: externalLauncher }
+    Process {
+        id: profileSetter
+        onExited: function(exitCode, exitStatus) {
+            root.busy = false
+            root.statusError = exitCode !== 0
+            root.statusMessage = exitCode === 0 ? "Perfil aplicado" : "No se pudo cambiar el perfil"
+            statusTimer.restart()
+            SystemStatus.refresh()
+        }
+    }
+    Timer { id: statusTimer; interval: 2500; onTriggered: root.statusMessage = "" }
+    Timer {
+        id: brightnessDelay
+        interval: 90
+        onTriggered: {
+            brightnessSetter.command = ["brightnessctl", "set", Math.max(2, Math.round(root.pendingBrightness * 100)) + "%"]
+            brightnessSetter.running = true
+        }
+    }
 
     PanelWindow {
         screen: root.targetScreen
@@ -98,7 +145,7 @@ Item {
                 event.accepted = true
             }
             width: 430
-            height: root.audioMenu === 0 ? 565 : 650
+            height: Math.min(680, parent.height - 64)
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.topMargin: 54
@@ -110,10 +157,19 @@ Item {
 
             MouseArea { anchors.fill: parent }
 
-            ColumnLayout {
+            Flickable {
                 anchors.fill: parent
-                anchors.margins: Theme.spacingLg
-                spacing: Theme.spacingMd
+                clip: true
+                contentWidth: width
+                contentHeight: contentColumn.implicitHeight + Theme.spacingLg * 2
+                boundsBehavior: Flickable.StopAtBounds
+
+                ColumnLayout {
+                    id: contentColumn
+                    x: Theme.spacingLg
+                    y: Theme.spacingLg
+                    width: parent.width - Theme.spacingLg * 2
+                    spacing: Theme.spacingMd
 
                 SectionTitle {
                     Layout.fillWidth: true
@@ -121,6 +177,21 @@ Item {
                     title: "Centro de control"
                     subtitle: SystemStatus.userName + "@" + SystemStatus.hostName
                     accent: Theme.purple
+                }
+
+                Rectangle {
+                    visible: root.statusMessage.length > 0
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: visible ? 30 : 0
+                    radius: Theme.cardRadius
+                    color: root.statusError ? Qt.rgba(1, 0.33, 0.33, 0.14) : Qt.rgba(0.31, 0.98, 0.48, 0.12)
+                    Text {
+                        anchors.centerIn: parent
+                        text: (root.busy ? "󰔟  " : root.statusError ? "󰅙  " : "󰄬  ") + root.statusMessage
+                        color: root.statusError ? Theme.red : Theme.green
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeSmall
+                    }
                 }
 
                 Card {
@@ -183,9 +254,9 @@ Item {
                                 value: SystemStatus.brightness
                                 accent: Theme.yellow
                                 onValueRequested: value => {
-                                    SystemStatus.brightness = value
-                                    brightnessSetter.command = ["brightnessctl", "set", Math.max(2, Math.round(value * 100)) + "%"]
-                                    brightnessSetter.running = true
+                                    root.pendingBrightness = Math.max(0.02, value)
+                                    SystemStatus.brightness = root.pendingBrightness
+                                    brightnessDelay.restart()
                                 }
                             }
                             Text {
@@ -212,11 +283,13 @@ Item {
                         title: "Wi-Fi"
                         subtitle: SystemStatus.wifiEnabled ? SystemStatus.network : "Desactivado"
                         checked: SystemStatus.wifiEnabled
+                        interactive: !root.busy
+                        actionIcon: "󰍹"
                         accent: Theme.cyan
                         onClicked: {
-                            command.command = ["nmcli", "radio", "wifi", SystemStatus.wifiEnabled ? "off" : "on"]
-                            command.running = true
+                            root.runCommand(["nmcli", "radio", "wifi", SystemStatus.wifiEnabled ? "off" : "on"], "Cambiando Wi-Fi…")
                         }
+                        onActionClicked: root.launchExternal(["nm-connection-editor"])
                     }
 
                     ToggleTile {
@@ -225,11 +298,13 @@ Item {
                         title: "Bluetooth"
                         subtitle: SystemStatus.bluetoothEnabled ? (SystemStatus.bluetoothAudioActive ? "Audio conectado" : "Activado") : "Desactivado"
                         checked: SystemStatus.bluetoothEnabled
+                        interactive: !root.busy
+                        actionIcon: "󰍹"
                         accent: Theme.purple
                         onClicked: {
-                            command.command = ["bluetoothctl", "power", SystemStatus.bluetoothEnabled ? "off" : "on"]
-                            command.running = true
+                            root.runCommand(["bluetoothctl", "power", SystemStatus.bluetoothEnabled ? "off" : "on"], "Cambiando Bluetooth…")
                         }
+                        onActionClicked: root.launchExternal(["blueman-manager"])
                     }
 
                     ToggleTile {
@@ -240,8 +315,7 @@ Item {
                         checked: SystemStatus.nightLightEnabled
                         accent: Theme.orange
                         onClicked: {
-                            command.command = ["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/night-light-menu.sh"]
-                            command.running = true
+                            root.runCommand(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/night-light-menu.sh"], "Configurando luz nocturna…")
                         }
                     }
 
@@ -251,11 +325,32 @@ Item {
                         title: "Batería"
                         subtitle: SystemStatus.battery === "CA"
                                   ? "Alimentación externa"
-                                  : SystemStatus.battery + "% · " + SystemStatus.batteryState
+                                  : SystemStatus.battery + "% · salud " + SystemStatus.batteryHealth + "% · " + SystemStatus.batteryTime
                         checked: SystemStatus.acConnected
                         interactive: false
                         accent: Theme.green
                         onClicked: {}
+                    }
+                }
+
+                Card {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 54
+                    RowLayout {
+                        anchors.fill: parent
+                        spacing: Theme.spacingSm
+                        QuickAction { icon: "󰅶"; label: "Cafeína"; active: CaffeineService.active; accent: Theme.yellow; onClicked: CaffeineService.toggle() }
+                        QuickAction { icon: "󰂛"; label: "No molestar"; active: NotificationService.doNotDisturb; accent: Theme.red; onClicked: NotificationService.doNotDisturb = !NotificationService.doNotDisturb }
+                        QuickAction { icon: "󰌾"; label: "Bloquear"; accent: Theme.cyan; onClicked: { root.runCommand(["loginctl", "lock-session"], "Bloqueando…"); root.closePanel() } }
+                        QuickAction {
+                            icon: "󰀝"
+                            label: "Avión"
+                            active: !SystemStatus.wifiEnabled && !SystemStatus.bluetoothEnabled
+                            accent: Theme.purple
+                            onClicked: root.runCommand(["bash", "-c", active
+                                ? "nmcli radio wifi on; bluetoothctl power on"
+                                : "nmcli radio wifi off; bluetoothctl power off"], "Cambiando modo avión…")
+                        }
                     }
                 }
 
@@ -316,6 +411,9 @@ Item {
                                             profileSetter.command = SystemStatus.powerBackend === "tuned"
                                                 ? ["pkexec", "tuned-adm", "profile", tunedProfiles[modelData.id]]
                                                 : ["powerprofilesctl", "set", modelData.id]
+                                            root.busy = true
+                                            root.statusError = false
+                                            root.statusMessage = "Cambiando perfil…"
                                             profileSetter.running = true
                                         }
                                     }
@@ -327,7 +425,7 @@ Item {
 
                 Card {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 104
+                    Layout.preferredHeight: 148
 
                     ColumnLayout {
                         anchors.fill: parent
@@ -363,6 +461,36 @@ Item {
                             TapHandler {
                                 cursorShape: Qt.PointingHandCursor
                                 onTapped: root.audioMenu = root.audioMenu === 1 ? 0 : 1
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Theme.spacingMd
+                            Text {
+                                text: root.source && root.source.audio.muted ? "󰍭" : "󰍬"
+                                color: root.source && root.source.audio.muted ? Theme.muted : Theme.pink
+                                font.family: Theme.iconFamily
+                                font.pixelSize: 16
+                            }
+                            ValueSlider {
+                                Layout.fillWidth: true
+                                value: root.source ? Math.min(1, root.source.audio.volume) : 0
+                                accent: Theme.pink
+                                onValueRequested: value => {
+                                    if (root.source) {
+                                        root.source.audio.muted = false
+                                        root.source.audio.volume = value
+                                    }
+                                }
+                            }
+                            Text {
+                                Layout.preferredWidth: 38
+                                horizontalAlignment: Text.AlignRight
+                                text: root.source ? Math.round(root.source.audio.volume * 100) + "%" : "--"
+                                color: Theme.foreground
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSizeSmall
                             }
                         }
 
@@ -447,8 +575,6 @@ Item {
                     }
                 }
 
-                Item { Layout.fillHeight: true }
-
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: Theme.spacingSm
@@ -502,8 +628,29 @@ Item {
                     }
                 }
             }
+            }
         }
 
     }
     Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "controlcenter") root.closePanel() } }
+
+    component QuickAction: Rectangle {
+        id: action
+        property string icon: ""
+        property string label: ""
+        property bool active: false
+        property color accent: Theme.purple
+        signal clicked()
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        radius: Theme.cardRadius
+        color: active ? Qt.rgba(accent.r, accent.g, accent.b, 0.18) : Theme.surface
+        Row {
+            anchors.centerIn: parent
+            spacing: 5
+            Text { text: action.icon; color: action.accent; font.family: Theme.iconFamily; font.pixelSize: 14 }
+            Text { text: action.label; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: 9 }
+        }
+        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: action.clicked() }
+    }
 }

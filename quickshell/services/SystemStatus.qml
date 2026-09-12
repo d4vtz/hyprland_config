@@ -13,6 +13,8 @@ QtObject {
     property string battery: "--"
     property string batteryState: "Sin batería"
     property string batteryTime: "--"
+    property string batteryHealth: "--"
+    property string batteryCycles: "--"
     property bool acConnected: false
     property real brightness: 0
     property real cpuUsage: 0
@@ -64,7 +66,7 @@ QtObject {
     }
 
     property Process batteryProcess: Process {
-        command: ["bash", "-c", "b=$(find /sys/class/power_supply -maxdepth 1 -name 'BAT*' -print -quit); ac=0; for p in /sys/class/power_supply/*/online; do [[ -r $p && $(<$p) == 1 ]] && ac=1; done; [[ -z $b ]] && { printf 'CA|Sin batería|--|%s' \"$ac\"; exit; }; cap=$(<$b/capacity); st=$(<$b/status); case \"$st\" in Charging) label=Cargando;; Discharging) label=Descargando;; Full) label='Carga completa';; 'Not charging') label='Conectada, sin cargar';; *) label=\"$st\";; esac; now=$(cat \"$b/energy_now\" 2>/dev/null || cat \"$b/charge_now\" 2>/dev/null || echo 0); full=$(cat \"$b/energy_full\" 2>/dev/null || cat \"$b/charge_full\" 2>/dev/null || echo \"$now\"); rate=$(cat \"$b/power_now\" 2>/dev/null || cat \"$b/current_now\" 2>/dev/null || echo 0); if [[ ${rate:-0} -gt 0 ]]; then [[ $st == Charging ]] && amount=$((full-now)) || amount=$now; secs=$((amount*3600/rate)); printf '%s|%s|%dh %02d min|%s' \"$cap\" \"$label\" $((secs/3600)) $(((secs%3600)/60)) \"$ac\"; else printf '%s|%s|--|%s' \"$cap\" \"$label\" \"$ac\"; fi"]
+        command: ["bash", "-c", "b=$(find /sys/class/power_supply -maxdepth 1 -name 'BAT*' -print -quit); ac=0; for p in /sys/class/power_supply/*/online; do [[ -r $p && $(<$p) == 1 ]] && ac=1; done; [[ -z $b ]] && { printf 'CA|Sin batería|--|%s|--|--' \"$ac\"; exit; }; cap=$(<$b/capacity); st=$(<$b/status); case \"$st\" in Charging) label=Cargando;; Discharging) label=Descargando;; Full) label='Carga completa';; 'Not charging') label='Conectada, sin cargar';; *) label=\"$st\";; esac; now=$(cat \"$b/energy_now\" 2>/dev/null || cat \"$b/charge_now\" 2>/dev/null || echo 0); full=$(cat \"$b/energy_full\" 2>/dev/null || cat \"$b/charge_full\" 2>/dev/null || echo \"$now\"); design=$(cat \"$b/energy_full_design\" 2>/dev/null || cat \"$b/charge_full_design\" 2>/dev/null || echo 0); cycles=$(cat \"$b/cycle_count\" 2>/dev/null || echo --); [[ ${design:-0} -gt 0 ]] && health=$((full*100/design)) || health=--; rate=$(cat \"$b/power_now\" 2>/dev/null || cat \"$b/current_now\" 2>/dev/null || echo 0); time=--; if [[ ${rate:-0} -gt 0 ]]; then [[ $st == Charging ]] && amount=$((full-now)) || amount=$now; secs=$((amount*3600/rate)); time=$(printf '%dh %02d min' $((secs/3600)) $(((secs%3600)/60))); fi; printf '%s|%s|%s|%s|%s|%s' \"$cap\" \"$label\" \"$time\" \"$ac\" \"$health\" \"$cycles\""]
         stdout: StdioCollector {
             onStreamFinished: {
                 const fields = text.trim().split("|")
@@ -72,6 +74,8 @@ QtObject {
                 root.batteryState = fields[1] || "Sin batería"
                 root.batteryTime = fields[2] || "--"
                 root.acConnected = fields[3] === "1"
+                root.batteryHealth = fields[4] || "--"
+                root.batteryCycles = fields[5] || "--"
             }
         }
     }
