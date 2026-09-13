@@ -17,6 +17,20 @@ count_lines() {
 }
 
 case ${1:-} in
+  list)
+    if command -v checkupdates >/dev/null; then
+      while read -r name current arrow next rest; do
+        [[ -n ${name:-} && ${arrow:-} == "->" ]] &&
+          printf 'Arch|%s|%s|%s\n' "$name" "$current" "$next"
+      done < <(checkupdates 2>/dev/null || true)
+    fi
+    if command -v paru >/dev/null; then
+      while read -r name current arrow next rest; do
+        [[ -n ${name:-} && ${arrow:-} == "->" ]] &&
+          printf 'AUR|%s|%s|%s\n' "$name" "$current" "$next"
+      done < <(paru -Qua 2>/dev/null || true)
+    fi
+    ;;
   status)
     official=0
     aur=0
@@ -44,7 +58,19 @@ case ${1:-} in
     ;;
   update)
     confirm "¿Actualizar paquetes oficiales y AUR?" || exit 0
-    exec uwsm app -- kitty --class orion-maintenance -e paru -Syu
+    exec uwsm app -- kitty --class orion-maintenance -e bash -lc '
+      printf "\\e[1;35mOrion · Actualización del sistema\\e[0m\\n\\n"
+      paru -Syu
+      result=$?
+      printf "\\n"
+      if (( result == 0 )); then
+        printf "\\e[1;32mActualización terminada correctamente.\\e[0m\\n"
+      else
+        printf "\\e[1;31mLa actualización terminó con código %s.\\e[0m\\n" "$result"
+      fi
+      read -r -p "Pulsa Enter para cerrar..."
+      exit "$result"
+    '
     ;;
   cache)
     confirm "¿Eliminar versiones antiguas de la caché de Pacman?" || exit 0
@@ -63,7 +89,7 @@ case ${1:-} in
     exec uwsm app -- kitty --class orion-maintenance -e bash "$script_dir/caelestia-upstream.sh" update
     ;;
   *)
-    printf 'Uso: %s {status|update|cache|services|upstream-check|upstream-update}\n' "${0##*/}" >&2
+    printf 'Uso: %s {list|status|update|cache|services|upstream-check|upstream-update}\n' "${0##*/}" >&2
     exit 2
     ;;
 esac
