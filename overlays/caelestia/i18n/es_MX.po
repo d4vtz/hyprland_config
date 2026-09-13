@@ -264,3 +264,9 @@ msgstr "Revisar servicios fallidos"
 
 msgid "Update Caelestia"
 msgstr "Actualizar Caelestia"
+
+msgid "Pending packages"
+msgstr "Paquetes pendientes"
+
+msgid "No pending package updates"
+msgstr "No hay actualizaciones de paquetes pendientes"
