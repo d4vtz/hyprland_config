@@ -30,7 +30,7 @@ StyledRect {
     }
 
     function run(action: string): void {
-        command.command = [root.helper, action];
+        command.command = ["bash", root.helper, action];
         command.running = true;
     }
 
@@ -38,7 +38,7 @@ StyledRect {
 
     Process {
         id: status
-        command: [root.helper, "status"]
+        command: ["bash", root.helper, "status"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const fields = text.trim().split("|");
