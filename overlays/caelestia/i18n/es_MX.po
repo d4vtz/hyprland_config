@@ -228,3 +228,39 @@ msgstr "Reiniciar"
 
 msgid "Shutdown"
 msgstr "Apagar"
+
+msgid "Maintenance"
+msgstr "Mantenimiento"
+
+msgid "%1 failed services"
+msgstr "%1 servicios con fallos"
+
+msgid "%1 updates available"
+msgstr "%1 actualizaciones disponibles"
+
+msgid "Caelestia update available"
+msgstr "Actualización de Caelestia disponible"
+
+msgid "System up to date"
+msgstr "Sistema actualizado"
+
+msgid "Packages"
+msgstr "Paquetes"
+
+msgid "Update system and AUR"
+msgstr "Actualizar sistema y AUR"
+
+msgid "Cache"
+msgstr "Caché"
+
+msgid "Clean package cache"
+msgstr "Limpiar caché de paquetes"
+
+msgid "Services"
+msgstr "Servicios"
+
+msgid "Review failed services"
+msgstr "Revisar servicios fallidos"
+
+msgid "Update Caelestia"
+msgstr "Actualizar Caelestia"
