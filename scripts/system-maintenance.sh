@@ -37,7 +37,7 @@ case ${1:-} in
       } | count_lines
     )
 
-    if "$script_dir/caelestia-upstream.sh" machine 2>/dev/null | grep -qx available; then
+    if bash "$script_dir/caelestia-upstream.sh" machine 2>/dev/null | grep -qx available; then
       upstream=1
     fi
     printf '%s|%s|%s|%s\n' "$official" "$aur" "$failed" "$upstream"
@@ -56,11 +56,11 @@ case ${1:-} in
       'systemctl --failed; printf "\nServicios de usuario:\n"; systemctl --user --failed; read -r -p "Pulsa Enter para cerrar..."'
     ;;
   upstream-check)
-    exec "$script_dir/caelestia-upstream.sh" check
+    exec bash "$script_dir/caelestia-upstream.sh" check
     ;;
   upstream-update)
     confirm "¿Actualizar Caelestia, reaplicar Orion y recompilar?" || exit 0
-    exec uwsm app -- kitty --class orion-maintenance -e "$script_dir/caelestia-upstream.sh" update
+    exec uwsm app -- kitty --class orion-maintenance -e bash "$script_dir/caelestia-upstream.sh" update
     ;;
   *)
     printf 'Uso: %s {status|update|cache|services|upstream-check|upstream-update}\n' "${0##*/}" >&2
