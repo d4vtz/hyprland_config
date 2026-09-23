@@ -11,8 +11,8 @@ PanelWindow {
     visible: showing && NotificationService.latest !== null && !NotificationService.doNotDisturb
     anchors { top: true; right: true }
     margins { top: 8; right: 8 }
-    implicitWidth: 350
-    implicitHeight: 112
+    implicitWidth: 380
+    implicitHeight: 120
     exclusiveZone: 0
     color: "transparent"
 
@@ -43,9 +43,9 @@ PanelWindow {
     Rectangle {
         anchors.fill: parent
         anchors.margins: 4
-        radius: Theme.radius + 2
+        radius: Theme.panelRadius
         color: Theme.background
-        border.color: Theme.border
+        border.color: "transparent"
 
         RowLayout {
             anchors.fill: parent
@@ -55,8 +55,8 @@ PanelWindow {
             Rectangle {
                 Layout.preferredWidth: 42
                 Layout.preferredHeight: 42
-                radius: 10
-                color: Theme.surface
+                radius: Theme.radiusSm
+                color: Theme.surfaceContainer
 
                 property string resolvedIcon: NotificationService.latest
                                               ? root.iconSource(NotificationService.latest.appIcon)
