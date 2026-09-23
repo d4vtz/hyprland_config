@@ -11,7 +11,6 @@ Shell de escritorio para Hyprland sobre Arch Linux. Quickshell/QML proporciona l
 - Sistema visual compartido (`Theme`, `Surface`, `Card`, `SectionTitle`, `ToggleTile`).
 - Dashboard nativo con métricas, conectividad, energía y almacenamiento.
 - Lanzador nativo de Orion Shell, centro de actividad, centro de control, monitor del sistema y ajustes propios.
-- Rofi y Waybar se conservan únicamente como fallback durante la transición.
 - Hyprpaper, Hyprlock e Hypridle.
 - Capturas con Grimblast y edición en Satty.
 - Super + F1 abre una hoja de atajos filtrable.
@@ -175,13 +174,6 @@ hyprctl reload
 qs kill && uwsm app -- qs
 ```
 
-Durante la migración puedes alternar sin cerrar la sesión:
-
-```bash
-~/.config/hypr/scripts/bar-waybar.sh       # fallback
-~/.config/hypr/scripts/bar-quickshell.sh  # volver a Quickshell
-```
-
 
 ## Arquitectura de Orion Shell
 
@@ -219,8 +211,6 @@ La shell ya incluye una primera implementación completa de sus superficies prin
 - `SettingsPanel.qml`: accesos de personalización, fondo, pantalla, red, Bluetooth y audio.
 - `Tray.qml`: bandeja de sistema.
 - `NotificationToast.qml`: avisos emergentes.
-
-Rofi, Waybar, `Hardware.qml` y `SystemArea.qml` permanecen en el repositorio como fallback o referencia, pero ya no forman parte del flujo principal de Orion Shell.
 
 
 ## Control por CLI
