@@ -158,9 +158,9 @@ ColumnLayout {
     Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: 34
-        radius: 8
-        color: Theme.surface
-        border.width: 1
+        radius: Theme.radiusSm
+        color: Theme.surfaceContainer
+        border.width: 0
         border.color: search.activeFocus ? Theme.purple : Theme.border
 
         Text {
@@ -246,7 +246,7 @@ ColumnLayout {
 
             width: ListView.view.width
             height: 40
-            radius: 8
+            radius: Theme.radiusSm
             color: index === root.selectedIndex || rowArea.containsMouse ? Theme.current : Theme.surface
             border.width: index === root.selectedIndex ? 1 : 0
             border.color: Theme.purple
