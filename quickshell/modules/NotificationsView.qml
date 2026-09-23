@@ -5,7 +5,7 @@ import "../services"
 
 ColumnLayout {
     id: root
-    spacing: 9
+    spacing: Theme.spacingSm
 
     RowLayout {
         Layout.fillWidth: true
@@ -45,7 +45,7 @@ ColumnLayout {
     ListView {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        spacing: 7
+        spacing: Theme.spacingSm
         clip: true
         model: NotificationService.notifications
 
@@ -53,13 +53,13 @@ ColumnLayout {
             required property var modelData
             width: ListView.view.width
             height: 82
-            radius: 8
-            color: Theme.surface
+            radius: Theme.radiusSm
+            color: Theme.surfaceContainer
 
             RowLayout {
                 anchors.fill: parent
                 anchors.margins: 10
-                spacing: 9
+                spacing: Theme.spacingSm
                 Image {
                     Layout.preferredWidth: 28
                     Layout.preferredHeight: 28
