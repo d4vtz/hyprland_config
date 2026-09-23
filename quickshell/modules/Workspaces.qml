@@ -13,32 +13,46 @@ Pill {
 
         Repeater {
             model: 7
+
             delegate: Rectangle {
                 required property int index
+
                 readonly property int workspaceId: index + 1
-                readonly property bool focused: Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id === workspaceId
-                implicitWidth: 28
-                implicitHeight: 26
-                radius: 7
-                color: focused ? Theme.current : "transparent"
+                readonly property bool focused: Hyprland.focusedWorkspace
+                    && Hyprland.focusedWorkspace.id === workspaceId
+
+                implicitWidth: focused ? 34 : 30
+                implicitHeight: 30
+                radius: 15
+                color: focused ? Theme.primary : "transparent"
+
+                Behavior on implicitWidth {
+                    NumberAnimation { duration: Theme.animationNormal; easing.type: Easing.OutCubic }
+                }
+
+                Behavior on color {
+                    ColorAnimation { duration: Theme.animationFast }
+                }
 
                 Text {
                     anchors.centerIn: parent
                     text: parent.workspaceId
-                    color: parent.focused ? Theme.foreground : Theme.muted
+                    color: parent.focused ? Theme.onPrimary : Theme.muted
                     font.family: Theme.fontFamily
-                    font.pixelSize: 12
+                    font.pixelSize: Theme.fontSizeSmall
+                    font.weight: parent.focused ? Font.DemiBold : Font.Normal
                 }
 
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: Hyprland.dispatch(Hyprland.usingLua
-                        ? 'hl.dsp.focus({ workspace = "' + parent.workspaceId + '" })'
-                        : "workspace " + parent.workspaceId)
+                    onClicked: Hyprland.dispatch(
+                        Hyprland.usingLua
+                            ? 'hl.dsp.focus({ workspace = "' + parent.workspaceId + '" })'
+                            : "workspace " + parent.workspaceId
+                    )
                 }
             }
         }
     }
 }
-
