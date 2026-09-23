@@ -24,7 +24,7 @@ Pill {
     }
 
     Text {
-        text: clock.date.toLocaleTimeString(Qt.locale(), "HH:mm")
+        text: clock.date.toLocaleTimeString(Qt.locale(), "h:mm AP")
         color: Theme.foreground
         font.family: Theme.fontFamily
         font.bold: true
@@ -39,7 +39,7 @@ Pill {
         parent: root
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.expanded = !root.expanded
+        onClicked: {\n            if (root.expanded) {\n                root.expanded = false\n                PanelCoordinator.close("clock")\n            } else {\n                PanelCoordinator.request("clock")\n                root.expanded = true\n            }\n        }
     }
 
     PanelWindow {
@@ -76,7 +76,7 @@ Pill {
                         implicitHeight: 30
                         radius: 8
                         color: previousArea.containsMouse ? Theme.current : "transparent"
-                        Text { anchors.centerIn: parent; text: "󰅁"; color: Theme.purple; font.family: Theme.iconFamily }
+                        OrionIcon { anchors.centerIn: parent; name: "chevron-left"; materialName: "chevron_left"; fallbackColor: Theme.purple; size: 18 }
                         MouseArea {
                             id: previousArea
                             anchors.fill: parent
@@ -102,7 +102,7 @@ Pill {
                         implicitHeight: 30
                         radius: 8
                         color: nextArea.containsMouse ? Theme.current : "transparent"
-                        Text { anchors.centerIn: parent; text: "󰅂"; color: Theme.purple; font.family: Theme.iconFamily }
+                        OrionIcon { anchors.centerIn: parent; name: "chevron-right"; materialName: "chevron_right"; fallbackColor: Theme.purple; size: 18 }
                         MouseArea {
                             id: nextArea
                             anchors.fill: parent
