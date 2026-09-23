@@ -37,7 +37,7 @@ Pill {
                 Text {
                     anchors.centerIn: parent
                     text: parent.workspaceId
-                    color: parent.focused ? Theme.onPrimary : Theme.muted
+                    color: parent.focused ? Theme.primaryText : Theme.muted
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSizeSmall
                     font.weight: parent.focused ? Font.DemiBold : Font.Normal
