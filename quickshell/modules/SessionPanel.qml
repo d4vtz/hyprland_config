@@ -53,8 +53,8 @@ Item {
             id: panelSurface
             focus: root.open
             Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
-            width: 470
-            height: 300
+            width: 500
+            height: 320
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
 
