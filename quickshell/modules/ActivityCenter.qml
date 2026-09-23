@@ -81,10 +81,10 @@ Item {
 
                     Repeater {
                         model: [
-                            { icon: "󰂚", label: "Avisos", page: 0, accent: Theme.cyan },
-                            { icon: "󰅇", label: "Portapapeles", page: 1, accent: Theme.pink },
-                            { icon: "󰏔", label: "Actualizaciones", page: 2, accent: Theme.orange },
-                            { icon: "󰒓", label: "Mantenimiento", page: 3, accent: Theme.green }
+                            { icon: "notifications", label: "Avisos", page: 0, accent: Theme.cyan },
+                            { icon: "content_paste", label: "Portapapeles", page: 1, accent: Theme.pink },
+                            { icon: "system_update", label: "Actualizaciones", page: 2, accent: Theme.orange },
+                            { icon: "build", label: "Mantenimiento", page: 3, accent: Theme.green }
                         ]
 
                         delegate: Rectangle {
@@ -99,7 +99,7 @@ Item {
                             Row {
                                 anchors.centerIn: parent
                                 spacing: 6
-                                Text { text: modelData.icon; color: modelData.accent; font.family: Theme.iconFamily }
+                                Text { text: modelData.icon; color: modelData.accent; font.family: Theme.materialIconFamily; font.pixelSize: 18 }
                                 Text { text: modelData.label; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
                             }
 
