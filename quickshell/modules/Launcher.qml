@@ -98,11 +98,11 @@ Item {
         Surface {
             id: panelSurface
             Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
-            width: 620
-            height: 500
+            width: 680
+            height: 560
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
-            anchors.topMargin: 90
+            anchors.topMargin: 82
 
             MouseArea { anchors.fill: parent }
 
@@ -145,7 +145,7 @@ Item {
                         color: Theme.foreground
                         selectionColor: Theme.purple
                         font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSizeBody
+                        font.pixelSize: Theme.fontSizeTitle
                         text: root.query
                         onTextChanged: root.query = text
                         Keys.onEscapePressed: event => {
