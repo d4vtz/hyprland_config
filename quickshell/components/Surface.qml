@@ -5,10 +5,15 @@ Rectangle {
     id: root
 
     property bool elevated: false
+    property bool outlined: false
     property int padding: Theme.spacingLg
 
     radius: Theme.panelRadius
     color: elevated ? Theme.elevated : Theme.background
-    border.color: Theme.border
-    border.width: 1
+    border.color: outlined ? Theme.border : "transparent"
+    border.width: outlined ? 1 : 0
+
+    Behavior on color {
+        ColorAnimation { duration: Theme.animationNormal }
+    }
 }
