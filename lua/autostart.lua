@@ -4,7 +4,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("systemctl --user start plasma-polkit-agent.service")
     -- Entrega a KWallet las credenciales que pam_kwallet5 recibió de SDDM.
     hl.exec_cmd("systemctl --user start plasma-kwallet-pam.service")
-    -- Quickshell sustituye a Waybar; scripts/bar-waybar.sh permite volver temporalmente.
+    -- Orion Shell es la única interfaz del escritorio y se inicia dentro de UWSM.
     hl.exec_cmd("uwsm app -- qs")
     -- Quickshell recibe notificaciones; cliphist conserva el historial del portapapeles.
     hl.exec_cmd("uwsm app -- wl-paste --watch cliphist store")
