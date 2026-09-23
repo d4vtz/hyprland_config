@@ -42,12 +42,12 @@ Item {
             id: panelSurface
             focus: root.open
             Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
-            width: Math.min(760, parent.width - 40)
-            height: Math.min(520, parent.height - 80)
+            width: Math.min(820, parent.width - 48)
+            height: Math.min(580, parent.height - 96)
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
-            anchors.topMargin: 58
-            elevated: false
+            anchors.topMargin: 72
+            elevated: true
 
             MouseArea { anchors.fill: parent }
 
