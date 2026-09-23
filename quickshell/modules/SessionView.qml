@@ -157,12 +157,12 @@ ColumnLayout {
                 Layout.preferredHeight: 78
                 radius: Theme.cardRadius
                 color: index === root.selectedIndex || actionArea.containsMouse ? Theme.current : Theme.surface
-                border.width: 1
+                border.width: 0
                 border.color: index === root.selectedIndex ? modelData.color : Theme.border
 
                 Column {
                     anchors.centerIn: parent
-                    spacing: 7
+                    spacing: Theme.spacingSm
 
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -199,7 +199,7 @@ ColumnLayout {
         Layout.preferredHeight: 62
         radius: Theme.cardRadius
         color: CaffeineService.active ? Qt.rgba(Theme.yellow.r, Theme.yellow.g, Theme.yellow.b, 0.14) : Theme.surface
-        border.width: 1
+        border.width: 0
         border.color: CaffeineService.active ? Theme.yellow : Theme.border
 
         RowLayout {
@@ -244,7 +244,7 @@ ColumnLayout {
                 Rectangle {
                     width: 18
                     height: 18
-                    radius: 9
+                    radius: Theme.radiusSm
                     anchors.verticalCenter: parent.verticalCenter
                     x: CaffeineService.active ? parent.width - width - 3 : 3
                     color: CaffeineService.active ? Theme.canvas : Theme.muted
@@ -269,8 +269,8 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         radius: Theme.cardRadius
-        color: Theme.surface
-        border.width: 1
+        color: Theme.surfaceContainer
+        border.width: 0
         border.color: root.pendingAction ? root.pendingAction.color : Theme.border
 
         ColumnLayout {
@@ -315,7 +315,7 @@ ColumnLayout {
                     Layout.preferredHeight: 38
                     radius: Theme.cardRadius
                     color: root.confirmationChoice === 0 || cancelArea.containsMouse ? Theme.current : Theme.elevated
-                    border.width: 1
+                    border.width: 0
                     border.color: root.confirmationChoice === 0 ? Theme.purple : Theme.border
 
                     Text {
@@ -344,7 +344,7 @@ ColumnLayout {
                     color: (root.confirmationChoice === 1 || confirmArea.containsMouse) && root.pendingAction
                            ? root.pendingAction.color
                            : Theme.elevated
-                    border.width: 1
+                    border.width: 0
                     border.color: root.confirmationChoice === 1 && root.pendingAction
                                   ? root.pendingAction.color
                                   : Theme.border
