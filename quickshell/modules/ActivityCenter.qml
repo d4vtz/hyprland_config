@@ -61,18 +61,18 @@ Item {
             id: panelSurface
             focus: root.open
             Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
-            width: 430
-            height: 540
+            width: 460
+            height: 590
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 54
-            anchors.rightMargin: 10
+            anchors.topMargin: 70
+            anchors.rightMargin: 12
 
             MouseArea { anchors.fill: parent }
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: Theme.spacingLg
+                anchors.margins: Theme.spacingXl
                 spacing: Theme.spacingMd
 
                 RowLayout {
@@ -93,7 +93,7 @@ Item {
                             Layout.preferredHeight: 38
                             radius: Theme.cardRadius
                             color: root.tab === modelData.page ? Theme.current : Theme.surface
-                            border.width: 1
+                            border.width: 0
                             border.color: root.tab === modelData.page ? modelData.accent : Theme.border
 
                             Row {
