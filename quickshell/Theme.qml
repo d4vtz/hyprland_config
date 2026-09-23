@@ -23,9 +23,7 @@ QtObject {
     readonly property color subtle: "#918999"
 
     readonly property color primary: "#bd93f9"
-    readonly property color onPrimary: "#25152f"
     readonly property color primaryContainer: "#4a3760"
-    readonly property color onPrimaryContainer: "#f0dcff"
     readonly property color secondary: "#ff79c6"
     readonly property color secondaryContainer: "#583146"
     readonly property color tertiary: "#8be9fd"
