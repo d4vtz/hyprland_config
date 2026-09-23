@@ -9,69 +9,85 @@ Item {
     property string category: ""
     property string fallback: ""
     property string fallbackName: "image-missing"
+    property string materialName: ""
     property real size: 18
     property color fallbackColor: Theme.foreground
     property bool smooth: true
-    property int candidateIndex: 0
-    readonly property string iconHome: "file://" + Quickshell.env("HOME") + "/.local/share/icons/Papirus-Dark/"
-    readonly property bool directSource: name.startsWith("/") || name.startsWith("file:")
-    readonly property string themedName: directSource ? name : name.replace(/\.(svg|png|xpm)$/i, "")
-    readonly property var candidates: {
-        if (!name.length)
-            return []
-        if (directSource)
-            return [name.startsWith("file:") ? name : "file://" + name]
 
-        const result = []
-        const categories = category.length
-            ? [category]
-            : ["apps", "actions", "devices", "status", "places", "mimetypes"]
-        const sizes = ["24x24", "22x22", "16x16", "32x32", "48x48", "64x64", "scalable"]
-        for (let s = 0; s < sizes.length; ++s) {
-            for (let c = 0; c < categories.length; ++c) {
-                if (categories.indexOf(categories[c]) !== c)
-                    continue
-                result.push(iconHome + sizes[s] + "/" + categories[c] + "/" + themedName + ".svg")
-                result.push(iconHome + sizes[s] + "/" + categories[c] + "/" + themedName + ".png")
-            }
+    readonly property string resolvedMaterialName: {
+        if (materialName.length)
+            return materialName
+
+        const map = {
+            "application-menu": "apps",
+            "dashboard-show": "dashboard",
+            "utilities-system-monitor": "monitor_heart",
+            "ac-adapter": "power",
+            "battery": "battery_full",
+            "battery-charging": "battery_charging_full",
+            "network-wireless": "wifi",
+            "network-wireless-offline": "wifi_off",
+            "audio-volume-high": "volume_up",
+            "audio-volume-medium": "volume_down",
+            "audio-volume-low": "volume_mute",
+            "notifications-disabled": "notifications_off",
+            "preferences-system-notifications": "notifications",
+            "edit-paste": "content_paste",
+            "system-software-update": "system_update",
+            "caffeine": "coffee",
+            "system-shutdown": "power_settings_new",
+            "preferences-system": "settings",
+            "search": "search",
+            "application-x-executable": "apps",
+            "content-loading": "progress_activity",
+            "dialog-error": "error",
+            "dialog-ok": "check_circle",
+            "image-missing": "image",
+            "network-wired": "lan",
+            "bluetooth": "bluetooth",
+            "brightness-high": "brightness_high",
+            "brightness-low": "brightness_low",
+            "lock": "lock",
+            "system-lock-screen": "lock",
+            "system-suspend": "bedtime",
+            "system-reboot": "restart_alt",
+            "media-playback-start": "play_arrow",
+            "media-playback-pause": "pause",
+            "media-skip-backward": "skip_previous",
+            "media-skip-forward": "skip_next",
+            "audio-volume-muted": "volume_off",
+            "preferences-desktop-display": "desktop_windows",
+            "folder": "folder",
+            "document-open": "folder_open",
+            "document-save": "save",
+            "view-refresh": "refresh",
+            "help-about": "info",
+            "system-run": "terminal",
+            "camera-photo": "photo_camera",
+            "application-exit": "logout",
+            "system-log-out": "logout",
+            "dialog-information": "info",
+            "dialog-warning": "warning",
+            "user": "person",
+            "computer": "computer"
         }
-        const themed = Quickshell.iconPath(themedName, true)
-        if (themed && themed.length)
-            result.push(themed)
-        return result
+        return map[name] || name || "image"
     }
 
     implicitWidth: size
     implicitHeight: size
 
-    Image {
-        id: themedIcon
+    Text {
+        id: materialIcon
         anchors.fill: parent
-        visible: status === Image.Ready
-        source: root.candidateIndex < root.candidates.length ? root.candidates[root.candidateIndex] : ""
-        sourceSize.width: Math.ceil(root.size)
-        sourceSize.height: Math.ceil(root.size)
-        fillMode: Image.PreserveAspectFit
-        smooth: root.smooth
-        asynchronous: true
-        onStatusChanged: {
-            if (status === Image.Error && root.candidateIndex + 1 < root.candidates.length)
-                root.candidateIndex++
-        }
-    }
-
-    onNameChanged: candidateIndex = 0
-    onCategoryChanged: candidateIndex = 0
-
-    Image {
-        anchors.centerIn: parent
-        width: root.size
-        height: root.size
-        visible: !themedIcon.visible
-        source: root.iconHome + "24x24/actions/application-menu.svg"
-        sourceSize.width: Math.ceil(root.size)
-        sourceSize.height: Math.ceil(root.size)
-        fillMode: Image.PreserveAspectFit
-        smooth: root.smooth
+        text: root.resolvedMaterialName
+        color: root.fallbackColor
+        font.family: Theme.materialIconFamily
+        font.pixelSize: root.size
+        font.weight: Font.Normal
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        renderType: Text.NativeRendering
+        visible: text.length > 0
     }
 }
