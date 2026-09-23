@@ -133,9 +133,9 @@ ColumnLayout {
         signal actionRequested()
         Layout.fillWidth: true
         Layout.preferredHeight: 64
-        radius: 9
-        color: Theme.surface
-        border.color: Theme.border
+        radius: Theme.radiusSm
+        color: Theme.surfaceContainer
+        border.color: "transparent"
         RowLayout {
             anchors.fill: parent
             anchors.margins: 11
