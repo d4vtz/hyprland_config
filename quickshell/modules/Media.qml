@@ -87,7 +87,15 @@ Pill {
         parent: root
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.expanded = !root.expanded
+        onClicked: {
+            if (root.expanded) {
+                root.expanded = false
+                PanelCoordinator.close("media")
+            } else {
+                PanelCoordinator.request("media")
+                root.expanded = true
+            }
+        }
     }
 
     Timer {
@@ -133,9 +141,9 @@ Pill {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "󰎆"
+                        text: "album"
                         color: Theme.current
-                        font.family: Theme.iconFamily
+                        font.family: Theme.materialIconFamily
                         font.pixelSize: 38
                     }
 
@@ -224,8 +232,9 @@ Pill {
                         spacing: 16
 
                         Text {
-                            text: "󰒮"
+                            text: "skip_previous"
                             color: Theme.foreground
+                            font.family: Theme.materialIconFamily
                             opacity: root.player && root.player.canGoPrevious ? 1 : 0.3
                             font.family: Theme.fontFamily
                             font.pixelSize: 18
@@ -248,9 +257,9 @@ Pill {
 
                             Text {
                                 anchors.centerIn: parent
-                                text: root.player && root.player.isPlaying ? "󰏤" : "󰐊"
+                                text: root.player && root.player.isPlaying ? "pause" : "play_arrow"
                                 color: Theme.background
-                                font.family: Theme.iconFamily
+                                font.family: Theme.materialIconFamily
                                 font.pixelSize: 17
                             }
                             MouseArea {
@@ -264,8 +273,9 @@ Pill {
                         }
 
                         Text {
-                            text: "󰒭"
+                            text: "skip_next"
                             color: Theme.foreground
+                            font.family: Theme.materialIconFamily
                             opacity: root.player && root.player.canGoNext ? 1 : 0.3
                             font.family: Theme.iconFamily
                             font.pixelSize: 18
@@ -286,4 +296,7 @@ Pill {
             onActivated: root.expanded = false
         }
     }
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.expanded && PanelCoordinator.activePanel !== "media") root.expanded = false } }
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.expanded && PanelCoordinator.activePanel !== "media") root.expanded = false } }
+
 }
