@@ -62,7 +62,7 @@ Item {
                     ColumnLayout {
                         spacing: 2
                         Text {
-                            text: Qt.formatDateTime(root.now, "hh:mm")
+                            text: Qt.formatDateTime(root.now, "h:mm AP")
                             color: Theme.foreground
                             font.family: Theme.fontFamily
                             font.pixelSize: 34
