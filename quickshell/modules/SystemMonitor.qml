@@ -80,7 +80,7 @@ Item {
             focus: root.open
             Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
             width: 690
-            height: 520
+            height: 580
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             anchors.topMargin: 70
@@ -187,7 +187,7 @@ Item {
                             required property int index
                             width: ListView.view.width
                             height: 32
-                            radius: 8
+                            radius: Theme.radiusSm
                             color: index % 2 === 0 ? Theme.surface : "transparent"
 
                             RowLayout {
