@@ -39,7 +39,15 @@ Pill {
         parent: root
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: {\n            if (root.expanded) {\n                root.expanded = false\n                PanelCoordinator.close("clock")\n            } else {\n                PanelCoordinator.request("clock")\n                root.expanded = true\n            }\n        }
+        onClicked: {
+            if (root.expanded) {
+                root.expanded = false
+                PanelCoordinator.close("clock")
+            } else {
+                PanelCoordinator.request("clock")
+                root.expanded = true
+            }
+        }
     }
 
     PanelWindow {
@@ -228,4 +236,6 @@ Pill {
         }
     }
     Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.expanded && PanelCoordinator.activePanel !== "clock") root.expanded = false } }
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.expanded && PanelCoordinator.activePanel !== "clock") root.expanded = false } }
+
 }
