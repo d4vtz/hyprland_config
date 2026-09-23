@@ -44,14 +44,14 @@ Item {
             height: 470
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 54
-            anchors.rightMargin: 10
+            anchors.topMargin: 70
+            anchors.rightMargin: 12
 
             MouseArea { anchors.fill: parent }
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: Theme.spacingLg
+                anchors.margins: Theme.spacingXl
                 spacing: Theme.spacingMd
 
                 SectionTitle {
@@ -122,7 +122,7 @@ Item {
         Layout.preferredHeight: 68
         radius: Theme.cardRadius
         color: area.containsMouse ? Theme.current : Theme.surface
-        border.width: 1
+        border.width: 0
         border.color: area.containsMouse ? tile.accent : Theme.border
 
         RowLayout {
