@@ -42,8 +42,8 @@ ColumnLayout {
     Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: 92
-        radius: 10
-        color: Theme.surface
+        radius: Theme.radiusSm
+        color: Theme.surfaceContainer
         border.color: root.updates.length > 0 ? Theme.orange : Theme.border
 
         RowLayout {
@@ -140,8 +140,8 @@ ColumnLayout {
                 required property string modelData
                 Layout.fillWidth: true
                 Layout.preferredHeight: 48
-                radius: 8
-                color: Theme.surface
+                radius: Theme.radiusSm
+                color: Theme.surfaceContainer
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 10
@@ -177,7 +177,7 @@ ColumnLayout {
         property color accent: Theme.purple
         signal clicked()
         Layout.preferredHeight: 42
-        radius: 9
+        radius: Theme.radiusSm
         color: area.containsMouse ? Theme.current : Theme.elevated
         border.color: button.accent
         RowLayout {
