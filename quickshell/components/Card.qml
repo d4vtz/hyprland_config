@@ -7,26 +7,24 @@ Rectangle {
     default property alias content: content.data
     property bool interactive: false
     property bool active: false
-    property color accent: Theme.purple
+    property color accent: Theme.primary
     signal clicked()
 
-    implicitHeight: content.implicitHeight + Theme.spacingMd * 2
+    implicitHeight: content.implicitHeight + Theme.spacingLg * 2
     radius: Theme.cardRadius
-    color: active ? Theme.current : mouse.containsMouse && interactive ? Theme.surfaceHover : Theme.surface
-    border.width: 1
-    border.color: active ? accent : Theme.border
+    color: active
+        ? Theme.primaryContainer
+        : mouse.containsMouse && interactive ? Theme.surfaceHover : Theme.surfaceContainer
+    border.width: 0
 
     Behavior on color {
-        ColorAnimation { duration: Theme.animationFast }
-    }
-    Behavior on border.color {
         ColorAnimation { duration: Theme.animationFast }
     }
 
     Item {
         id: content
         anchors.fill: parent
-        anchors.margins: Theme.spacingMd
+        anchors.margins: Theme.spacingLg
     }
 
     MouseArea {
