@@ -73,8 +73,9 @@ Item {
         Surface {
             focus: root.open
             Keys.onEscapePressed: event => { if (root.audioMenu !== 0) root.audioMenu = 0; else root.closePanel(); event.accepted = true }
-            width: 430; height: Math.min(680, parent.height - 64)
-            anchors.top: parent.top; anchors.right: parent.right; anchors.topMargin: 54; anchors.rightMargin: 10
+            width: 440; height: Math.min(700, parent.height - 76)
+            anchors.top: parent.top; anchors.right: parent.right; anchors.topMargin: 70; anchors.rightMargin: 12
+            elevated: true
             Behavior on height { NumberAnimation { duration: Theme.animationFast; easing.type: Easing.OutCubic } }
             MouseArea { anchors.fill: parent }
             Flickable {
