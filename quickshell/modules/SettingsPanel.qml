@@ -68,14 +68,14 @@ Item {
                     columnSpacing: Theme.spacingSm
                     rowSpacing: Theme.spacingSm
 
-                    ActionTile { icon: "󰏘"; title: "Tema"; subtitle: "Dracula"; accent: Theme.purple; commandLine: "bash ~/.config/hypr/scripts/theme-switch.sh dracula" }
+                    ActionTile { icon: "󰏘"; title: "Tema"; subtitle: "Dracula"; accent: Theme.purple; commandLine: "notify-send Orion 'Dracula es el tema activo'" }
                     ActionTile { icon: "󰸉"; title: "Fondo"; subtitle: "Cambiar imagen"; accent: Theme.pink; commandLine: "bash ~/.config/hypr/scripts/wallpaper-menu.sh" }
                     ActionTile { icon: "󰍹"; title: "Pantallas"; subtitle: "KScreen"; accent: Theme.cyan; commandLine: "systemsettings kcm_kscreen" }
                     ActionTile { icon: "󰖩"; title: "Red"; subtitle: "NetworkManager"; accent: Theme.green; commandLine: "nm-connection-editor" }
                     ActionTile { icon: "󰂯"; title: "Bluetooth"; subtitle: "Blueman"; accent: Theme.cyan; commandLine: "blueman-manager" }
                     ActionTile { icon: "󰓃"; title: "Audio"; subtitle: "PipeWire"; accent: Theme.orange; commandLine: "pavucontrol" }
                     ActionTile { icon: "󰒓"; title: "Sistema"; subtitle: "Plasma Settings"; accent: Theme.purple; commandLine: "systemsettings" }
-                    ActionTile { icon: "󰑐"; title: "Recargar"; subtitle: "Orion Shell"; accent: Theme.green; commandLine: "qs kill; uwsm app -- qs" }
+                    ActionTile { icon: "󰑐"; title: "Recargar"; subtitle: "Orion Shell"; accent: Theme.green; commandLine: "~/.config/hypr/scripts/orionctl reload" }
                 }
 
                 Card {
