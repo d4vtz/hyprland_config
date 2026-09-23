@@ -67,5 +67,6 @@ QtObject {
     readonly property int animationSlow: 320
 
     readonly property string fontFamily: "Inter"
-    readonly property string iconFamily: "Material Symbols Rounded"
+    readonly property string iconFamily: "JetBrainsMono Nerd Font"
+    readonly property string materialIconFamily: "Material Symbols Rounded"
 }
