@@ -94,8 +94,8 @@ ColumnLayout {
             required property string modelData
             width: ListView.view.width
             height: 34
-            radius: 8
-            color: Theme.surface
+            radius: Theme.radiusSm
+            color: Theme.surfaceContainer
             Text {
                 anchors.fill: parent
                 anchors.leftMargin: Theme.spacingMd
@@ -120,8 +120,8 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.preferredHeight: 62
         radius: Theme.cardRadius
-        color: Theme.surface
-        border.width: 1
+        color: Theme.surfaceContainer
+        border.width: 0
         border.color: tile.count > 0 ? tile.accent : Theme.border
 
         RowLayout {
@@ -150,7 +150,7 @@ ColumnLayout {
         radius: Theme.cardRadius
         color: area.containsMouse && button.enabled ? Theme.current : Theme.elevated
         opacity: button.enabled ? 1 : 0.45
-        border.width: 1
+        border.width: 0
         border.color: button.accent
 
         Row {
