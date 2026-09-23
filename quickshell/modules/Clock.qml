@@ -235,7 +235,6 @@ Pill {
             onActivated: root.expanded = false
         }
     }
-    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.expanded && PanelCoordinator.activePanel !== "clock") root.expanded = false } }
-    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.expanded && PanelCoordinator.activePanel !== "clock") root.expanded = false } }
 
+    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.expanded && PanelCoordinator.activePanel !== "clock") root.expanded = false } }
 }
