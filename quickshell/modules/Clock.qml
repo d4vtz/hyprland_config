@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Wayland
 import ".."
 import "../components"
+import "../services"
 
 Pill {
     id: root
@@ -57,7 +58,7 @@ Pill {
         color: "transparent"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
-        MouseArea { anchors.fill: parent; onClicked: root.expanded = false }
+        MouseArea { anchors.fill: parent; onClicked: { root.expanded = false; PanelCoordinator.close("clock") } }
 
         Rectangle {
             anchors.top: parent.top
@@ -232,7 +233,7 @@ Pill {
 
         Shortcut {
             sequence: "Esc"
-            onActivated: root.expanded = false
+            onActivated: { root.expanded = false; PanelCoordinator.close("clock") }
         }
     }
 
