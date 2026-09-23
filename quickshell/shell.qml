@@ -24,21 +24,25 @@ ShellRoot {
             required property var modelData
             screen: modelData
             color: "transparent"
-            implicitHeight: 46
+            implicitHeight: 58
             anchors { top: true; left: true; right: true }
-            exclusiveZone: 46
+            exclusiveZone: 58
 
             Rectangle {
                 anchors.fill: parent
-                anchors.margins: 4
+                anchors.topMargin: 6
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                anchors.bottomMargin: 6
                 color: Theme.barBackground
-                radius: Theme.cardRadius
-                border.color: "transparent"
+                radius: Theme.panelRadius
+                border.width: 1
+                border.color: Qt.rgba(0.72, 0.58, 0.98, 0.10)
 
                 RowLayout {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: Theme.spacingSm
+                    anchors.leftMargin: Theme.spacingMd
                     spacing: 7
 
                     Pill {
@@ -74,7 +78,7 @@ ShellRoot {
                 RowLayout {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.rightMargin: Theme.spacingSm
+                    anchors.rightMargin: Theme.spacingMd
                     spacing: 7
 
                     Media {}
