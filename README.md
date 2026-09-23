@@ -24,7 +24,7 @@ sudo pacman -S --needed \
   uwsm xdg-desktop-portal-hyprland polkit-kde-agent \
   kwallet kwallet-pam kwalletmanager \
   quickshell qt6-declarative qt6-svg qt6-imageformats \
-  waybar rofi hyprpaper hyprlock hypridle \
+  hyprpaper hyprlock hypridle \
   satty grim slurp wl-clipboard cliphist jq cava curl pacman-contrib \
   brightnessctl playerctl pavucontrol network-manager-applet \
   bluez-utils blueman power-profiles-daemon hyprsunset intel-gpu-tools \
@@ -126,24 +126,9 @@ Este archivo es local a la máquina y no ensucia el repositorio.
 
 ## Temas
 
-Dracula es el tema inicial. Quickshell concentra su paleta en
-`quickshell/Theme.qml`; el selector existente sincroniza Hyprland, la Waybar de
-respaldo, Rofi, SwayNC y Hyprlock:
+Dracula es el tema de Orion. La paleta de Quickshell está centralizada en `quickshell/Theme.qml` y la configuración de Hyprland correspondiente en `themes/dracula.lua`.
 
-```bash
-~/.config/hypr/scripts/theme-switch.sh dracula
-```
-
-Para añadir una paleta llamada nord, crea:
-
-```text
-themes/nord.lua
-themes/nord.css
-themes/nord.rasi
-themes/nord-hyprlock.conf
-```
-
-y ejecuta theme-switch.sh nord.
+La separación entre tema y componentes permite incorporar tematización dinámica más adelante sin rehacer los módulos.
 
 ## Organización
 
