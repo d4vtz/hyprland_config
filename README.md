@@ -26,7 +26,7 @@ sudo pacman -S --needed \
   quickshell qt6-declarative qt6-svg qt6-imageformats \
   hyprpaper hyprlock hypridle \
   satty grim slurp wl-clipboard cliphist jq cava curl pacman-contrib \
-  brightnessctl playerctl pavucontrol network-manager-applet \
+  brightnessctl playerctl pavucontrol \
   bluez-utils blueman power-profiles-daemon hyprsunset intel-gpu-tools \
   pipewire wireplumber qt5-wayland qt6-wayland \
   kitty dolphin inter-font ttf-jetbrains-mono-nerd
@@ -51,9 +51,7 @@ Conserva configuraciones previas que no sean enlaces:
 
 ```bash
 mv ~/.config/hypr ~/.config/hypr.backup 2>/dev/null || true
-mv ~/.config/waybar ~/.config/waybar.backup 2>/dev/null || true
 mv ~/.config/quickshell ~/.config/quickshell.backup 2>/dev/null || true
-mv ~/.config/rofi ~/.config/rofi.backup 2>/dev/null || true
 ```
 
 Instala los enlaces:
@@ -128,7 +126,7 @@ Este archivo es local a la máquina y no ensucia el repositorio.
 
 Dracula es el tema de Orion. La paleta de Quickshell está centralizada en `quickshell/Theme.qml` y la configuración de Hyprland correspondiente en `themes/dracula.lua`.
 
-La separación entre tema y componentes permite incorporar tematización dinámica más adelante sin rehacer los módulos.
+La estética de Orion sigue el lenguaje Material 3 de DankMaterialShell: barra flotante, superficies tonales, pills, tarjetas grandes, paneles elevados, jerarquía tipográfica y animaciones suaves. DMS es la referencia visual, no una dependencia ni código copiado.
 
 ## Organización
 
@@ -141,9 +139,6 @@ quickshell/             Orion Shell
   modules/              Launcher, barra, dashboard, centro de control, actividad,
                         monitor, ajustes y paneles funcionales
   services/             Estado reactivo del sistema
-waybar/                 Barra anterior, conservada como fallback
-rofi/                  Lanzador
-swaync/                Configuración anterior, conservada como referencia
 scripts/               Utilidades del escritorio
 hyprlock.conf           Pantalla de bloqueo
 hypridle.conf           Inactividad y suspensión
@@ -155,14 +150,15 @@ hyprpaper.conf          Fondo
 ```bash
 cd ~/.local/src/hyprland_config
 git pull --ff-only
-hyprctl reload
-qs kill && uwsm app -- qs
+~/.config/hypr/scripts/orionctl reload
 ```
+
+No ejecutes `qs` manualmente si Orion ya está iniciado por UWSM. Eso crea dos shells y, como suele ocurrir con Linux, ambas creen que son la legítima.
 
 
 ## Arquitectura de Orion Shell
 
-La migración mantiene las funciones existentes mientras elimina progresivamente la lógica visual duplicada:
+Orion concentra la interfaz en Quickshell y mantiene Hyprland/Lua como motor del escritorio. La estética completa usa un único sistema visual Material 3 inspirado en DankMaterialShell:
 
 ```text
 Hyprland / Lua
@@ -177,7 +173,7 @@ Orion Shell / Quickshell
  ├── Modules
  │   ├── Bar
  │   ├── Dashboard
- │   ├── Hardware
+ │   ├── Control Center
  │   ├── Media
  │   ├── Notifications
  │   └── Clipboard
