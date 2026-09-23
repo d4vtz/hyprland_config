@@ -29,7 +29,7 @@ sudo pacman -S --needed \
   brightnessctl playerctl pavucontrol \
   bluez-utils blueman power-profiles-daemon hyprsunset intel-gpu-tools \
   pipewire wireplumber qt5-wayland qt6-wayland \
-  kitty dolphin inter-font ttf-jetbrains-mono-nerd
+  kitty dolphin inter-font ttf-jetbrains-mono-nerd ttf-material-symbols-variable
 ```
 
 Grimblast está en AUR:
