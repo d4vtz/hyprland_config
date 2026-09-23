@@ -14,11 +14,11 @@ ColumnLayout {
     property int pendingIndex: -1
     property int confirmationChoice: 0 // 0 cancelar, 1 confirmar
     property var actions: [
-        { icon: "󰌾", color: Theme.cyan, command: "loginctl lock-session", label: "Bloquear", destructive: false },
-        { icon: "󰒲", color: Theme.green, command: "systemctl suspend", label: "Suspender", destructive: false },
-        { icon: "󰍃", color: Theme.purple, command: "uwsm stop", label: "Salir", destructive: true },
-        { icon: "󰑐", color: Theme.orange, command: "systemctl reboot", label: "Reiniciar", destructive: true },
-        { icon: "󰐥", color: Theme.red, command: "systemctl poweroff", label: "Apagar", destructive: true }
+        { icon: "lock", color: Theme.cyan, command: "loginctl lock-session", label: "Bloquear", destructive: false },
+        { icon: "bedtime", color: Theme.green, command: "systemctl suspend", label: "Suspender", destructive: false },
+        { icon: "logout", color: Theme.purple, command: "uwsm stop", label: "Salir", destructive: true },
+        { icon: "restart_alt", color: Theme.orange, command: "systemctl reboot", label: "Reiniciar", destructive: true },
+        { icon: "power_settings_new", color: Theme.red, command: "systemctl poweroff", label: "Apagar", destructive: true }
     ]
     readonly property var pendingAction: pendingIndex >= 0 && pendingIndex < actions.length
                                          ? actions[pendingIndex]
