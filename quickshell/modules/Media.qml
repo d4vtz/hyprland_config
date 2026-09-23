@@ -111,11 +111,11 @@ Pill {
             anchors.right: parent.right
             anchors.topMargin: 2
             anchors.rightMargin: 304
-            width: 390
-            height: 188
-            radius: Theme.radius + 2
+            width: 420
+            height: 204
+            radius: Theme.panelRadius
             color: Theme.background
-            border.color: Theme.border
+            border.color: "transparent"
 
             MouseArea { anchors.fill: parent }
 
@@ -128,7 +128,7 @@ Pill {
                     Layout.preferredWidth: 132
                     Layout.preferredHeight: 132
                     radius: Theme.radius
-                    color: Theme.surface
+                    color: Theme.surfaceContainer
                     clip: true
 
                     Text {
