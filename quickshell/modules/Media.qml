@@ -236,7 +236,6 @@ Pill {
                             color: Theme.foreground
                             font.family: Theme.materialIconFamily
                             opacity: root.player && root.player.canGoPrevious ? 1 : 0.3
-                            font.family: Theme.fontFamily
                             font.pixelSize: 18
                             MouseArea {
                                 anchors.fill: parent
@@ -277,7 +276,6 @@ Pill {
                             color: Theme.foreground
                             font.family: Theme.materialIconFamily
                             opacity: root.player && root.player.canGoNext ? 1 : 0.3
-                            font.family: Theme.iconFamily
                             font.pixelSize: 18
                             MouseArea {
                                 anchors.fill: parent
@@ -296,8 +294,7 @@ Pill {
             onActivated: root.expanded = false
         }
     }
-    Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.expanded && PanelCoordinator.activePanel !== "media") root.expanded = false } }
+
 
     Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.expanded && PanelCoordinator.activePanel !== "media") root.expanded = false } }
-
 }
