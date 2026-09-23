@@ -15,10 +15,10 @@ Pill {
         spacing: 8
 
         Text {
-            text: "󰣆"
+            text: "window"
             color: Theme.cyan
-            font.family: Theme.iconFamily
-            font.pixelSize: 15
+            font.family: Theme.materialIconFamily
+            font.pixelSize: 18
         }
         Text {
             Layout.maximumWidth: 205
