@@ -65,7 +65,7 @@ Item {
             height: 590
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 58
+            anchors.topMargin: Theme.barPanelTopMargin
             anchors.rightMargin: 10
 
             MouseArea { anchors.fill: parent }
