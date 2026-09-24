@@ -117,7 +117,7 @@ Pill {
         Rectangle {
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 2
+            anchors.topMargin: 58
             anchors.rightMargin: 304
             width: 420
             height: 204
