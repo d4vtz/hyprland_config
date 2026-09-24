@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell.Io
 import ".."
 import "../services"
+import "../components"
 
 ColumnLayout {
     id: root
@@ -166,9 +167,9 @@ ColumnLayout {
 
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: modelData.icon
+                        materialName: modelData.icon
                         color: modelData.color
-                        font.family: Theme.iconFamily
+                        font.family: Theme.materialIconFamily
                         font.pixelSize: 21
                     }
 
@@ -278,12 +279,11 @@ ColumnLayout {
             width: parent.width - Theme.spacingXl * 2
             spacing: Theme.spacingLg
 
-            Text {
+            OrionIcon {
                 Layout.alignment: Qt.AlignHCenter
-                text: root.pendingAction ? root.pendingAction.icon : ""
-                color: root.pendingAction ? root.pendingAction.color : Theme.foreground
-                font.family: Theme.iconFamily
-                font.pixelSize: 34
+                materialName: root.pendingAction ? root.pendingAction.icon : "error"
+                fallbackColor: root.pendingAction ? root.pendingAction.color : Theme.foreground
+                size: 34
             }
 
             Text {
