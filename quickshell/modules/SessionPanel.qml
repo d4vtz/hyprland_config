@@ -55,8 +55,10 @@ Item {
             Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
             width: 500
             height: 320
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.topMargin: 58
+            anchors.rightMargin: 10
 
             MouseArea { anchors.fill: parent }
 
