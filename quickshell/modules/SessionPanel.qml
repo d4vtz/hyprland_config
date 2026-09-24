@@ -73,7 +73,8 @@ Item {
 
                     SectionTitle {
                         Layout.fillWidth: true
-                        icon: "󰐥"
+                        iconName: "system-shutdown"
+                        iconCategory: "actions"
                         title: "Sesión"
                         subtitle: "Orion Shell"
                         accent: Theme.purple
