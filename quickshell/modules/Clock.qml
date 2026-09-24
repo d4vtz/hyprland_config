@@ -63,7 +63,7 @@ Pill {
         Rectangle {
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 58
+            anchors.topMargin: Theme.barPanelTopMargin
             width: 334
             height: 326
             radius: Theme.radius + 2
