@@ -11,110 +11,32 @@ Item {
     id: root
     property bool open: false
     property var targetScreen: null
-
     function closePanel() { open = false; PanelCoordinator.close("session") }
-
-    function showPanel(screen) {
-        if (screen) targetScreen = screen
-        PanelCoordinator.request("session")
-        open = true
-        Qt.callLater(sessionView.takeFocus)
-    }
-
-    function toggle(screen) {
-        if (open) {
-            closePanel()
-            return
-        }
-        showPanel(screen)
-    }
-
-    IpcHandler {
-        target: "session"
-        function toggle(): void { root.toggle() }
-        function show(): void { root.showPanel(null) }
-        function hide(): void { root.closePanel() }
-    }
-
+    function showPanel(screen) { if (screen) targetScreen = screen; PanelCoordinator.request("session"); open = true; Qt.callLater(sessionView.takeFocus) }
+    function toggle(screen) { if (open) closePanel(); else showPanel(screen) }
+    IpcHandler { target: "session"; function toggle(): void { root.toggle() }; function show(): void { root.showPanel(null) }; function hide(): void { root.closePanel() } }
     PanelWindow {
-        screen: root.targetScreen
-        visible: root.open
+        screen: root.targetScreen; visible: root.open
         anchors { top: true; right: true; bottom: true; left: true }
-        exclusiveZone: 0
-        color: "transparent"
+        exclusiveZone: 0; color: "transparent"
+        WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: root.closePanel()
-        }
-
+        MouseArea { anchors.fill: parent; onClicked: root.closePanel() }
         Surface {
-            id: panelSurface
-            focus: root.open
+            id: panelSurface; focus: root.open
             Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
-            width: 500
-            height: 320
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.topMargin: Theme.barPanelTopMargin
-            anchors.rightMargin: 10
-
+            width: 500; height: 320; anchors.top: parent.top; anchors.right: parent.right; anchors.topMargin: Theme.barPanelTopMargin; anchors.rightMargin: 10
             MouseArea { anchors.fill: parent }
-
             ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: Theme.spacingXl
-                spacing: Theme.spacingMd
-
+                anchors.fill: parent; anchors.margins: Theme.spacingXl; spacing: Theme.spacingMd
                 RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Theme.spacingLg
-
-                    SectionTitle {
-                        Layout.fillWidth: true
-                        iconName: "system-shutdown"
-                        iconCategory: "actions"
-                        title: "Sesión"
-                        subtitle: "Orion Shell"
-                        accent: Theme.purple
-                    }
-
-                    ColumnLayout {
-                        Layout.preferredWidth: 135
-                        Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                        spacing: 2
-
-                        Text {
-                            Layout.fillWidth: true
-                            text: SystemStatus.userName
-                            horizontalAlignment: Text.AlignRight
-                            color: Theme.foreground
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSizeSmall
-                        }
-
-                        Text {
-                            Layout.fillWidth: true
-                            text: "Activo " + SystemStatus.uptime
-                            horizontalAlignment: Text.AlignRight
-                            color: Theme.green
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSizeSmall
-                        }
-                    }
+                    Layout.fillWidth: true; spacing: Theme.spacingLg
+                    SectionTitle { Layout.fillWidth: true; iconName: "power_settings_new"; iconCategory: "actions"; title: "Sesión"; subtitle: "Orion Shell"; accent: Theme.purple }
+                    ColumnLayout { Layout.preferredWidth: 135; Layout.alignment: Qt.AlignVCenter | Qt.AlignRight; spacing: 2; Text { Layout.fillWidth: true; text: SystemStatus.userName; horizontalAlignment: Text.AlignRight; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }; Text { Layout.fillWidth: true; text: "Activo " + SystemStatus.uptime; horizontalAlignment: Text.AlignRight; color: Theme.green; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall } }
                 }
-
-                SessionView {
-                    id: sessionView
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    onCloseRequested: root.closePanel()
-                    onPanelCloseRequested: root.closePanel()
-                }
+                SessionView { id: sessionView; Layout.fillWidth: true; Layout.fillHeight: true; onCloseRequested: root.closePanel(); onPanelCloseRequested: root.closePanel() }
             }
         }
     }
-
     Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "session") root.closePanel() } }
 }
