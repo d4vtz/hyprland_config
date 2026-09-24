@@ -4,7 +4,6 @@ import QtQuick
 
 QtObject {
     // Orion: estética Material 3 / DankMaterialShell, identidad cromática Dracula.
-    // Este archivo es la única fuente de verdad visual del shell.
     readonly property color barBackground: "#d9191a24"
 
     readonly property color canvas: "#0b0a0f"
@@ -17,7 +16,6 @@ QtObject {
 
     readonly property color border: "#4a4557"
     readonly property color borderActive: "#a98bd6"
-
     readonly property color foreground: "#f7f2fb"
     readonly property color primaryText: "#25152f"
     readonly property color muted: "#c2bacb"
@@ -47,8 +45,9 @@ QtObject {
     readonly property int spacing2xl: 32
 
     readonly property int barHeight: 48
-    // El panel se acopla al borde visual inferior de la barra (58 - 6 px).
-    readonly property int barPanelTopMargin: 52
+    // La barra visual ocupa y=6..52. El popup empieza antes de ella y queda
+    // parcialmente oculto por la barra, creando un único plano continuo.
+    readonly property int barPanelTopMargin: 24
     readonly property int pillHeight: 36
     readonly property int controlHeight: 48
 
@@ -61,13 +60,7 @@ QtObject {
     readonly property int fontSizeSmall: 11
     readonly property int fontSizeBody: 13
     readonly property int fontSizeTitle: 16
-    readonly property int fontSizeHeading: 22
-    readonly property int fontSizeDisplay: 36
-
     readonly property int animationFast: 140
-    readonly property int animationNormal: 220
-    readonly property int animationSlow: 320
-
     readonly property string fontFamily: "Inter"
     readonly property string iconFamily: "JetBrainsMono Nerd Font"
     readonly property string materialIconFamily: "Material Symbols Rounded"
