@@ -165,12 +165,11 @@ ColumnLayout {
                     anchors.centerIn: parent
                     spacing: Theme.spacingSm
 
-                    Text {
+                    OrionIcon {
                         anchors.horizontalCenter: parent.horizontalCenter
                         materialName: modelData.icon
-                        color: modelData.color
-                        font.family: Theme.materialIconFamily
-                        font.pixelSize: 21
+                        fallbackColor: modelData.color
+                        size: 21
                     }
 
                     Text {
