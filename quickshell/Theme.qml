@@ -45,9 +45,9 @@ QtObject {
     readonly property int spacing2xl: 32
 
     readonly property int barHeight: 48
-    // La barra visual ocupa y=6..52. El popup empieza antes de ella y queda
-    // parcialmente oculto por la barra, creando un único plano continuo.
-    readonly property int barPanelTopMargin: 24
+    // La barra visual ocupa y=6..52. Los paneles contextuales comienzan exactamente
+    // en y=52 y usan la misma capa Overlay para formar una sola superficie visual.
+    readonly property int barPanelTopMargin: 52
     readonly property int pillHeight: 36
     readonly property int controlHeight: 48
 
