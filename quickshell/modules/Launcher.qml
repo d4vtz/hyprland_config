@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import Quickshell.Widgets
 import ".."
 import "../components"
 import "../services"
@@ -43,12 +44,10 @@ Item {
         }
         if (screen) targetScreen = screen
         PanelCoordinator.request("launcher")
-        open = !open
-        if (open) {
-            query = ""
-            appList.running = true
-            focusSearch()
-        }
+        open = true
+        query = ""
+        appList.running = true
+        focusSearch()
     }
 
     function launch(entry) {
@@ -86,14 +85,10 @@ Item {
         anchors { top: true; right: true; bottom: true; left: true }
         exclusiveZone: 0
         color: "transparent"
+        WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                root.closePanel()
-            }
-        }
+        MouseArea { anchors.fill: parent; onClicked: root.closePanel() }
 
         Surface {
             id: panelSurface
@@ -103,7 +98,6 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             anchors.topMargin: 82
-
             MouseArea { anchors.fill: parent }
 
             ColumnLayout {
@@ -113,7 +107,8 @@ Item {
 
                 SectionTitle {
                     Layout.fillWidth: true
-                    icon: "󰍉"
+                    iconName: "search"
+                    iconCategory: "actions"
                     title: "Aplicaciones"
                     subtitle: "Busca y abre aplicaciones"
                     accent: Theme.purple
@@ -127,14 +122,7 @@ Item {
                     border.width: 1
                     border.color: search.activeFocus ? Theme.purple : Theme.border
 
-                    OrionIcon {
-                        anchors.left: parent.left
-                        anchors.leftMargin: Theme.spacingMd
-                        anchors.verticalCenter: parent.verticalCenter
-                        name: "search"
-                        category: "actions"
-                        size: 17
-                    }
+                    OrionIcon { anchors.left: parent.left; anchors.leftMargin: Theme.spacingMd; anchors.verticalCenter: parent.verticalCenter; name: "search"; category: "actions"; size: 17 }
 
                     TextInput {
                         id: search
@@ -148,14 +136,8 @@ Item {
                         font.pixelSize: Theme.fontSizeTitle
                         text: root.query
                         onTextChanged: root.query = text
-                        Keys.onEscapePressed: event => {
-                            root.closePanel()
-                            event.accepted = true
-                        }
-                        Keys.onReturnPressed: {
-                            if (root.filteredEntries.length > 0)
-                                root.launch(root.filteredEntries[0])
-                        }
+                        Keys.onEscapePressed: event => { root.closePanel(); event.accepted = true }
+                        Keys.onReturnPressed: if (root.filteredEntries.length > 0) root.launch(root.filteredEntries[0])
                     }
                 }
 
@@ -184,60 +166,46 @@ Item {
                                 Layout.preferredHeight: 36
                                 radius: 10
                                 color: Theme.elevated
+
+                                IconImage {
+                                    id: appIcon
+                                    anchors.centerIn: parent
+                                    width: 25
+                                    height: 25
+                                    implicitSize: 25
+                                    asynchronous: true
+                                    source: modelData.icon.length > 0 ? Quickshell.iconPath(modelData.icon, true) : ""
+                                    visible: status === Image.Ready
+                                }
+
                                 OrionIcon {
                                     anchors.centerIn: parent
-                                    name: modelData.icon || "application-x-executable"
+                                    name: "application-x-executable"
                                     category: "apps"
                                     fallbackName: "application-x-executable"
+                                    fallbackColor: Theme.muted
                                     size: 24
+                                    visible: !appIcon.visible
                                 }
                             }
 
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 1
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: modelData.name
-                                    color: Theme.foreground
-                                    font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.fontSizeBody
-                                    font.weight: Font.Medium
-                                    elide: Text.ElideRight
-                                }
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: modelData.id
-                                    color: Theme.muted
-                                    font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.fontSizeSmall
-                                    elide: Text.ElideRight
-                                }
+                                Text { Layout.fillWidth: true; text: modelData.name; color: Theme.foreground; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeBody; font.weight: Font.Medium; elide: Text.ElideRight }
+                                Text { Layout.fillWidth: true; text: modelData.id; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall; elide: Text.ElideRight }
                             }
 
-                            OrionIcon { name: "go-next"; category: "actions"; size: 14 }
+                            OrionIcon { name: "go-next"; materialName: "chevron_right"; category: "actions"; fallbackColor: Theme.muted; size: 14 }
                         }
 
-                        MouseArea {
-                            id: appArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.launch(modelData)
-                        }
+                        MouseArea { id: appArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.launch(modelData) }
                     }
                 }
 
-                Text {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: root.filteredEntries.length + " aplicaciones"
-                    color: Theme.subtle
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSizeSmall
-                }
+                Text { Layout.alignment: Qt.AlignHCenter; text: root.filteredEntries.length + " aplicaciones"; color: Theme.subtle; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
             }
         }
-
     }
 
     Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.open && PanelCoordinator.activePanel !== "launcher") root.closePanel() } }
