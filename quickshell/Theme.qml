@@ -47,6 +47,8 @@ QtObject {
     readonly property int spacing2xl: 32
 
     readonly property int barHeight: 48
+    // El panel se acopla al borde visual inferior de la barra (58 - 6 px).
+    readonly property int barPanelTopMargin: 52
     readonly property int pillHeight: 36
     readonly property int controlHeight: 48
 
