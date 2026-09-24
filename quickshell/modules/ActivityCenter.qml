@@ -65,8 +65,8 @@ Item {
             height: 590
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 70
-            anchors.rightMargin: 12
+            anchors.topMargin: 58
+            anchors.rightMargin: 10
 
             MouseArea { anchors.fill: parent }
 
