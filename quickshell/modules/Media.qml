@@ -32,10 +32,11 @@ Pill {
     }
 
     function updateSpectrum(frame) {
-        const values = frame.trim().split(";")
-            .filter(value => value.length > 0)
+        const values = String(frame).trim().split(";")
+            .map(value => Number(value))
+            .filter(value => isFinite(value))
             .slice(0, 8)
-            .map(value => Math.max(0.06, Math.min(1, Number(value) / 100)))
+            .map(value => Math.max(0.06, Math.min(1, value / 100)))
         if (values.length === 8)
             spectrum = values
     }
@@ -72,15 +73,27 @@ Pill {
     }
 
     Process {
+        id: cavaProcess
         running: true
-        command: [
-            "cava",
-            "-p",
-            Qt.resolvedUrl("../cava.conf").toString().replace("file://", "")
-        ]
+        command: ["cava", "-p", Quickshell.shellDir + "/cava.conf"]
         stdout: SplitParser {
+            splitMarker: "\n"
             onRead: frame => root.updateSpectrum(frame)
         }
+        stderr: SplitParser {
+            onRead: message => console.warn("cava:", message)
+        }
+        onExited: function(exitCode, exitStatus) {
+            if (exitCode !== 0)
+                console.warn("cava exited with code", exitCode)
+            restartTimer.restart()
+        }
+    }
+
+    Timer {
+        id: restartTimer
+        interval: 1000
+        onTriggered: if (!cavaProcess.running) cavaProcess.running = true
     }
 
     MouseArea {
@@ -110,9 +123,10 @@ Pill {
         anchors { top: true; right: true; bottom: true; left: true }
         exclusiveZone: 0
         color: "transparent"
+        WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
-        MouseArea { anchors.fill: parent; onClicked: root.expanded = false }
+        MouseArea { anchors.fill: parent; onClicked: { root.expanded = false; PanelCoordinator.close("media") } }
 
         Rectangle {
             anchors.top: parent.top
@@ -139,12 +153,11 @@ Pill {
                     color: Theme.surfaceContainer
                     clip: true
 
-                    Text {
+                    OrionIcon {
                         anchors.centerIn: parent
-                        text: "album"
-                        color: Theme.current
-                        font.family: Theme.materialIconFamily
-                        font.pixelSize: 38
+                        materialName: "album"
+                        fallbackColor: Theme.current
+                        size: 38
                     }
 
                     Image {
@@ -161,25 +174,8 @@ Pill {
                     Layout.fillHeight: true
                     spacing: 5
 
-                    Text {
-                        Layout.fillWidth: true
-                        text: root.player ? (root.player.trackTitle || "Sin título") : "Nada reproduciéndose"
-                        color: Theme.foreground
-                        elide: Text.ElideRight
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 13
-                        font.bold: true
-                    }
-
-                    Text {
-                        Layout.fillWidth: true
-                        text: root.player ? (root.player.trackArtist || root.player.identity || "Artista desconocido") : "Abre tu reproductor multimedia"
-                        color: Theme.muted
-                        elide: Text.ElideRight
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 11
-                    }
-
+                    Text { Layout.fillWidth: true; text: root.player ? (root.player.trackTitle || "Sin título") : "Nada reproduciéndose"; color: Theme.foreground; elide: Text.ElideRight; font.family: Theme.fontFamily; font.pixelSize: 13; font.bold: true }
+                    Text { Layout.fillWidth: true; text: root.player ? (root.player.trackArtist || root.player.identity || "Artista desconocido") : "Abre tu reproductor multimedia"; color: Theme.muted; elide: Text.ElideRight; font.family: Theme.fontFamily; font.pixelSize: 11 }
                     Item { Layout.fillHeight: true }
 
                     Rectangle {
@@ -188,113 +184,30 @@ Pill {
                         Layout.preferredHeight: 5
                         radius: 3
                         color: Theme.current
-
-                        Rectangle {
-                            width: root.player && root.player.lengthSupported && root.player.length > 0
-                                ? parent.width * Math.min(1, root.player.position / root.player.length)
-                                : 0
-                            height: parent.height
-                            radius: parent.radius
-                            color: Theme.purple
-
-                            Behavior on width {
-                                NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
-                            }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            enabled: root.player && root.player.canSeek && root.player.positionSupported
-                            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            onClicked: mouse => root.player.position = root.player.length * mouse.x / width
-                        }
+                        Rectangle { width: root.player && root.player.lengthSupported && root.player.length > 0 ? parent.width * Math.min(1, root.player.position / root.player.length) : 0; height: parent.height; radius: parent.radius; color: Theme.purple }
+                        MouseArea { anchors.fill: parent; enabled: root.player && root.player.canSeek && root.player.positionSupported; cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor; onClicked: mouse => root.player.position = root.player.length * mouse.x / width }
                     }
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Text {
-                            text: root.player ? root.formatTime(root.player.position) : "0:00"
-                            color: Theme.muted
-                            font.family: Theme.fontFamily
-                            font.pixelSize: 9
-                        }
+                        Text { text: root.player ? root.formatTime(root.player.position) : "0:00"; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 9 }
                         Item { Layout.fillWidth: true }
-                        Text {
-                            text: root.player && root.player.lengthSupported ? root.formatTime(root.player.length) : "--:--"
-                            color: Theme.muted
-                            font.family: Theme.fontFamily
-                            font.pixelSize: 9
-                        }
+                        Text { text: root.player && root.player.lengthSupported ? root.formatTime(root.player.length) : "--:--"; color: Theme.muted; font.family: Theme.fontFamily; font.pixelSize: 9 }
                     }
 
                     RowLayout {
                         Layout.alignment: Qt.AlignHCenter
                         spacing: 16
-
-                        Text {
-                            text: "skip_previous"
-                            color: Theme.foreground
-                            font.family: Theme.materialIconFamily
-                            opacity: root.player && root.player.canGoPrevious ? 1 : 0.3
-                            font.pixelSize: 18
-                            MouseArea {
-                                anchors.fill: parent
-                                enabled: root.player && root.player.canGoPrevious
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.player.previous()
-                            }
-                        }
-
-                        Rectangle {
-                            implicitWidth: 38
-                            implicitHeight: 38
-                            radius: 19
-                            color: playArea.containsMouse ? Theme.pink : Theme.purple
-                            opacity: root.player && root.player.canTogglePlaying ? 1 : 0.4
-
-                            Behavior on color { ColorAnimation { duration: Theme.animationFast } }
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: root.player && root.player.isPlaying ? "pause" : "play_arrow"
-                                color: Theme.background
-                                font.family: Theme.materialIconFamily
-                                font.pixelSize: 17
-                            }
-                            MouseArea {
-                                id: playArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                enabled: root.player && root.player.canTogglePlaying
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.player.togglePlaying()
-                            }
-                        }
-
-                        Text {
-                            text: "skip_next"
-                            color: Theme.foreground
-                            font.family: Theme.materialIconFamily
-                            opacity: root.player && root.player.canGoNext ? 1 : 0.3
-                            font.pixelSize: 18
-                            MouseArea {
-                                anchors.fill: parent
-                                enabled: root.player && root.player.canGoNext
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.player.next()
-                            }
-                        }
+                        OrionIcon { materialName: "skip_previous"; fallbackColor: Theme.foreground; size: 18; opacity: root.player && root.player.canGoPrevious ? 1 : 0.3; MouseArea { anchors.fill: parent; onClicked: if (root.player && root.player.canGoPrevious) root.player.previous() } }
+                        OrionIcon { materialName: root.player && root.player.isPlaying ? "pause" : "play_arrow"; fallbackColor: Theme.background; size: 22; Rectangle { anchors.fill: parent; anchors.margins: -7; z: -1; radius: 20; color: Theme.purple }; MouseArea { anchors.fill: parent; onClicked: if (root.player) root.player.togglePlaying() } }
+                        OrionIcon { materialName: "skip_next"; fallbackColor: Theme.foreground; size: 18; opacity: root.player && root.player.canGoNext ? 1 : 0.3; MouseArea { anchors.fill: parent; onClicked: if (root.player && root.player.canGoNext) root.player.next() } }
                     }
                 }
             }
         }
 
-        Shortcut {
-            sequence: "Esc"
-            onActivated: root.expanded = false
-        }
+        Shortcut { sequence: "Esc"; onActivated: { root.expanded = false; PanelCoordinator.close("media") } }
     }
-
 
     Connections { target: PanelCoordinator; function onActivePanelChanged() { if (root.expanded && PanelCoordinator.activePanel !== "media") root.expanded = false } }
 }
